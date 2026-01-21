@@ -1,0 +1,66 @@
+
+
+Software Version,3.17.17
+
+
+
+Experiment File Path:,C:\Users\Samb\Desktop\20260116-mgig-gylcogen_glo.xpt
+Protocol File Path:,C:\Users\Public\Documents\Protocols\luminesence-96wells-1.0s-glycogen_glo.prt
+
+
+
+Plate Number,Plate 1
+Date,1/16/2026
+Time,13:34:35
+Reader Type:,Synergy HTX
+Reader Serial Number:,25030704
+Reading Type,Reader
+
+Procedure Details
+
+Plate Type,Costar 96 flat bottom
+Eject plate on completion,
+Read,Luminescence Endpoint
+,Full Plate
+,Integration Time: 0:01.00 (MM:SS.ss)
+,Filter Set 1
+,    Emission: Hole
+,    Optics: Top,  Gain: 135
+,Read Speed: Normal,  Delay: 100 msec
+,Extended Dynamic Range
+,Read Height: 1 mm
+
+Layout
+,1,2,3,4,5,6,7,8,9,10,11,12
+A,SPL1,SPL1,SPL1,,,,,,,,,,Well ID
+,A3-gly,A3-gly,A3-gly,,,,,,,,,,Name
+B,SPL2,SPL2,SPL2,,,,,,,,,,Well ID
+,A4-gly,A4-gly,A4-gly,,,,,,,,,,Name
+C,SPL3,SPL3,SPL3,,,,,,,,,,Well ID
+,A3-glu,A3-glu,A3-glu,,,,,,,,,,Name
+D,SPL4,SPL4,SPL4,,,,,,,,,,Well ID
+,A4-glu,A4-glu,A4-glu,,,,,,,,,,Name
+E,,,,,,,,,,,,,Well ID
+,,,,,,,,,,,,,Name
+F,SPL5,SPL6,SPL7,SPL8,SPL9,,SPL10,SPL11,SPL12,SPL13,SPL14,,Well ID
+,Std-Glyc-20,Std-Glyc-2,Std-Glyc-0.2,Std-Glyc-0.02,Std-Glyc-0,,Std-Gluc-100,Std-Gluc-10,Std-Gluc-1,Std-Gluc-0.1,Std-Gluc-0,,Name
+G,SPL5,SPL6,SPL7,SPL8,SPL9,,SPL10,SPL11,SPL12,SPL13,SPL14,,Well ID
+,Std-Glyc-20,Std-Glyc-2,Std-Glyc-0.2,Std-Glyc-0.02,Std-Glyc-0,,Std-Gluc-100,Std-Gluc-10,Std-Gluc-1,Std-Gluc-0.1,Std-Gluc-0,,Name
+H,SPL5,SPL6,SPL7,SPL8,SPL9,,SPL10,SPL11,SPL12,SPL13,SPL14,,Well ID
+,Std-Glyc-20,Std-Glyc-2,Std-Glyc-0.2,Std-Glyc-0.02,Std-Glyc-0,,Std-Gluc-100,Std-Gluc-10,Std-Gluc-1,Std-Gluc-0.1,Std-Gluc-0,,Name
+
+
+
+Actual Temperature:,25.3
+
+Results
+,1,2,3,4,5,6,7,8,9,10,11,12
+A,148538,162161,164823,,,,,,,,,,Lum
+B,156919,171436,159759,,,,,,,,,,Lum
+C,1253,1185,1442,,,,,,,,,,Lum
+D,513,468,508,,,,,,,,,,Lum
+E,,,,,,,,,,,,,Lum
+F,143671,10701,1775,1013,965,,123278,11464,1253,380,256,,Lum
+G,147053,9993,1794,1081,1043,,120537,11802,1204,382,263,,Lum
+H,155087,11134,1840,1028,1815,,124845,11452,1229,374,253,,Lum
+
