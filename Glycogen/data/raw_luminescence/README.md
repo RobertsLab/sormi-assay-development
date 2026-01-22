@@ -19,8 +19,16 @@ Where `<data_type>` should be one of the following:
 
 - `raw_lum*`: Comma-separated files containing _only_ the raw luminescence readings from the plate reader. See the corresponding plate layout file for sample information.
 
+`<date>`: Date of the experiment in `YYYYMMDD` format.
+
+`<species>`: Species designation, e.g., `mgig` for _Magallana gigas_.
+
+`<misc_info>`: Additional information about the experiment, such as assay type or specific conditions.
+
+`<extension>`: File extension indicating the file type, such as `.txt` for tab-delimited files or `.csv` for comma-separated files.
+
 ## File Descriptions
 
-- `*20260112-cgig-glycogen_glo-dilutions_test`: Initial dilution test using Sample A2 (50mg tissue weight).
+- `*20260112-mgig-glycogen_glo-dilutions_test`: Initial dilution test using Sample A2 (50mg tissue weight).
 
 - `*20260116-mgig-gylcogen_glo*`: Samples A3 and A4.
