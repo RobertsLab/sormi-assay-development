@@ -422,6 +422,8 @@ for (i in 1:nrow(glucose_summary_data)) {
 
 # SAMPLE A2 QUANTIFICATION
 
+The results here (Total glycogen) reflect the poor pipetting - the numbers aren't particularly close. In fact, the 2000 dilution factor is an order of magnitude higher than the others.
+
 ```{r sample-quantification, include=TRUE}
 #| results: hold
 
@@ -538,7 +540,4 @@ for (i in 1:nrow(gluc_sample_data_sorted)) {
 }
 ```
 
-
-
-# DISCUSSION
 
