@@ -46,8 +46,8 @@ knitr::opts_chunk$set(
 
 ```{r data, include=TRUE}
 
-plate_layout <- read.csv("https://raw.githubusercontent.com/RobertsLab/sormi-assay-development/refs/heads/main/Glycogen/data/raw_luminescence/layout-20260112-mgig-glycogen_glo-dilutions_test.csv", header = FALSE)
-raw_luminescence <- read.csv("https://raw.githubusercontent.com/RobertsLab/sormi-assay-development/refs/heads/main/Glycogen/data/raw_luminescence/raw_lum-20260112-mgig-glycogen_glo-dilutions_test.csv", header = FALSE)
+plate_layout <- read.csv("https://raw.githubusercontent.com/RobertsLab/sormi-assay-development/refs/heads/main/Glycogen/data/raw_luminescence/layout-Gen5-20260112-mgig-glycogen_glo-dilutions_test.csv", header = FALSE)
+raw_luminescence <- read.csv("https://raw.githubusercontent.com/RobertsLab/sormi-assay-development/refs/heads/main/Glycogen/data/raw_luminescence/raw_lum-Gen5-20260112-mgig-glycogen_glo-dilutions_test.csv", header = FALSE)
 
 print("Plate layout:")
 str(plate_layout)
