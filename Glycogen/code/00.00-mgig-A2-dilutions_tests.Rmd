@@ -20,7 +20,6 @@ output:
     number_sections: true
     code_folding: show
     code_download: true
-bibliography: references.bib
 ---
 # BACKGROUND
 
