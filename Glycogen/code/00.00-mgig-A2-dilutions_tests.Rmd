@@ -35,7 +35,7 @@ Insoluble material was _not_ pelleted prior to beginning assay, which led to pip
 
 
 
-```{r setup, include=FALSE}
+```{r setup, include=TRUE}
 library(knitr)
 library(ggplot2)
 library(dplyr)
