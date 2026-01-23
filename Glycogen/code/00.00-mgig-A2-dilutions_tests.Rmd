@@ -22,9 +22,17 @@ output:
     code_download: true
 bibliography: references.bib
 ---
+# BACKGROUND
+
+This was the initial testing of the [Glycogen-Glo Assay (Promega)](https://github.com/RobertsLab/resources/blob/master/protocols/Commercial_Protocols/Promega_Glycogen_Glo_Assay.pdf) (GitHub; PDF) using _M.gigas_ (Pacific oyster) ctenidia homegenate from [20251210](https://robertslab.github.io/sams-notebook/posts/2025/2025-12-10-Tissue-Collection-and-Homogenization---M.gigas-Ctenidia-for-Glycogen-Glo-Assay/) (notebook entry).
+
+The idea was to identify a range (i.e. a very rough min/max) of starting tissues amounts that will fall within the range of the Glycogen-Glo standard curves. Additionally, this was an initial walk-through of using this kit to help figure out a general protocol that identified any tips/tricks/pitfalls to aid in developing a Standard Operating Protocol (SOP) for the [Roberts Lab Handbook](https://robertslab.github.io/resources/).
+
 
 ```{r setup, include=FALSE}
 library(knitr)
+library(ggplot2)
+library(dplyr)
 knitr::opts_chunk$set(
   echo = TRUE,         # Display code chunks
   eval = FALSE,        # Evaluate code chunks
@@ -32,4 +40,150 @@ knitr::opts_chunk$set(
   message = FALSE,     # Hide messages
   comment = ""         # Prevents appending '##' to beginning of lines in code output
 )
+```
+
+# DATA
+
+```{r data, include=TRUE}
+
+plate_layout <- read.csv("https://raw.githubusercontent.com/RobertsLab/sormi-assay-development/refs/heads/main/Glycogen/data/raw_luminescence/layout-20260112-mgig-glycogen_glo-dilutions_test.csv", header = FALSE)
+raw_luminescence <- read.csv("https://raw.githubusercontent.com/RobertsLab/sormi-assay-development/refs/heads/main/Glycogen/data/raw_luminescence/layout-20260112-mgig-glycogen_glo-dilutions_test.csv", header = FALSE)
+
+print("Plate layout:")
+str(plate_layout)
+
+cat("\n\n")
+
+print("Raw luminescence:")
+str(raw_luminescence)
+```
+
+# STANDARD CURVES
+
+## Glycogen Standard Curve
+
+### Extract luminescence data
+
+```{r extract-glycogen-data, include=TRUE}
+# Extract glycogen standard curve data from plate layout and raw luminescence.
+# Rows E, F, G (rows 5, 6, 7) correspond to glycogen standards
+# Columns 1-5 contain the standard curve concentrations
+
+# Extract concentration values from plate layout (row 5, columns 1-5)
+# Parse concentration from labels like "STD-glyc-20" -> 20
+concentrations <- as.numeric(gsub("STD-glyc-", "", plate_layout[5, 1:5]))
+
+# Extract standard curve luminescence values for each replicate from raw_luminescence
+row_E <- as.numeric(raw_luminescence[5, 1:5])  # Row 5 (E)
+row_F <- as.numeric(raw_luminescence[6, 1:5])  # Row 6 (F)
+row_G <- as.numeric(raw_luminescence[7, 1:5])  # Row 7 (G)
+
+# Extract sample data from row A (columns 1, 3, 4, 5, 6)
+# Parse tissue amounts from labels like "A2-glyc-50" -> 50
+sample_cols <- c(1, 3, 4, 5, 6)
+tissue_mg <- as.numeric(gsub("A2-glyc-", "", plate_layout[1, sample_cols]))
+sample_luminescence <- as.numeric(raw_luminescence[1, sample_cols])
+```
+
+
+### Calculate summary statistics and linear regression
+```{r glycogen-summary-data, include=TRUE}
+#| results: hold
+
+
+# Calculate mean and standard error for each concentration
+means <- numeric(length(concentrations))
+std_errors <- numeric(length(concentrations))
+std_devs <- numeric(length(concentrations))
+
+for (i in 1:length(concentrations)) {
+  values <- c(row_E[i], row_F[i], row_G[i])
+  means[i] <- mean(values)
+  std_devs[i] <- sd(values)
+  std_errors[i] <- sd(values) / sqrt(length(values))
+}
+
+# Create data frame for plotting
+glycogen_summary_data <- data.frame(
+  concentration = concentrations,
+  mean_luminescence = means,
+  se = std_errors,
+  sd = std_devs,
+  cv = (std_devs / means) * 100
+)
+
+# Calculate linear regression and R-squared
+lm_model <- lm(mean_luminescence ~ concentration, data = glycogen_summary_data)
+r_squared <- summary(lm_model)$r.squared
+slope <- coef(lm_model)[2]
+intercept <- coef(lm_model)[1]
+
+# Create sample data frame
+sample_data <- data.frame(
+  tissue_mg = tissue_mg,
+  luminescence = sample_luminescence,
+  label = paste(tissue_mg, "mg")
+)
+```
+
+### Plot Glycogen Standard Curve with Sample Points
+```{r plot-glycogen-data, fig.width=10, fig.height=6, include=TRUE}
+# Create the plot
+plot <- ggplot(glycogen_summary_data, aes(x = concentration, y = mean_luminescence)) +
+  geom_smooth(method = "lm", se = FALSE, linetype = "dashed", 
+              color = "coral", linewidth = 1) +
+  geom_errorbar(aes(ymin = mean_luminescence - se, ymax = mean_luminescence + se),
+                width = 0.1, linewidth = 1, color = "darkblue") +
+  geom_line(color = "steelblue", linewidth = 1) +
+  geom_point(aes(color = "Standard Curve", shape = "Standard Curve"), size = 4) +
+  geom_point(data = sample_data, aes(x = tissue_mg, y = luminescence,
+             color = label, shape = label), size = 4) +
+  scale_color_manual(name = "",
+                     values = c("Standard Curve" = "steelblue",
+                                "50 mg" = "darkred",
+                                "2.5 mg" = "darkorange",
+                                "0.25 mg" = "darkgreen",
+                                "0.025 mg" = "purple",
+                                "0 mg" = "brown")) +
+  scale_shape_manual(name = "",
+                     values = c("Standard Curve" = 16,
+                                "50 mg" = 17,
+                                "2.5 mg" = 15,
+                                "0.25 mg" = 18,
+                                "0.025 mg" = 8,
+                                "0 mg" = 4)) +
+  annotate("label", x = max(glycogen_summary_data$concentration) * 1.2, 
+           y = max(glycogen_summary_data$mean_luminescence) * 0.15,
+           label = sprintf("y = %.2fx + %.2f\nR² = %.4f", slope, intercept, r_squared),
+           size = 3.5, fontface = "bold", fill = "white", 
+           color = "coral", label.padding = unit(0.3, "lines")) +
+  labs(
+    title = "Glycogen Standard Curve",
+    x = "Glycogen Concentration (µg/µL)",
+    y = "Luminescence",
+    caption = "Error bars represent standard error of the mean (SEM)"
+  ) +
+  scale_x_continuous(breaks = concentrations) +
+  theme_bw() +
+  theme(
+    plot.title = element_text(size = 14, face = "bold"),
+    axis.title = element_text(size = 12, face = "bold"),
+    panel.grid.minor = element_line(linetype = "dashed", color = "grey70")
+  )
+
+# Save the plot
+ggsave("../output/00.00-mgig-A2-dilutions_tests.Rmd/glycogen_plot.png", plot, width = 10, height = 6, dpi = 300)
+
+# Display the plot
+plot
+
+# Print summary statistics
+cat("Glycogen Standard Curve Summary:\n")
+cat(rep("=", 50), "\n", sep = "")
+for (i in 1:nrow(glycogen_summary_data)) {
+  cat(sprintf("Concentration: %g µg/µL\n", glycogen_summary_data$concentration[i]))
+  cat(sprintf("  Mean Luminescence: %.2f\n", glycogen_summary_data$mean_luminescence[i]))
+  cat(sprintf("  Standard Error: %.2f\n", glycogen_summary_data$se[i]))
+  cat(sprintf("  CV%%: %.2f%%\n\n", glycogen_summary_data$cv[i]))
+}
 ```
