@@ -40,7 +40,7 @@ library(ggplot2)
 library(dplyr)
 knitr::opts_chunk$set(
   echo = TRUE,         # Display code chunks
-  eval = FALSE,        # Evaluate code chunks
+  eval = TRUE,        # Evaluate code chunks
   warning = FALSE,     # Hide warnings
   message = FALSE,     # Hide messages
   comment = ""         # Prevents appending '##' to beginning of lines in code output
