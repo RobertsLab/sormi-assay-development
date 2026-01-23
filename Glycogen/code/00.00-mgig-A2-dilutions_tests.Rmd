@@ -135,11 +135,10 @@ sample_data <- data.frame(
 ```{r plot-glycogen-data, fig.width=10, fig.height=6, include=TRUE}
 # Create the plot
 plot <- ggplot(glycogen_summary_data, aes(x = concentration, y = mean_luminescence)) +
-  geom_smooth(method = "lm", se = FALSE, linetype = "dashed", 
+  geom_smooth(aes(linetype = "Std Curve Best Fit Line"), method = "lm", se = FALSE, 
               color = "coral", linewidth = 1) +
   geom_errorbar(aes(ymin = mean_luminescence - se, ymax = mean_luminescence + se),
                 width = 0.1, linewidth = 1, color = "darkblue") +
-  geom_line(color = "steelblue", linewidth = 1) +
   geom_point(aes(color = "Standard Curve", shape = "Standard Curve"), size = 4) +
   geom_point(data = sample_data, aes(x = glycogen_conc, y = luminescence,
              color = label, shape = label), size = 4) +
@@ -157,6 +156,8 @@ plot <- ggplot(glycogen_summary_data, aes(x = concentration, y = mean_luminescen
                                 "0.25 mg" = 18,
                                 "0.025 mg" = 8,
                                 "0 mg" = 4)) +
+  scale_linetype_manual(name = "",
+                        values = c("Best Fit Line" = "dashed")) +
   annotate("label", x = max(glycogen_summary_data$concentration) * 1.2, 
            y = max(glycogen_summary_data$mean_luminescence) * 0.15,
            label = sprintf("y = %.2fx + %.2f\nR² = %.4f", slope, intercept, r_squared),
