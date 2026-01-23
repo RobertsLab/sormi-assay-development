@@ -26,7 +26,13 @@ bibliography: references.bib
 
 This was the initial testing of the [Glycogen-Glo Assay (Promega)](https://github.com/RobertsLab/resources/blob/master/protocols/Commercial_Protocols/Promega_Glycogen_Glo_Assay.pdf) (GitHub; PDF) using _M.gigas_ (Pacific oyster) ctenidia homegenate from [20251210](https://robertslab.github.io/sams-notebook/posts/2025/2025-12-10-Tissue-Collection-and-Homogenization---M.gigas-Ctenidia-for-Glycogen-Glo-Assay/) (notebook entry).
 
-The idea was to identify a range (i.e. a very rough min/max) of starting tissues amounts that will fall within the range of the Glycogen-Glo standard curves. Additionally, this was an initial walk-through of using this kit to help figure out a general protocol that identified any tips/tricks/pitfalls to aid in developing a Standard Operating Protocol (SOP) for the [Roberts Lab Handbook](https://robertslab.github.io/resources/).
+The idea was to identify a range (i.e. a very rough min/max) of starting tissue amounts that will fall within the range of the Glycogen-Glo standard curves. Additionally, this was an initial walk-through of using this kit to help figure out a general protocol that identified any tips/tricks/pitfalls to aid in developing a Standard Operating Protocol (SOP) for the [Roberts Lab Handbook](https://robertslab.github.io/resources/).
+
+## Important note(s)
+
+Insoluble material was _not_ pelleted prior to beginning assay, which led to pipetting issues. Dilution factor `2` was skipped in this analysis due to some of these issues.
+
+
 
 
 ```{r setup, include=FALSE}
@@ -531,3 +537,8 @@ for (i in 1:nrow(gluc_sample_data_sorted)) {
               total_result))
 }
 ```
+
+
+
+# DISCUSSION
+
