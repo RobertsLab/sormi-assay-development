@@ -60,6 +60,8 @@ Sample name layouts are as follows:
 
 - `<sample>-<analyte>-<tissue amount in mg>-df.<dilution factor>`
 
+E.g. `A2-glyc-50-df.10`
+
 Where:
 - `<sample>`: Sample identifier (e.g., A2)
 - `<analyte>`: Either "glyc" for glycogen or "gluc" for glucose
