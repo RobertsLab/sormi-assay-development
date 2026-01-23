@@ -10,5 +10,7 @@
 
 - [`Gen5-20260112-mgig-glycogen_glo-dilutions_test.xpt`](./Gen5-20260112-mgig-glycogen_glo-dilutions_test.xpt): Agilent Gen5 experiment file for initial Glycogen-Glo dilutions test using Sample A02.
 
-- [`Gen5-20260116-mgig-gylcogen_glo.xpt`](./Gen5-20260116-mgig-gylcogen_glo.xpt) : Agilent Gen5 experiment file for 01.16.2026 experiment, samples A3 and A4.
+- [`Gen5-20260116-mgig-gylcogen_glo.xpt`](./Gen5-20260116-mgig-gylcogen_glo.xpt): Agilent Gen5 experiment file for 01.16.2026 experiment, samples A3 and A4.
+
+- [`Gen5-default-96well-luminescence.xpt`](Gen5-default-96well-luminescence.xpt): Agilent Gen5 default experiment file for 96-well luminescence readings. Serves as a template and backup for future experiments. Set to read all wells for luminescence, as well as contain desired data export formatting.
 
