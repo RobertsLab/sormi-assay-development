@@ -1,0 +1,66 @@
+
+
+Software Version	3.16.10
+
+
+
+Experiment File Path:	C:\Users\sam\Desktop\gitrepos\RobertsLab\sormi-assay-development\Glycogen\data\plate_reader_files\Gen5-20260112-mgig-glycogen_glo-dilutions_test.xpt
+Protocol File Path:	C:\Users\sam\Documents\plate_reader\luminesence-1.0s-glycogen_glo.prt
+
+
+
+Plate Number	Plate 1
+Date	1/12/2026
+Time	1:25:44 PM
+Reader Type:	Synergy HTX
+Reader Serial Number:	25030704
+Reading Type	Reader
+
+Procedure Details
+
+Plate Type	Costar 96 flat bottom
+Eject plate on completion	
+Read	Luminescence Endpoint
+	Full Plate
+	Integration Time: 0:01.00 (MM:SS.ss)
+	Filter Set 1
+	    Emission: Hole
+	    Optics: Top,  Gain: 135
+	Read Speed: Normal,  Delay: 100 msec
+	Extended Dynamic Range
+	Read Height: 1 mm
+
+Layout
+	1	2	3	4	5	6	7	8	9	10	11	12
+A	SPL1	SPL2	SPL3	SPL4	SPL5	SPL6							Well ID
+	A2-glyc-50-df.1	A2-glyc-50-df.2	A2-glyc-50-df.20	A2-glyc-50-df.200	A2-glyc-50-df.2000	A2-glyc-50-df.0							Name
+B	SPL1	SPL2	SPL3	SPL4	SPL5	SPL6							Well ID
+	A2-glyc-50-df.1	A2-glyc-50-df.2	A2-glyc-50-df.20	A2-glyc-50-df.200	A2-glyc-50-df.2000	A2-glyc-50-df.0							Name
+C	SPL7	SPL8	SPL9	SPL10	SPL11	SPL12							Well ID
+	A2-gluc-50-df.1	A2-gluc-50-df.2	A2-gluc-50-df.20	A2-gluc-50-df.200	A2-gluc-50-df.2000	A2-gluc-50-df.0							Name
+D	SPL7	SPL8	SPL9	SPL10	SPL11	SPL12							Well ID
+	A2-gluc-50-df.1	A2-gluc-50-df.2	A2-gluc-50-df.20	A2-gluc-50-df.200	A2-gluc-50-df.2000	A2-gluc-50-df.0							Name
+E	SPL13	SPL14	SPL15	SPL16	SPL17			SPL18	SPL19	SPL20	SPL21	SPL22	Well ID
+	STD-glyc-20	STD-glyc-2	STD-glyc-0.2	STD-glyc-0.02	STD-glyc-0			STD-gluc-100	STD-gluc-10	STD-gluc-1	STD-gluc-0.1	STD-gluc-0	Name
+F	SPL13	SPL14	SPL15	SPL16	SPL17			SPL18	SPL19	SPL20	SPL21	SPL22	Well ID
+	STD-glyc-20	STD-glyc-2	STD-glyc-0.2	STD-glyc-0.02	STD-glyc-0			STD-gluc-100	STD-gluc-10	STD-gluc-1	STD-gluc-0.1	STD-gluc-0	Name
+G	SPL13	SPL14	SPL15	SPL16	SPL17			SPL18	SPL19	SPL20	SPL21	SPL22	Well ID
+	STD-glyc-20	STD-glyc-2	STD-glyc-0.2	STD-glyc-0.02	STD-glyc-0			STD-gluc-100	STD-gluc-10	STD-gluc-1	STD-gluc-0.1	STD-gluc-0	Name
+H													Well ID
+													Name
+
+
+
+Actual Temperature:	21.9
+
+Results
+	1	2	3	4	5	6	7	8	9	10	11	12
+A	185099	174562	61687	7654	1762	813							Lum
+B	166410	181069	83790	19910	10704	3187							Lum
+C	843	744	421	237	227	689							Lum
+D	396	230	261	257	221	234							Lum
+E	107660	9963	1968	1277	1164			117932	12389	1703	673	606	Lum
+F	110174	10220	1875	1256	737			122103	12418	1748	638	499	Lum
+G	102674	10001	1815	1126	963			121056	12415	1629	480	356	Lum
+H													Lum
+
