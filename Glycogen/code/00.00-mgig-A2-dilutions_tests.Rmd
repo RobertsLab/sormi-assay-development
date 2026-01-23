@@ -119,9 +119,14 @@ slope <- coef(lm_model)[2]
 intercept <- coef(lm_model)[1]
 
 # Create sample data frame
+# Calculate glycogen concentration from luminescence using the standard curve equation
+# Rearranging y = mx + b to solve for x: x = (y - b) / m
+sample_glycogen_conc <- (sample_luminescence - intercept) / slope
+
 sample_data <- data.frame(
   tissue_mg = tissue_mg,
   luminescence = sample_luminescence,
+  glycogen_conc = sample_glycogen_conc,
   label = paste(tissue_mg, "mg")
 )
 ```
@@ -136,7 +141,7 @@ plot <- ggplot(glycogen_summary_data, aes(x = concentration, y = mean_luminescen
                 width = 0.1, linewidth = 1, color = "darkblue") +
   geom_line(color = "steelblue", linewidth = 1) +
   geom_point(aes(color = "Standard Curve", shape = "Standard Curve"), size = 4) +
-  geom_point(data = sample_data, aes(x = tissue_mg, y = luminescence,
+  geom_point(data = sample_data, aes(x = glycogen_conc, y = luminescence,
              color = label, shape = label), size = 4) +
   scale_color_manual(name = "",
                      values = c("Standard Curve" = "steelblue",
