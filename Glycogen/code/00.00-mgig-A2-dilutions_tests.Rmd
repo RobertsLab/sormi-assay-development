@@ -413,3 +413,121 @@ for (i in 1:nrow(glucose_summary_data)) {
   cat(sprintf("  CV%%: %.2f%%\n\n", glucose_summary_data$cv[i]))
 }
 ```
+
+# SAMPLE A2 QUANTIFICATION
+
+```{r sample-quantification, include=TRUE}
+#| results: hold
+
+# Function to calculate concentration from luminescence using linear model
+# Returns concentration or "OUT OF RANGE" message
+calculate_concentration <- function(luminescence, slope, intercept, min_conc, max_conc, units) {
+  # Calculate concentration from y = mx + b -> x = (y - b) / m
+  concentration <- (luminescence - intercept) / slope
+  
+  # Check if within range
+  if (concentration < min_conc) {
+    return("OUT OF RANGE - TOO LOW")
+  } else if (concentration > max_conc) {
+    return("OUT OF RANGE - TOO HIGH")
+  } else {
+    return(sprintf("%.4f %s", concentration, units))
+  }
+}
+
+# Glycogen calculations
+cat("GLYCOGEN ASSAY RESULTS (Sample A2):\n")
+cat(rep("=", 100), "\n", sep = "")
+cat(sprintf("%-15s %-20s %-25s %s\n", "Dilution Factor", "Luminescence", "Calculated Glycogen", "Total Glycogen"))
+cat(rep("-", 100), "\n", sep = "")
+
+glycogen_min <- min(concentrations)
+glycogen_max <- max(concentrations)
+
+# Sort by dilution factor
+sample_data_sorted <- sample_data[order(sample_data$dilution_factor), ]
+
+for (i in 1:nrow(sample_data_sorted)) {
+  result <- calculate_concentration(
+    sample_data_sorted$mean_luminescence[i],
+    slope,
+    intercept,
+    glycogen_min,
+    glycogen_max,
+    "µg/µL"
+  )
+  
+  # Calculate total glycogen (concentration in original sample before dilution)
+  conc <- (sample_data_sorted$mean_luminescence[i] - intercept) / slope
+  df <- sample_data_sorted$dilution_factor[i]
+  # Handle division by zero for df=0
+  if (df == 0) {
+    total_result <- "N/A"
+  } else {
+    total_glyc <- conc * df
+    # Check if within range after accounting for dilution
+    if (total_glyc < glycogen_min * df) {
+      total_result <- "OUT OF RANGE - TOO LOW"
+    } else if (total_glyc > glycogen_max * df) {
+      total_result <- "OUT OF RANGE - TOO HIGH"
+    } else {
+      total_result <- sprintf("%.4f µg/µL", total_glyc)
+    }
+  }
+  
+  cat(sprintf("%-15s %-20.0f %-25s %s\n", 
+              sample_data_sorted$label[i], 
+              sample_data_sorted$mean_luminescence[i], 
+              result,
+              total_result))
+}
+
+cat("\n\n")
+
+# Glucose calculations
+cat("GLUCOSE ASSAY RESULTS (Sample A2):\n")
+cat(rep("=", 100), "\n", sep = "")
+cat(sprintf("%-15s %-20s %-25s %s\n", "Dilution Factor", "Luminescence", "Calculated Glucose", "Total Glucose"))
+cat(rep("-", 100), "\n", sep = "")
+
+glucose_min <- min(gluc_concentrations)
+glucose_max <- max(gluc_concentrations)
+
+# Sort by dilution factor
+gluc_sample_data_sorted <- gluc_sample_data[order(gluc_sample_data$dilution_factor), ]
+
+for (i in 1:nrow(gluc_sample_data_sorted)) {
+  result <- calculate_concentration(
+    gluc_sample_data_sorted$mean_luminescence[i],
+    gluc_slope,
+    gluc_intercept,
+    glucose_min,
+    glucose_max,
+    "µM"
+  )
+  
+  # Calculate total glucose (concentration in original sample before dilution)
+  conc <- (gluc_sample_data_sorted$mean_luminescence[i] - gluc_intercept) / gluc_slope
+  df <- gluc_sample_data_sorted$dilution_factor[i]
+  # Handle division by zero for df=0
+  if (df == 0) {
+    total_result <- "N/A"
+  } else {
+    total_gluc <- conc * df
+    # Check if within range after accounting for dilution
+    if (total_gluc < glucose_min * df) {
+      total_result <- "OUT OF RANGE - TOO LOW"
+    } else if (total_gluc > glucose_max * df) {
+      total_result <- "OUT OF RANGE - TOO HIGH"
+    } else {
+      total_result <- sprintf("%.4f µM", total_gluc)
+    }
+  }
+  
+  cat(sprintf("%-15s %-20.0f %-25s %s\n", 
+              gluc_sample_data_sorted$label[i], 
+              gluc_sample_data_sorted$mean_luminescence[i], 
+              result,
+              total_result))
+}
+```
