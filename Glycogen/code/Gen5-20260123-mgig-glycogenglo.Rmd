@@ -5,26 +5,56 @@ date: "2026-01-23"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+```{r data, include=TRUE}
+
+plate_layout <- read.csv("https://raw.githubusercontent.com/RobertsLab/sormi-assay-development/refs/heads/main/Glycogen/data/raw_luminescence/layout-Gen5-20260123-mgig-glycogenglo.csv", header = FALSE)
+raw_luminescence <- read.csv("https://raw.githubusercontent.com/RobertsLab/sormi-assay-development/refs/heads/main/Glycogen/data/raw_luminescence/raw_lum-Gen5-20260123-mgig-glycogenglo.csv", header = FALSE)
+
+cat("Plate layout:\n")
+str(plate_layout)
+
+cat("\n\n")
+
+cat("Raw luminescence:\n")
+str(raw_luminescence)
 ```
 
-## R Markdown
+# STANDARD CURVES
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+## Glycogen Standard Curve
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+### Extract luminescence data
 
-```{r cars}
-summary(cars)
+```{r extract-glycogen-data, include=TRUE}
+# Extract glycogen standard curve data from plate layout and raw luminescence.
+# Rows F, G, H (rows 6, 7, 8) correspond to glycogen standards
+# Columns 1-5 contain the standard curve concentrations
+
+# Extract concentration values from plate layout (row 6, columns 1-5)
+# Parse concentration from labels like "STD-glyc-20" -> 20
+concentrations <- as.numeric(gsub("STD-glyc-", "", plate_layout[6, 1:5]))
+
+# Extract standard curve luminescence values for each replicate from raw_luminescence
+row_F <- as.numeric(raw_luminescence[6, 1:5])  # Row 5 (E)
+row_G <- as.numeric(raw_luminescence[7, 1:5])  # Row 6 (F)
+row_H <- as.numeric(raw_luminescence[8, 1:5])  # Row 7 (G)
+
+# Extract sample data from rows A-E (columns 1-3, 4-6)
+# Parse dilution factors from labels like "A2-glyc-50-df.10" -> 10
+#unsure of how to adjust code to read sample replicates horizontally
+sample_cols <- c(1,2,3)
+dilution_factors_row_A <- as.numeric(gsub(".*-df\\.", "", plate_layout[1, sample_cols]))
+dilution_factors_row_B <- as.numeric(gsub(".*-df\\.", "", plate_layout[2, sample_cols]))
+dilution_factors_row_C <- as.numeric(gsub(".*-df\\.", "", plate_layout[3, sample_cols]))
+dilution_factors_row_D <- as.numeric(gsub(".*-df\\.", "", plate_layout[4, sample_cols]))
+dilution_factors_row_E <- as.numeric(gsub(".*-df\\.", "", plate_layout[5, sample_cols]))
+
+sample_luminescence_row_A <- as.numeric(raw_luminescence[1, sample_cols])
+sample_luminescence_row_B <- as.numeric(raw_luminescence[2, sample_cols])
+sample_luminescence_row_C <- as.numeric(raw_luminescence[2, sample_cols])
+sample_luminescence_row_D <- as.numeric(raw_luminescence[2, sample_cols])
+sample_luminescence_row_E <- as.numeric(raw_luminescence[2, sample_cols])
+
+# Combine the two rows of samples
+
 ```
-
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
