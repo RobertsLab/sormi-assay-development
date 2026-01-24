@@ -43,7 +43,8 @@ knitr::opts_chunk$set(
   eval = TRUE,        # Evaluate code chunks
   warning = FALSE,     # Hide warnings
   message = FALSE,     # Hide messages
-  comment = ""         # Prevents appending '##' to beginning of lines in code output
+  comment = "",         # Prevents appending '##' to beginning of lines in code output
+  results = 'hold'     # Holds output so it's all printed together after code chunk
 )
 ```
 
@@ -80,12 +81,12 @@ Where:
 plate_layout <- read.csv("https://raw.githubusercontent.com/RobertsLab/sormi-assay-development/refs/heads/main/Glycogen/data/raw_luminescence/layout-Gen5-20260112-mgig-glycogen_glo-dilutions_test.csv", header = FALSE)
 raw_luminescence <- read.csv("https://raw.githubusercontent.com/RobertsLab/sormi-assay-development/refs/heads/main/Glycogen/data/raw_luminescence/raw_lum-Gen5-20260112-mgig-glycogen_glo-dilutions_test.csv", header = FALSE)
 
-print("Plate layout:")
+cat("Plate layout:\n")
 str(plate_layout)
 
 cat("\n\n")
 
-print("Raw luminescence:")
+cat("Raw luminescence:\n")
 str(raw_luminescence)
 ```
 
@@ -126,9 +127,6 @@ sample_luminescence <- c(sample_luminescence_row_A, sample_luminescence_row_B)
 
 ### Calculate summary statistics and linear regression
 ```{r glycogen-summary-data, include=TRUE}
-#| results: hold
-
-
 # Calculate mean and standard error for each concentration
 means <- numeric(length(concentrations))
 std_errors <- numeric(length(concentrations))
@@ -291,9 +289,6 @@ gluc_sample_luminescence <- c(gluc_sample_luminescence_row_C, gluc_sample_lumine
 
 ### Calculate summary statistics and linear regression
 ```{r glucose-summary-data, include=TRUE}
-#| results: hold
-
-
 # Calculate mean and standard error for each concentration
 gluc_means <- numeric(length(gluc_concentrations))
 gluc_std_errors <- numeric(length(gluc_concentrations))
@@ -424,8 +419,6 @@ for (i in 1:nrow(glucose_summary_data)) {
 The results here (Total glycogen) reflect the poor pipetting - the numbers aren't particularly close. In fact, the 2000 dilution factor is an order of magnitude higher than the others.
 
 ```{r sample-quantification, include=TRUE}
-#| results: hold
-
 # Function to calculate concentration from luminescence using linear model
 # Returns concentration or "OUT OF RANGE" message
 calculate_concentration <- function(luminescence, slope, intercept, min_conc, max_conc, units) {
