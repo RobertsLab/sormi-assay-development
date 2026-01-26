@@ -4,18 +4,13 @@ Code directory for SORMI glycogen assays.
 
 All file names should adhere to this format:
 
-`00.00-<species>-<code_description>.Rmd`
+- `Gen5-YYYYMMDD-<species_abbrevation>-<experiment_description>.Rmd`
 
-- `00.00`: Numbers to left of decimal should be incremented for each new type of analysis, which is unrelated to other existing analyses. Numbers to the right of the decimal should be incremented for analyses related to existing analyses.
+    - For `<species_abbrevation>`, use first letter of genus and first three letters of species. E.g. `mgig` for *M. gigas*.
 
-	- E.g. `01.00-exon-counts.Rmd`
-	- E.g. `01.01-exon-counts-per-gene.Rmd`
-	
-- `<species>`: Species designation, e.g., `mgig` for _Magallana gigas_.
+- `.Rmd`: Most code is anticipated to be run using R Markdown. However, other formats are fine (e.g. Jupyter Notebooks).
 
-- `<code_description>`: Provide a brief description of code functionality. E.g. `glycogen_glo`.
-
-- `.Rmd`: Most code is anticipated to be run using R Markdown. However, other formats are fine (e.g. Jupyter Notebooks). 
+This naming convention keeps with the format used for plate reader experiment files in `../data/plate_reader_files` and allows for easy identification of which code corresponds to which experiment.
 
 All outputs from a script should be directed to a corresponding directory with the same name (excluding the suffix) in the `../ouput` directory.
 

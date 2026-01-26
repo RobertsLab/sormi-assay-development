@@ -8,7 +8,7 @@ This directory contains raw luminescence data files and corresponding plate layo
 
 Files in this directory follow a specific naming convention to ensure clarity and organization:
 
-- `<data_type>_<date>_<species>_<misc_info>.<extension>`
+- `<data_type>-Gen5-YYYYMMDD-<species_abbrevation>-<experiment_description>.<extension>`
 
 
 Where `<data_type>` should be one of the following:
@@ -19,13 +19,18 @@ Where `<data_type>` should be one of the following:
 
 - `raw_lum*`: Comma-separated files containing _only_ the raw luminescence readings from the plate reader. See the corresponding plate layout file for sample information.
 
-`<date>`: Date of the experiment in `YYYYMMDD` format.
+`YYYYMMDD`: Date of the experiment in `YYYYMMDD` format.
 
-`<species>`: Species designation, e.g., `mgig` for _Magallana gigas_.
+`<species_abbrevation>`: Species designation, e.g., `mgig` for _Magallana gigas_.
 
-`<misc_info>`: Additional information about the experiment, such as assay type or specific conditions.
+`<experiment_description>`: Additional information about the experiment, such as assay type or specific conditions.
 
 `<extension>`: File extension indicating the file type, such as `.txt` for tab-delimited files or `.csv` for comma-separated files.
+
+
+This naming convention keeps with the format used for plate reader experiment files in `../data/plate_reader_files` and allows for easy identification of which code corresponds to which experiment.
+
+---
 
 ## File Descriptions
 
