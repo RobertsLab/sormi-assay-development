@@ -1,43 +1,66 @@
----
-title: "Gen5-20260112-mgig-glycogen_glo-dilutions_test"
-author: "Sam White"
-date: "2026-01-12"
-output: 
-  github_document:
-    toc: true
-    number_sections: true
-  bookdown::html_document2:
-    theme: cosmo
-    toc: true
-    toc_float: true
-    number_sections: true
-    code_folding: show
-    code_download: true
-  html_document:
-    theme: cosmo
-    toc: true
-    toc_float: true
-    number_sections: true
-    code_folding: show
-    code_download: true
----
-# BACKGROUND
+Gen5-20260112-mgig-glycogen_glo-dilutions_test
+================
+Sam White
+2026-01-12
 
-This was the initial testing of the [Glycogen-Glo Assay (Promega)](https://github.com/RobertsLab/resources/blob/master/protocols/Commercial_Protocols/Promega_Glycogen_Glo_Assay.pdf) (GitHub; PDF) using _M.gigas_ (Pacific oyster) ctenidia homegenate from [20251210](https://robertslab.github.io/sams-notebook/posts/2025/2025-12-10-Tissue-Collection-and-Homogenization---M.gigas-Ctenidia-for-Glycogen-Glo-Assay/) (notebook entry).
+- [1 BACKGROUND](#1-background)
+  - [1.1 Important note(s)](#11-important-notes)
+- [2 DATA](#2-data)
+- [3 STANDARD CURVES](#3-standard-curves)
+  - [3.1 Glycogen Standard Curve](#31-glycogen-standard-curve)
+    - [3.1.1 Extract luminescence data](#311-extract-luminescence-data)
+    - [3.1.2 Calculate summary statistics and linear
+      regression](#312-calculate-summary-statistics-and-linear-regression)
+    - [3.1.3 Plot Glycogen Standard Curve with Sample
+      Points](#313-plot-glycogen-standard-curve-with-sample-points)
+  - [3.2 Glucose Standard Curve](#32-glucose-standard-curve)
+    - [3.2.1 Extract luminescence data](#321-extract-luminescence-data)
+    - [3.2.2 Calculate summary statistics and linear
+      regression](#322-calculate-summary-statistics-and-linear-regression)
+    - [3.2.3 Plot Glucose Standard Curve with Sample
+      Points](#323-plot-glucose-standard-curve-with-sample-points)
+- [4 SAMPLE A2 QUANTIFICATION](#4-sample-a2-quantification)
 
-The idea was to identify a range (i.e. a very rough min/max) of starting tissue amounts that will fall within the range of the Glycogen-Glo standard curves. Additionally, this was an initial walk-through of using this kit to help figure out a general protocol that identified any tips/tricks/pitfalls to aid in developing a Standard Operating Protocol (SOP) for the [Roberts Lab Handbook](https://robertslab.github.io/resources/).
+# 1 BACKGROUND
 
-## Important note(s)
+This was the initial testing of the [Glycogen-Glo Assay
+(Promega)](https://github.com/RobertsLab/resources/blob/master/protocols/Commercial_Protocols/Promega_Glycogen_Glo_Assay.pdf)
+(GitHub; PDF) using *M.gigas* (Pacific oyster) ctenidia homegenate from
+[20251210](https://robertslab.github.io/sams-notebook/posts/2025/2025-12-10-Tissue-Collection-and-Homogenization---M.gigas-Ctenidia-for-Glycogen-Glo-Assay/)
+(notebook entry).
 
-Insoluble material was _not_ pelleted prior to beginning assay, which led to pipetting issues. Dilution factor `2` was skipped in this analysis due to some of these issues.
+The idea was to identify a range (i.e. a very rough min/max) of starting
+tissue amounts that will fall within the range of the Glycogen-Glo
+standard curves. Additionally, this was an initial walk-through of using
+this kit to help figure out a general protocol that identified any
+tips/tricks/pitfalls to aid in developing a Standard Operating Protocol
+(SOP) for the [Roberts Lab
+Handbook](https://robertslab.github.io/resources/).
 
+## 1.1 Important note(s)
 
+Insoluble material was *not* pelleted prior to beginning assay, which
+led to pipetting issues. Dilution factor `2` was skipped in this
+analysis due to some of these issues.
 
-
-```{r setup, include=TRUE}
+``` r
 library(knitr)
 library(ggplot2)
 library(dplyr)
+```
+
+    ## 
+    ## Attaching package: 'dplyr'
+
+    ## The following objects are masked from 'package:stats':
+    ## 
+    ##     filter, lag
+
+    ## The following objects are masked from 'package:base':
+    ## 
+    ##     intersect, setdiff, setequal, union
+
+``` r
 knitr::opts_chunk$set(
   echo = TRUE,         # Display code chunks
   eval = TRUE,        # Evaluate code chunks
@@ -48,19 +71,21 @@ knitr::opts_chunk$set(
 )
 ```
 
-# DATA
+# 2 DATA
 
-Data contains two CSV files:
-1. Plate layout: Specifies the contents of each well in the 96-well plate.
-2. Raw luminescence readings: Contains the luminescence values measured from the plate.
+Data contains two CSV files: 1. Plate layout: Specifies the contents of
+each well in the 96-well plate. 2. Raw luminescence readings: Contains
+the luminescence values measured from the plate.
 
-There are two standard curves on the plate. Both curves have three replicates each:
-- Glycogen Standard Curve: Rows E, F, G (5, 6, 7), Columns 1-5
-- Glucose Standard Curve: Rows E, F, G (5, 6, 7), Columns 8-12
+There are two standard curves on the plate. Both curves have three
+replicates each: - Glycogen Standard Curve: Rows E, F, G (5, 6, 7),
+Columns 1-5 - Glucose Standard Curve: Rows E, F, G (5, 6, 7), Columns
+8-12
 
-There is a single sample (`A2`) with six dilution factors for both glycogen and glucose measurements. Dilutions were run in duplicate:
-- Glycogen Samples: Rows A and B (1, 2), Columns 1-6
-- Glucose Samples: Rows C and D (3, 4), Columns 1-6
+There is a single sample (`A2`) with six dilution factors for both
+glycogen and glucose measurements. Dilutions were run in duplicate: -
+Glycogen Samples: Rows A and B (1, 2), Columns 1-6 - Glucose Samples:
+Rows C and D (3, 4), Columns 1-6
 
 Sample name layouts are as follows:
 
@@ -68,16 +93,13 @@ Sample name layouts are as follows:
 
 E.g. `A2-glyc-50-df.10`
 
-Where:
-- `<sample>`: Sample identifier (e.g., A2)
-- `<analyte>`: Either "glyc" for glycogen or "gluc" for glucose
-- `<tissue amount in mg>`: Amount of tissue _originally collected_ in mg.
-- `<dilution factor>`: Dilution factor applied during sample preparation. E.g a dilution factor of `1` means no dilution, `10` means a 1:10 dilution, etc.
+Where: - `<sample>`: Sample identifier (e.g., A2) - `<analyte>`: Either
+“glyc” for glycogen or “gluc” for glucose - `<tissue amount in mg>`:
+Amount of tissue *originally collected* in mg. - `<dilution factor>`:
+Dilution factor applied during sample preparation. E.g a dilution factor
+of `1` means no dilution, `10` means a 1:10 dilution, etc.
 
-
-
-```{r data, include=TRUE}
-
+``` r
 plate_layout <- read.csv("https://raw.githubusercontent.com/RobertsLab/sormi-assay-development/refs/heads/main/Glycogen/data/raw_luminescence/layout-Gen5-20260112-mgig-glycogen_glo-dilutions_test.csv", header = FALSE)
 raw_luminescence <- read.csv("https://raw.githubusercontent.com/RobertsLab/sormi-assay-development/refs/heads/main/Glycogen/data/raw_luminescence/raw_lum-Gen5-20260112-mgig-glycogen_glo-dilutions_test.csv", header = FALSE)
 
@@ -90,13 +112,44 @@ cat("Raw luminescence:\n")
 str(raw_luminescence)
 ```
 
-# STANDARD CURVES
+    Plate layout:
+    'data.frame':   8 obs. of  12 variables:
+     $ V1 : chr  "A2-glyc-50-df.1" "A2-glyc-50-df.1" "A2-gluc-50-df.1" "A2-gluc-50-df.1" ...
+     $ V2 : chr  "A2-glyc-50-df.2" "A2-glyc-50-df.2" "A2-gluc-50-df.2" "A2-gluc-50-df.2" ...
+     $ V3 : chr  "A2-glyc-50-df.20" "A2-glyc-50-df.20" "A2-gluc-50-df.20" "A2-gluc-50-df.20" ...
+     $ V4 : chr  "A2-glyc-50-df.200" "A2-glyc-50-df.200" "A2-gluc-50-df.200" "A2-gluc-50-df.200" ...
+     $ V5 : chr  "A2-glyc-50-df.2000" "A2-glyc-50-df.2000" "A2-gluc-50-df.2000" "A2-gluc-50-df.2000" ...
+     $ V6 : chr  "A2-glyc-50-df.0" "A2-glyc-50-df.0" "A2-gluc-50-df.0" "A2-gluc-50-df.0" ...
+     $ V7 : logi  NA NA NA NA NA NA ...
+     $ V8 : chr  "" "" "" "" ...
+     $ V9 : chr  "" "" "" "" ...
+     $ V10: chr  "" "" "" "" ...
+     $ V11: chr  "" "" "" "" ...
+     $ V12: chr  "" "" "" "" ...
 
-## Glycogen Standard Curve
 
-### Extract luminescence data
+    Raw luminescence:
+    'data.frame':   8 obs. of  12 variables:
+     $ V1 : int  185099 166410 843 396 107660 110174 102674 NA
+     $ V2 : int  174562 181069 744 230 9963 10220 10001 NA
+     $ V3 : int  61687 83790 421 261 1968 1875 1815 NA
+     $ V4 : int  7654 19910 237 257 1277 1256 1126 NA
+     $ V5 : int  1762 10704 227 221 1164 737 963 NA
+     $ V6 : int  813 3187 689 234 NA NA NA NA
+     $ V7 : logi  NA NA NA NA NA NA ...
+     $ V8 : int  NA NA NA NA 117932 122103 121056 NA
+     $ V9 : int  NA NA NA NA 12389 12418 12415 NA
+     $ V10: int  NA NA NA NA 1703 1748 1629 NA
+     $ V11: int  NA NA NA NA 673 638 480 NA
+     $ V12: int  NA NA NA NA 606 499 356 NA
 
-```{r extract-glycogen-data, include=TRUE}
+# 3 STANDARD CURVES
+
+## 3.1 Glycogen Standard Curve
+
+### 3.1.1 Extract luminescence data
+
+``` r
 # Extract glycogen standard curve data from plate layout and raw luminescence.
 # Rows E, F, G (rows 5, 6, 7) correspond to glycogen standards
 # Columns 1-5 contain the standard curve concentrations
@@ -124,9 +177,9 @@ dilution_factors <- c(dilution_factors_row_A, dilution_factors_row_B)
 sample_luminescence <- c(sample_luminescence_row_A, sample_luminescence_row_B)
 ```
 
+### 3.1.2 Calculate summary statistics and linear regression
 
-### Calculate summary statistics and linear regression
-```{r glycogen-summary-data, include=TRUE}
+``` r
 # Calculate mean and standard error for each concentration
 means <- numeric(length(concentrations))
 std_errors <- numeric(length(concentrations))
@@ -186,8 +239,9 @@ sample_data <- data.frame(
 )
 ```
 
-### Plot Glycogen Standard Curve with Sample Points
-```{r plot-glycogen-data, fig.width=10, fig.height=6, include=TRUE}
+### 3.1.3 Plot Glycogen Standard Curve with Sample Points
+
+``` r
 # Create the plot
 plot <- ggplot(glycogen_summary_data, aes(x = concentration, y = mean_luminescence)) +
   geom_smooth(aes(linetype = "Std Curve Best Fit Line"), method = "lm", se = FALSE, 
@@ -242,7 +296,11 @@ ggsave("../output/Gen5-20260112-mgig-glycogen_glo-dilutions_test/glycogen_plot.p
 
 # Display the plot
 plot
+```
 
+![](Gen5-20260112-mgig-glycogen_glo-dilutions_test_files/figure-gfm/plot-glycogen-data-1.png)<!-- -->
+
+``` r
 # Print summary statistics
 cat("Glycogen Standard Curve Summary:\n")
 cat(rep("=", 50), "\n", sep = "")
@@ -254,11 +312,38 @@ for (i in 1:nrow(glycogen_summary_data)) {
 }
 ```
 
-## Glucose Standard Curve
+    Glycogen Standard Curve Summary:
+    ==================================================
+    Concentration: 20 µg/µL
+      Mean Luminescence: 106836.00
+      Standard Error: 2203.92
+      CV%: 3.57%
 
-### Extract luminescence data
+    Concentration: 2 µg/µL
+      Mean Luminescence: 10061.33
+      Standard Error: 80.09
+      CV%: 1.38%
 
-```{r extract-glucose-data, include=TRUE}
+    Concentration: 0.2 µg/µL
+      Mean Luminescence: 1886.00
+      Standard Error: 44.51
+      CV%: 4.09%
+
+    Concentration: 0.02 µg/µL
+      Mean Luminescence: 1219.67
+      Standard Error: 47.22
+      CV%: 6.71%
+
+    Concentration: 0 µg/µL
+      Mean Luminescence: 954.67
+      Standard Error: 123.33
+      CV%: 22.38%
+
+## 3.2 Glucose Standard Curve
+
+### 3.2.1 Extract luminescence data
+
+``` r
 # Extract glucose standard curve data from plate layout and raw luminescence.
 # Rows E, F, G (rows 5, 6, 7) correspond to glucose standards
 # Columns 8-12 contain the standard curve concentrations
@@ -286,9 +371,9 @@ gluc_dilution_factors <- c(gluc_dilution_factors_row_C, gluc_dilution_factors_ro
 gluc_sample_luminescence <- c(gluc_sample_luminescence_row_C, gluc_sample_luminescence_row_D)
 ```
 
+### 3.2.2 Calculate summary statistics and linear regression
 
-### Calculate summary statistics and linear regression
-```{r glucose-summary-data, include=TRUE}
+``` r
 # Calculate mean and standard error for each concentration
 gluc_means <- numeric(length(gluc_concentrations))
 gluc_std_errors <- numeric(length(gluc_concentrations))
@@ -348,8 +433,9 @@ gluc_sample_data <- data.frame(
 )
 ```
 
-### Plot Glucose Standard Curve with Sample Points
-```{r plot-glucose-data, fig.width=10, fig.height=6, include=TRUE}
+### 3.2.3 Plot Glucose Standard Curve with Sample Points
+
+``` r
 # Create the plot
 gluc_plot <- ggplot(glucose_summary_data, aes(x = concentration, y = mean_luminescence)) +
   geom_smooth(aes(linetype = "Std Curve Best Fit Line"), method = "lm", se = FALSE, 
@@ -402,7 +488,11 @@ ggsave("../output/Gen5-20260112-mgig-glycogen_glo-dilutions_test/glucose_plot.pn
 
 # Display the plot
 gluc_plot
+```
 
+![](Gen5-20260112-mgig-glycogen_glo-dilutions_test_files/figure-gfm/plot-glucose-data-1.png)<!-- -->
+
+``` r
 # Print summary statistics
 cat("Glucose Standard Curve Summary:\n")
 cat(rep("=", 50), "\n", sep = "")
@@ -414,11 +504,40 @@ for (i in 1:nrow(glucose_summary_data)) {
 }
 ```
 
-# SAMPLE A2 QUANTIFICATION
+    Glucose Standard Curve Summary:
+    ==================================================
+    Concentration: 100 µg/µL
+      Mean Luminescence: 120363.67
+      Standard Error: 1252.84
+      CV%: 1.80%
 
-The results here (Total glycogen) reflect the poor pipetting - the numbers aren't particularly close. In fact, the 2000 dilution factor is an order of magnitude higher than the others.
+    Concentration: 10 µg/µL
+      Mean Luminescence: 12407.33
+      Standard Error: 9.21
+      CV%: 0.13%
 
-```{r sample-quantification, include=TRUE}
+    Concentration: 1 µg/µL
+      Mean Luminescence: 1693.33
+      Standard Error: 34.69
+      CV%: 3.55%
+
+    Concentration: 0.1 µg/µL
+      Mean Luminescence: 597.00
+      Standard Error: 59.37
+      CV%: 17.22%
+
+    Concentration: 0 µg/µL
+      Mean Luminescence: 487.00
+      Standard Error: 72.42
+      CV%: 25.76%
+
+# 4 SAMPLE A2 QUANTIFICATION
+
+The results here (Total glycogen) reflect the poor pipetting - the
+numbers aren’t particularly close. In fact, the 2000 dilution factor is
+an order of magnitude higher than the others.
+
+``` r
 # Function to calculate concentration from luminescence using linear model
 # Returns concentration or "OUT OF RANGE" message
 calculate_concentration <- function(luminescence, slope, intercept, min_conc, max_conc, units) {
@@ -532,4 +651,23 @@ for (i in 1:nrow(gluc_sample_data_sorted)) {
 }
 ```
 
+    GLYCOGEN ASSAY RESULTS (Sample A2):
+    ====================================================================================================
+    Dilution Factor Luminescence         Calculated Glycogen       Total Glycogen
+    ----------------------------------------------------------------------------------------------------
+    df.0            2000                 0.2612 µg/µL            N/A
+    df.1            175754               OUT OF RANGE - TOO HIGH   OUT OF RANGE - TOO HIGH
+    df.20           72738                13.5945 µg/µL           271.8899 µg/µL
+    df.200          13782                2.4819 µg/µL            496.3867 µg/µL
+    df.2000         6233                 1.0590 µg/µL            2118.0833 µg/µL
 
+
+    GLUCOSE ASSAY RESULTS (Sample A2):
+    ====================================================================================================
+    Dilution Factor Luminescence         Calculated Glucose        Total Glucose
+    ----------------------------------------------------------------------------------------------------
+    df.0            462                  OUT OF RANGE - TOO LOW    N/A
+    df.1            620                  0.1243 µM                0.1243 µM
+    df.20           341                  OUT OF RANGE - TOO LOW    OUT OF RANGE - TOO LOW
+    df.200          247                  OUT OF RANGE - TOO LOW    OUT OF RANGE - TOO LOW
+    df.2000         224                  OUT OF RANGE - TOO LOW    OUT OF RANGE - TOO LOW
