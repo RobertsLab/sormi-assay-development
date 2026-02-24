@@ -444,17 +444,17 @@ glyc_plot <- ggplot(glycogen_summary_data, aes(x = glyc_concentration, y = glyc_
                 width = 0.1, linewidth = 1, color = "darkblue") +
   geom_point(aes(color = "Standard Curve", shape = "Standard Curve"), size = 4) +
   
-   geom_errorbar(data = glyc_A1_data, aes(x = glyc_A1_conc, y = glyc_A1_mean_luminescence,
+  geom_errorbar(data = glyc_A1_data, aes(x = glyc_A1_conc, y = glyc_A1_mean_luminescence,
                 ymin = glyc_A1_mean_luminescence - glyc_A1_se, ymax = glyc_A1_mean_luminescence + glyc_A1_se,
                 color = label), width = 0.1, linewidth = 1) +
   geom_point(data = glyc_A1_data, aes(x = glyc_A1_conc, y = glyc_A1_mean_luminescence,
-            color = label, shape = label), size = 4) +
+             color = label, shape = label), size = 4) +
   
-    geom_errorbar(data = glyc_A2_data, aes(x = glyc_A2_conc, y = glyc_A2_mean_luminescence,
+  geom_errorbar(data = glyc_A2_data, aes(x = glyc_A2_conc, y = glyc_A2_mean_luminescence,
                 ymin = glyc_A2_mean_luminescence - glyc_A2_se, ymax = glyc_A2_mean_luminescence + glyc_A2_se,
                 color = label), width = 0.1, linewidth = 1) +
   geom_point(data = glyc_A2_data, aes(x = glyc_A2_conc, y = glyc_A2_mean_luminescence,
-            color = label, shape = label), size = 4) +
+             color = label, shape = label), size = 4) +
   
   geom_errorbar(data = glyc_A3_data, aes(x = glyc_A3_conc, y = glyc_A3_mean_luminescence,
                 ymin = glyc_A3_mean_luminescence - glyc_A3_se, ymax = glyc_A3_mean_luminescence + glyc_A3_se,
@@ -466,7 +466,7 @@ glyc_plot <- ggplot(glycogen_summary_data, aes(x = glyc_concentration, y = glyc_
                 ymin = glyc_A4_mean_luminescence - glyc_A4_se, ymax = glyc_A4_mean_luminescence + glyc_A4_se,
                 color = label), width = 0.1, linewidth = 1) +
   geom_point(data = glyc_A4_data, aes(x = glyc_A4_conc, y = glyc_A4_mean_luminescence,
-           color = label, shape = label), size = 4) +
+             color = label, shape = label), size = 4) +
   
   geom_errorbar(data = glyc_A5_data, aes(x = glyc_A5_conc, y = glyc_A5_mean_luminescence,
                 ymin = glyc_A5_mean_luminescence - glyc_A5_se, ymax = glyc_A5_mean_luminescence + glyc_A5_se,
@@ -503,6 +503,8 @@ glyc_plot <- ggplot(glycogen_summary_data, aes(x = glyc_concentration, y = glyc_
                 color = label), width = 0.1, linewidth = 1) +
   geom_point(data = glyc_B2_data, aes(x = glyc_B2_conc, y = glyc_B2_mean_luminescence,
              color = label, shape = label), size = 4) +
+
+  
   
   scale_color_manual(name = "",
                      values = c("Standard Curve" = "steelblue",
@@ -520,6 +522,7 @@ glyc_plot <- ggplot(glycogen_summary_data, aes(x = glyc_concentration, y = glyc_
   scale_shape_manual(name = "",
                      values = c("Standard Curve" = 16,
                                  "A1df.2" = 17,
+                                 "A2df.2" = 15,
                                  "A3df.2" = 18,
                                  "A4df.2" = 8,
                                  "A5df.2" = 4,
@@ -537,8 +540,8 @@ glyc_plot <- ggplot(glycogen_summary_data, aes(x = glyc_concentration, y = glyc_
            size = 3.5, fontface = "bold", fill = "white", 
            color = "coral", label.padding = unit(0.3, "lines")) +
   labs(
-    title = "Glycogen Standard Curve",
-    x = "Glycogen Concentration (µg/µL)",
+    title = "glycogen Standard Curve",
+    x = "glycogen Concentration (µg/µL)",
     y = "Luminescence",
     caption = "Error bars represent standard error of the mean (SEM)"
   ) +
@@ -562,7 +565,21 @@ glyc_A7_data
 glyc_A8_data
 glyc_B1_data
 glyc_B2_data
+
+
+
+# Print summary statistics
+cat("Glycogen Standard Curve Summary:\n")
+cat(rep("=", 50), "\n", sep = "")
+for (i in 1:nrow(glycogen_summary_data)) {
+  cat(sprintf("Concentration: %g µg/µL\n", glycogen_summary_data$concentration[i]))
+  cat(sprintf("  Mean Luminescence: %.2f\n",glycogen_summary_data$mean_luminescence[i]))
+  cat(sprintf("  Standard Error: %.2f\n", glycogen_summary_data$se[i]))
+  cat(sprintf("  CV%%: %.2f%%\n\n", glycogen_summary_data$cv[i]))
+}
+
 ```
+
 ```{r, sample glycogen calculations}
 tab <- matrix(c(glyc_A1_dilution, glyc_A1_mean_lum, glyc_A1_mean_conc,  (glyc_A1_dilution*glyc_A1_mean_conc), 
                 glyc_A2_dilution, glyc_A2_mean_lum, glyc_A2_mean_conc,  (glyc_A2_dilution*glyc_A2_mean_conc), 
@@ -1089,7 +1106,7 @@ glu_plot <- ggplot(glucose_summary_data, aes(x = glu_concentration, y = glu_mean
            color = "coral", label.padding = unit(0.3, "lines")) +
   labs(
     title = "glucose Standard Curve",
-    x = "glucose Concentration (µg/µL)",
+    x = "glucose Concentration (µM)",
     y = "Luminescence",
     caption = "Error bars represent standard error of the mean (SEM)"
   ) +
@@ -1114,6 +1131,7 @@ glu_A8_data
 glu_B1_data
 glu_B2_data
 ```
+
 ```{r, sample glucose calculations}
 tab <- matrix(c(glu_A1_dilution, glu_A1_mean_lum, glu_A1_mean_conc,  (glu_A1_dilution*glu_A1_mean_conc), 
                 glu_A2_dilution, glu_A2_mean_lum, glu_A2_mean_conc,  (glu_A2_dilution*glu_A2_mean_conc), 
