@@ -129,7 +129,7 @@ glyc_A1_mean_lum <- numeric(length(glyc_A1_dilution))
 glyc_A1_se_lum <- numeric(length(glyc_A1_dilution))
 glyc_A1_mean_conc <- numeric(length(glyc_A1_dilution))
 
-for (i in 1:length(A1_unique_dilution_factors)) {
+for (i in 1:length(glyc_A1_dilution)) {
   df_val <- glyc_A1_dilution[i]
   # Get luminescence values for this dilution factor from both rows
   glyc_A1_lum_values <- c(glyc_A1_luminescence[glyc_A1_dilution == df_val])
@@ -159,7 +159,7 @@ glyc_A2_mean_lum <- numeric(length(glyc_A2_dilution))
 glyc_A2_se_lum <- numeric(length(glyc_A2_dilution))
 glyc_A2_mean_conc <- numeric(length(glyc_A2_dilution))
 
-for (i in 1:length(A2_unique_dilution_factors)) {
+for (i in 1:length(glyc_A2_dilution)) {
   df_val <- glyc_A2_dilution[i]
   # Get luminescence values for this dilution factor from both rows
   glyc_A2_lum_values <- c(glyc_A2_luminescence[glyc_A2_dilution == df_val])
@@ -190,7 +190,7 @@ glyc_A3_mean_lum <- numeric(length(glyc_A3_dilution))
 glyc_A3_se_lum <- numeric(length(glyc_A3_dilution))
 glyc_A3_mean_conc <- numeric(length(glyc_A3_dilution))
 
-for (i in 1:length(A3_unique_dilution_factors)) {
+for (i in 1:length(glyc_A3_dilution)) {
   df_val <- glyc_A3_dilution[i]
   # Get luminescence values for this dilution factor from both rows
   glyc_A3_lum_values <- c(glyc_A3_luminescence[glyc_A3_dilution == df_val])
@@ -222,7 +222,7 @@ glyc_A4_mean_lum <- numeric(length(glyc_A4_dilution))
 glyc_A4_se_lum <- numeric(length(glyc_A4_dilution))
 glyc_A4_mean_conc <- numeric(length(glyc_A4_dilution))
 
-for (i in 1:length(A4_unique_dilution_factors)) {
+for (i in 1:length(glyc_A4_dilution)) {
   df_val <- glyc_A4_dilution[i]
   # Get luminescence values for this dilution factor from both rows
   glyc_A4_lum_values <- c(glyc_A4_luminescence[glyc_A4_dilution == df_val])
@@ -253,7 +253,7 @@ glyc_A5_mean_lum <- numeric(length(glyc_A5_dilution))
 glyc_A5_se_lum <- numeric(length(glyc_A5_dilution))
 glyc_A5_mean_conc <- numeric(length(glyc_A5_dilution))
 
-for (i in 1:length(A5_unique_dilution_factors)) {
+for (i in 1:length(glyc_A5_dilution)) {
   df_val <- glyc_A5_dilution[i]
   # Get luminescence values for this dilution factor from both rows
   glyc_A5_lum_values <- c(glyc_A5_luminescence[glyc_A5_dilution == df_val])
@@ -284,7 +284,7 @@ glyc_A6_mean_lum <- numeric(length(glyc_A6_dilution))
 glyc_A6_se_lum <- numeric(length(glyc_A6_dilution))
 glyc_A6_mean_conc <- numeric(length(glyc_A6_dilution))
 
-for (i in 1:length(A6_unique_dilution_factors)) {
+for (i in 1:length(glyc_A6_dilution)) {
   df_val <- glyc_A6_dilution[i]
   # Get luminescence values for this dilution factor from both rows
   glyc_A6_lum_values <- c(glyc_A6_luminescence[glyc_A6_dilution == df_val])
@@ -316,7 +316,7 @@ glyc_A7_mean_lum <- numeric(length(glyc_A7_dilution))
 glyc_A7_se_lum <- numeric(length(glyc_A7_dilution))
 glyc_A7_mean_conc <- numeric(length(glyc_A7_dilution))
 
-for (i in 1:length(A7_unique_dilution_factors)) {
+for (i in 1:length(glyc_A7_dilution)) {
   df_val <- glyc_A7_dilution[i]
   # Get luminescence values for this dilution factor from both rows
   glyc_A7_lum_values <- c(glyc_A7_luminescence[glyc_A7_dilution == df_val])
@@ -347,7 +347,7 @@ glyc_A8_mean_lum <- numeric(length(glyc_A8_dilution))
 glyc_A8_se_lum <- numeric(length(glyc_A8_dilution))
 glyc_A8_mean_conc <- numeric(length(glyc_A8_dilution))
 
-for (i in 1:length(A8_unique_dilution_factors)) {
+for (i in 1:length(glyc_A8_dilution)) {
   df_val <- glyc_A8_dilution[i]
   # Get luminescence values for this dilution factor from both rows
   glyc_A8_lum_values <- c(glyc_A8_luminescence[glyc_A8_dilution == df_val])
@@ -379,7 +379,7 @@ glyc_B1_mean_lum <- numeric(length(glyc_B1_dilution))
 glyc_B1_se_lum <- numeric(length(glyc_B1_dilution))
 glyc_B1_mean_conc <- numeric(length(glyc_B1_dilution))
 
-for (i in 1:length(B1_unique_dilution_factors)) {
+for (i in 1:length(glyc_B1_dilution)) {
   df_val <- glyc_B1_dilution[i]
   # Get luminescence values for this dilution factor from both rows
   glyc_B1_lum_values <- c(glyc_B1_luminescence[glyc_B1_dilution == df_val])
@@ -411,7 +411,7 @@ glyc_B2_mean_lum <- numeric(length(glyc_B2_dilution))
 glyc_B2_se_lum <- numeric(length(glyc_B2_dilution))
 glyc_B2_mean_conc <- numeric(length(glyc_B2_dilution))
 
-for (i in 1:length(B2_unique_dilution_factors)) {
+for (i in 1:length(glyc_B2_dilution)) {
   df_val <- glyc_B2_dilution[i]
   # Get luminescence values for this dilution factor from both rows
   glyc_B2_lum_values <- c(glyc_B2_luminescence[glyc_B2_dilution == df_val])
@@ -444,17 +444,17 @@ glyc_plot <- ggplot(glycogen_summary_data, aes(x = glyc_concentration, y = glyc_
                 width = 0.1, linewidth = 1, color = "darkblue") +
   geom_point(aes(color = "Standard Curve", shape = "Standard Curve"), size = 4) +
   
-  geom_errorbar(data = glyc_A1_data, aes(x = glyc_A1_conc, y = glyc_A1_mean_luminescence,
+   geom_errorbar(data = glyc_A1_data, aes(x = glyc_A1_conc, y = glyc_A1_mean_luminescence,
                 ymin = glyc_A1_mean_luminescence - glyc_A1_se, ymax = glyc_A1_mean_luminescence + glyc_A1_se,
                 color = label), width = 0.1, linewidth = 1) +
   geom_point(data = glyc_A1_data, aes(x = glyc_A1_conc, y = glyc_A1_mean_luminescence,
-             color = label, shape = label), size = 4) +
+            color = label, shape = label), size = 4) +
   
-  geom_errorbar(data = glyc_A2_data, aes(x = glyc_A2_conc, y = glyc_A2_mean_luminescence,
+    geom_errorbar(data = glyc_A2_data, aes(x = glyc_A2_conc, y = glyc_A2_mean_luminescence,
                 ymin = glyc_A2_mean_luminescence - glyc_A2_se, ymax = glyc_A2_mean_luminescence + glyc_A2_se,
                 color = label), width = 0.1, linewidth = 1) +
   geom_point(data = glyc_A2_data, aes(x = glyc_A2_conc, y = glyc_A2_mean_luminescence,
-             color = label, shape = label), size = 4) +
+            color = label, shape = label), size = 4) +
   
   geom_errorbar(data = glyc_A3_data, aes(x = glyc_A3_conc, y = glyc_A3_mean_luminescence,
                 ymin = glyc_A3_mean_luminescence - glyc_A3_se, ymax = glyc_A3_mean_luminescence + glyc_A3_se,
@@ -466,7 +466,7 @@ glyc_plot <- ggplot(glycogen_summary_data, aes(x = glyc_concentration, y = glyc_
                 ymin = glyc_A4_mean_luminescence - glyc_A4_se, ymax = glyc_A4_mean_luminescence + glyc_A4_se,
                 color = label), width = 0.1, linewidth = 1) +
   geom_point(data = glyc_A4_data, aes(x = glyc_A4_conc, y = glyc_A4_mean_luminescence,
-             color = label, shape = label), size = 4) +
+           color = label, shape = label), size = 4) +
   
   geom_errorbar(data = glyc_A5_data, aes(x = glyc_A5_conc, y = glyc_A5_mean_luminescence,
                 ymin = glyc_A5_mean_luminescence - glyc_A5_se, ymax = glyc_A5_mean_luminescence + glyc_A5_se,
@@ -503,8 +503,6 @@ glyc_plot <- ggplot(glycogen_summary_data, aes(x = glyc_concentration, y = glyc_
                 color = label), width = 0.1, linewidth = 1) +
   geom_point(data = glyc_B2_data, aes(x = glyc_B2_conc, y = glyc_B2_mean_luminescence,
              color = label, shape = label), size = 4) +
-
-  
   
   scale_color_manual(name = "",
                      values = c("Standard Curve" = "steelblue",
@@ -522,7 +520,6 @@ glyc_plot <- ggplot(glycogen_summary_data, aes(x = glyc_concentration, y = glyc_
   scale_shape_manual(name = "",
                      values = c("Standard Curve" = 16,
                                  "A1df.2" = 17,
-                                 "A2df.2" = 15,
                                  "A3df.2" = 18,
                                  "A4df.2" = 8,
                                  "A5df.2" = 4,
@@ -565,18 +562,6 @@ glyc_A7_data
 glyc_A8_data
 glyc_B1_data
 glyc_B2_data
-
-# Print summary statistics
-cat("Glycogen Standard Curve Summary:\n")
-cat(rep("=", 50), "\n", sep = "")
-for (i in 1:nrow(glycogen_summary_data)) {
-  cat(sprintf("Concentration: %g µg/µL\n", glycogen_summary_data$concentration[i]))
-  cat(sprintf("  Mean Luminescence: %.2f\n",glycogen_summary_data$mean_luminescence[i]))
-  cat(sprintf("  Standard Error: %.2f\n", glycogen_summary_data$se[i]))
-  cat(sprintf("  CV%%: %.2f%%\n\n", glycogen_summary_data$cv[i]))
-}
-
-cat("\n\n")
 ```
 ```{r, sample glycogen calculations}
 tab <- matrix(c(glyc_A1_dilution, glyc_A1_mean_lum, glyc_A1_mean_conc,  (glyc_A1_dilution*glyc_A1_mean_conc), 
@@ -692,7 +677,7 @@ glu_A1_mean_lum <- numeric(length(glu_A1_dilution))
 glu_A1_se_lum <- numeric(length(glu_A1_dilution))
 glu_A1_mean_conc <- numeric(length(glu_A1_dilution))
 
-for (i in 1:length(A1_unique_dilution_factors)) {
+for (i in 1:length(glu_A1_dilution)) {
   df_val <- glu_A1_dilution[i]
   # Get luminescence values for this dilution factor from both rows
   glu_A1_lum_values <- c(glu_A1_luminescence[glu_A1_dilution == df_val])
@@ -722,7 +707,7 @@ glu_A2_mean_lum <- numeric(length(glu_A2_dilution))
 glu_A2_se_lum <- numeric(length(glu_A2_dilution))
 glu_A2_mean_conc <- numeric(length(glu_A2_dilution))
 
-for (i in 1:length(A2_unique_dilution_factors)) {
+for (i in 1:length(glu_A2_dilution)) {
   df_val <- glu_A2_dilution[i]
   # Get luminescence values for this dilution factor from both rows
   glu_A2_lum_values <- c(glu_A2_luminescence[glu_A2_dilution == df_val])
@@ -753,7 +738,7 @@ glu_A3_mean_lum <- numeric(length(glu_A3_dilution))
 glu_A3_se_lum <- numeric(length(glu_A3_dilution))
 glu_A3_mean_conc <- numeric(length(glu_A3_dilution))
 
-for (i in 1:length(A3_unique_dilution_factors)) {
+for (i in 1:length(glu_A3_dilution)) {
   df_val <- glu_A3_dilution[i]
   # Get luminescence values for this dilution factor from both rows
   glu_A3_lum_values <- c(glu_A3_luminescence[glu_A3_dilution == df_val])
@@ -785,7 +770,7 @@ glu_A4_mean_lum <- numeric(length(glu_A4_dilution))
 glu_A4_se_lum <- numeric(length(glu_A4_dilution))
 glu_A4_mean_conc <- numeric(length(glu_A4_dilution))
 
-for (i in 1:length(A4_unique_dilution_factors)) {
+for (i in 1:length(glu_A4_dilution)) {
   df_val <- glu_A4_dilution[i]
   # Get luminescence values for this dilution factor from both rows
   glu_A4_lum_values <- c(glu_A4_luminescence[glu_A4_dilution == df_val])
@@ -816,7 +801,7 @@ glu_A5_mean_lum <- numeric(length(glu_A5_dilution))
 glu_A5_se_lum <- numeric(length(glu_A5_dilution))
 glu_A5_mean_conc <- numeric(length(glu_A5_dilution))
 
-for (i in 1:length(A5_unique_dilution_factors)) {
+for (i in 1:length(glu_A5_dilution)) {
   df_val <- glu_A5_dilution[i]
   # Get luminescence values for this dilution factor from both rows
   glu_A5_lum_values <- c(glu_A5_luminescence[glu_A5_dilution == df_val])
@@ -847,7 +832,7 @@ glu_A6_mean_lum <- numeric(length(glu_A6_dilution))
 glu_A6_se_lum <- numeric(length(glu_A6_dilution))
 glu_A6_mean_conc <- numeric(length(glu_A6_dilution))
 
-for (i in 1:length(A6_unique_dilution_factors)) {
+for (i in 1:length(glu_A6_dilution)) {
   df_val <- glu_A6_dilution[i]
   # Get luminescence values for this dilution factor from both rows
   glu_A6_lum_values <- c(glu_A6_luminescence[glu_A6_dilution == df_val])
@@ -879,7 +864,7 @@ glu_A7_mean_lum <- numeric(length(glu_A7_dilution))
 glu_A7_se_lum <- numeric(length(glu_A7_dilution))
 glu_A7_mean_conc <- numeric(length(glu_A7_dilution))
 
-for (i in 1:length(A7_unique_dilution_factors)) {
+for (i in 1:length(glu_A7_dilution)) {
   df_val <- glu_A7_dilution[i]
   # Get luminescence values for this dilution factor from both rows
   glu_A7_lum_values <- c(glu_A7_luminescence[glu_A7_dilution == df_val])
@@ -910,7 +895,7 @@ glu_A8_mean_lum <- numeric(length(glu_A8_dilution))
 glu_A8_se_lum <- numeric(length(glu_A8_dilution))
 glu_A8_mean_conc <- numeric(length(glu_A8_dilution))
 
-for (i in 1:length(A8_unique_dilution_factors)) {
+for (i in 1:length(glu_A8_dilution)) {
   df_val <- glu_A8_dilution[i]
   # Get luminescence values for this dilution factor from both rows
   glu_A8_lum_values <- c(glu_A8_luminescence[glu_A8_dilution == df_val])
@@ -942,7 +927,7 @@ glu_B1_mean_lum <- numeric(length(glu_B1_dilution))
 glu_B1_se_lum <- numeric(length(glu_B1_dilution))
 glu_B1_mean_conc <- numeric(length(glu_B1_dilution))
 
-for (i in 1:length(B1_unique_dilution_factors)) {
+for (i in 1:length(glu_B1_dilution)) {
   df_val <- glu_B1_dilution[i]
   # Get luminescence values for this dilution factor from both rows
   glu_B1_lum_values <- c(glu_B1_luminescence[glu_B1_dilution == df_val])
@@ -974,7 +959,7 @@ glu_B2_mean_lum <- numeric(length(glu_B2_dilution))
 glu_B2_se_lum <- numeric(length(glu_B2_dilution))
 glu_B2_mean_conc <- numeric(length(glu_B2_dilution))
 
-for (i in 1:length(B2_unique_dilution_factors)) {
+for (i in 1:length(glu_B2_dilution)) {
   df_val <- glu_B2_dilution[i]
   # Get luminescence values for this dilution factor from both rows
   glu_B2_lum_values <- c(glu_B2_luminescence[glu_B2_dilution == df_val])
