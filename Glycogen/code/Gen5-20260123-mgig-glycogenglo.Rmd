@@ -4,6 +4,7 @@ author: "Hazel Abrahamson-Amerine"
 date: "2026-01-23"
 output: html_document
 ---
+
 ```{r setup, include=TRUE}
 library(knitr)
 library(ggplot2)
@@ -54,7 +55,7 @@ glyc_row_G <- as.numeric(raw_luminescence[7, 1:5])  # Row 7 (G)
 glyc_row_H <- as.numeric(raw_luminescence[8, 1:5])  # Row 8 (H)
 ```
 
-``` {r glycogen samples, include=TRUE}
+```{r glycogen samples, include=TRUE}
 #Extract glycogen sample data - wells A1-E6
 glyc_sample_cols1 <- c(1,2,3)
 glyc_A1_dilution <- as.numeric(gsub(".*-df\\.", "", plate_layout[1, 1]))
@@ -90,7 +91,7 @@ glyc_B2_dilution <- as.numeric(gsub(".*-df\\.", "", plate_layout[5, 4]))
 glyc_B2_luminescence <- as.numeric(raw_luminescence[5, glyc_sample_cols2])
 ```
 
-``` {r glycogen summary statistics and linear regression,include=TRUE}
+```{r glycogen summary statistics and linear regression,include=TRUE}
 # Calculate mean and standard error for each concentration
 glyc_means <- numeric(length(glyc_concentrations))
 glyc_std_errors <- numeric(length(glyc_concentrations))
@@ -119,7 +120,7 @@ glyc_slope <- coef(lm_model)[2]
 glyc_intercept <- coef(lm_model)[1]
 ```
 
-``` {r add A1 glycogen to standard curve, include=TRUE}
+```{r add A1 glycogen to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glycogen concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -149,7 +150,8 @@ glyc_A1_data <- data.frame(
 glyc_A1_mean_lum
 glyc_A1_mean_conc
 ```
-``` {r add A2 glycogen to standard curve, include=TRUE}
+
+```{r add A2 glycogen to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glycogen concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -180,7 +182,7 @@ glyc_A2_mean_lum
 glyc_A2_mean_conc
 ```
 
-``` {r add A3 glycogen to standard curve, include=TRUE}
+```{r add A3 glycogen to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glycogen concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -211,8 +213,7 @@ glyc_A3_mean_lum
 glyc_A3_mean_conc
 ```
 
-
-``` {r add A4 glycogen to standard curve, include=TRUE}
+```{r add A4 glycogen to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glycogen concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -243,7 +244,7 @@ glyc_A4_mean_lum
 glyc_A4_mean_conc
 ```
 
-``` {r add A5 glycogen to standard curve, include=TRUE}
+```{r add A5 glycogen to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glycogen concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -274,7 +275,7 @@ glyc_A5_mean_lum
 glyc_A5_mean_conc
 ```
 
-``` {r add A6 glycogen to standard curve, include=TRUE}
+```{r add A6 glycogen to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glycogen concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -305,8 +306,7 @@ glyc_A6_mean_lum
 glyc_A6_mean_conc
 ```
 
-
-``` {r add A7 glycogen to standard curve, include=TRUE}
+```{r add A7 glycogen to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glycogen concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -337,7 +337,7 @@ glyc_A7_mean_lum
 glyc_A7_mean_conc
 ```
 
-``` {r add A8 glycogen to standard curve, include=TRUE}
+```{r add A8 glycogen to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glycogen concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -368,8 +368,7 @@ glyc_A8_mean_lum
 glyc_A8_mean_conc
 ```
 
-
-``` {r add B1 glycogen to standard curve, include=TRUE}
+```{r add B1 glycogen to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glycogen concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -400,8 +399,7 @@ glyc_B1_mean_lum
 glyc_B1_mean_conc
 ```
 
-
-``` {r add B2 glycogen to standard curve, include=TRUE}
+```{r add B2 glycogen to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glycogen concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -432,10 +430,7 @@ glyc_B2_mean_lum
 glyc_B2_mean_conc
 ```
 
-
-
-
-``` {r plot glycogen standard curve with samples, include=TRUE}
+```{r plot glycogen standard curve with samples, include=TRUE}
 # Create the plot
 glyc_plot <- ggplot(glycogen_summary_data, aes(x = glyc_concentration, y = glyc_mean_luminescence)) +
   geom_smooth(aes(linetype = "Std Curve Best Fit Line"), method = "lm", se = FALSE, 
@@ -601,7 +596,7 @@ print("All samples have calculated glycogen > 20 ug/uL, and are therefore out of
 
 # STANDARD CURVES
 
-## Glycogen Standard Curve
+## Glucose Standard Curve
 
 ```{r glucose standard data, include=TRUE}
 # Extract glycogen standard curve data from plate layout and raw luminescence.
@@ -619,7 +614,7 @@ glu_row_G <- as.numeric(raw_luminescence[7, 7:11])  # Row 7 (G)
 glu_row_H <- as.numeric(raw_luminescence[8, 7:11])  # Row 8 (H)
 ```
 
-``` {r glucose samples, include=TRUE}
+```{r glucose samples, include=TRUE}
 #Extract glucose sample data - wells A1-E6
 glu_sample_cols1 <- c(7,8,9)
 glu_A1_dilution <- as.numeric(gsub(".*-df\\.", "", plate_layout[1, 7]))
@@ -655,7 +650,7 @@ glu_B2_dilution <- as.numeric(gsub(".*-df\\.", "", plate_layout[5, 10]))
 glu_B2_luminescence <- as.numeric(raw_luminescence[5, glu_sample_cols2])
 ```
 
-``` {r glucose summary statistics and linear regression, include=TRUE}
+```{r glucose summary statistics and linear regression, include=TRUE}
 # Calculate mean and standard error for each concentration
 glu_means <- numeric(length(glu_concentrations))
 glu_std_errors <- numeric(length(glu_concentrations))
@@ -684,7 +679,7 @@ glu_slope <- coef(lm_model)[2]
 glu_intercept <- coef(lm_model)[1]
 ```
 
-``` {r add A1 glucose to standard curve, include=TRUE}
+```{r add A1 glucose to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glucose concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -714,7 +709,8 @@ glu_A1_data <- data.frame(
 glu_A1_mean_lum
 glu_A1_mean_conc
 ```
-``` {r add A2 glucose to standard curve, include=TRUE}
+
+```{r add A2 glucose to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glucose concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -745,7 +741,7 @@ glu_A2_mean_lum
 glu_A2_mean_conc
 ```
 
-``` {r add A3 glucose to standard curve, include=TRUE}
+```{r add A3 glucose to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glucose concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -776,8 +772,7 @@ glu_A3_mean_lum
 glu_A3_mean_conc
 ```
 
-
-``` {r add A4 glucose to standard curve, include=TRUE}
+```{r add A4 glucose to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glucose concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -808,7 +803,7 @@ glu_A4_mean_lum
 glu_A4_mean_conc
 ```
 
-``` {r add A5 glucose to standard curve, include=TRUE}
+```{r add A5 glucose to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glucose concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -839,7 +834,7 @@ glu_A5_mean_lum
 glu_A5_mean_conc
 ```
 
-``` {r add A6 glucose to standard curve, include=TRUE}
+```{r add A6 glucose to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glucose concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -870,8 +865,7 @@ glu_A6_mean_lum
 glu_A6_mean_conc
 ```
 
-
-``` {r add A7 glucose to standard curve, include=TRUE}
+```{r add A7 glucose to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glucose concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -902,7 +896,7 @@ glu_A7_mean_lum
 glu_A7_mean_conc
 ```
 
-``` {r add A8 glucose to standard curve, include=TRUE}
+```{r add A8 glucose to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glucose concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -933,8 +927,7 @@ glu_A8_mean_lum
 glu_A8_mean_conc
 ```
 
-
-``` {r add B1 glucose to standard curve, include=TRUE}
+```{r add B1 glucose to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glucose concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -965,8 +958,7 @@ glu_B1_mean_lum
 glu_B1_mean_conc
 ```
 
-
-``` {r add B2 glucose to standard curve, include=TRUE}
+```{r add B2 glucose to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glucose concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -997,10 +989,7 @@ glu_B2_mean_lum
 glu_B2_mean_conc
 ```
 
-
-
-
-``` {r plot glucose standard curve with samples, include=TRUE}
+```{r plot glucose standard curve with samples, include=TRUE}
 # Create the plot
 glu_plot <- ggplot(glucose_summary_data, aes(x = glu_concentration, y = glu_mean_luminescence)) +
   geom_smooth(aes(linetype = "Std Curve Best Fit Line"), method = "lm", se = FALSE, 
@@ -1148,4 +1137,3 @@ rownames(tab) <- c('A1','A2','A3','A4','A5','A6','A7','A8','B1','B2' )
 tab <- as.table(tab)
 tab
 ```
-

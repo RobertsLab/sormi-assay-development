@@ -603,7 +603,7 @@ tab
 
 # STANDARD CURVES
 
-## Glycogen Standard Curve
+## Glucose Standard Curve
 
 ```{r glucose standard data, include=TRUE}
 # Extract glycogen standard curve data from plate layout and raw luminescence.
