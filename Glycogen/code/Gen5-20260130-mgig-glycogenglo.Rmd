@@ -1,11 +1,14 @@
 ---
-  title: "Gen5-20260130-mgig-glycogenglo"
+title: "Gen5-20260130-mgig-glycogenglo"
 author: "Hazel Abrahamson-Amerine"
 date: "2026-02-27"
-output: html_document
+output:  
+    github_document:
+      toc: true
+      number_sections: true
 ---
   
-  ```{r setup, include=TRUE}
+```{r setup, include=TRUE}
 library(knitr)
 library(ggplot2)
 library(dplyr)
