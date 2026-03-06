@@ -1,17 +1,32 @@
----
-title: "Gen5-20260204-mgig-glycogenglo"
-author: "Hazel Abrahamson-Amerine"
-date: "2026-02-27"
-output:  
-    github_document:
-      toc: true
-      number_sections: true
----
+Gen5-20260204-mgig-glycogenglo
+================
+Hazel Abrahamson-Amerine
+2026-02-27
 
-```{r setup, include=TRUE}
+- [1 STANDARD CURVES](#1-standard-curves)
+  - [1.1 Glycogen Standard Curve](#11-glycogen-standard-curve)
+    - [1.1.1 Extract luminescence data](#111-extract-luminescence-data)
+- [2 STANDARD CURVES](#2-standard-curves)
+  - [2.1 Glucose Standard Curve](#21-glucose-standard-curve)
+
+``` r
 library(knitr)
 library(ggplot2)
 library(dplyr)
+```
+
+    ## 
+    ## Attaching package: 'dplyr'
+
+    ## The following objects are masked from 'package:stats':
+    ## 
+    ##     filter, lag
+
+    ## The following objects are masked from 'package:base':
+    ## 
+    ##     intersect, setdiff, setequal, union
+
+``` r
 knitr::opts_chunk$set(
   echo = TRUE,         # Display code chunks
   eval = TRUE,        # Evaluate code chunks
@@ -22,8 +37,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r data, include=TRUE}
-
+``` r
 plate_layout <- read.csv("https://raw.githubusercontent.com/RobertsLab/sormi-assay-development/refs/heads/main/Glycogen/data/raw_luminescence/layout-Gen5-20260204-mgig-glycogenglo.csv", header = FALSE)
 raw_luminescence <- read.csv("https://raw.githubusercontent.com/RobertsLab/sormi-assay-development/refs/heads/main/Glycogen/data/raw_luminescence/raw_lum-Gen5-20260204-mgig-glycogenglo.csv", header = FALSE)
 
@@ -36,13 +50,44 @@ cat("Raw luminescence:\n")
 str(raw_luminescence)
 ```
 
-# STANDARD CURVES
+    Plate layout:
+    'data.frame':   8 obs. of  12 variables:
+     $ V1 : chr  "A6-glyc-25-df.20" "A7-glyc-17-df.20" "A8-glyc-12-df.20" "B1-glyc-20-df.20" ...
+     $ V2 : chr  "A6-glyc-25-df.20" "A7-glyc-17-df.20" "A8-glyc-12-df.20" "B1-glyc-20-df.20" ...
+     $ V3 : chr  "A6-glyc-25-df.20" "A7-glyc-17-df.20" "A8-glyc-12-df.20" "B1-glyc-20-df.20" ...
+     $ V4 : chr  "B3-glyc-15-df.20" "B4-glyc-28-df.20" "B5-glyc-27-df.20" "B6-glyc-35-df.20" ...
+     $ V5 : chr  "B3-glyc-15-df.20" "B4-glyc-28-df.20" "B5-glyc-27-df.20" "B6-glyc-35-df.20" ...
+     $ V6 : chr  "B3-glyc-15-df.20" "B4-glyc-28-df.20" "B5-glyc-27-df.20" "B6-glyc-35-df.20" ...
+     $ V7 : chr  "A6-glu-25-df.20" "A7-glu-17-df.20" "A8-glu-12-df.20" "B1-glu-20-df.20" ...
+     $ V8 : chr  "A6-glu-25-df.20" "A7-glu-17-df.20" "A8-glu-12-df.20" "B1-glu-20-df.20" ...
+     $ V9 : chr  "A6-glu-25-df.20" "A7-glu-17-df.20" "A8-glu-12-df.20" "B1-glu-20-df.20" ...
+     $ V10: chr  "B3-glu-15-df.20" "B4-glu-28-df.20" "B5-glu-27-df.20" "B6-glu-35-df.20" ...
+     $ V11: chr  "B3-glu-15-df.20" "B4-glu-28-df.20" "B5-glu-27-df.20" "B6-glu-35-df.20" ...
+     $ V12: chr  "B3-glu-15-df.20" "B4-glu-28-df.20" "B5-glu-27-df.20" "B6-glu-35-df.20" ...
 
-## Glycogen Standard Curve
 
-### Extract luminescence data
+    Raw luminescence:
+    'data.frame':   8 obs. of  12 variables:
+     $ V1 : int  45305 13069 44163 33662 61951 114941 114336 115315
+     $ V2 : int  44213 11211 43305 34529 63244 7101 6906 9660
+     $ V3 : int  44763 13204 41636 33178 66142 1439 1382 1501
+     $ V4 : int  20383 89772 81935 41112 5933 964 989 1028
+     $ V5 : int  32232 85256 86742 45344 5986 944 1258 912
+     $ V6 : int  27787 88576 86889 45379 10980 NA NA NA
+     $ V7 : int  5855 5050 7153 7284 8037 123828 125644 125987
+     $ V8 : int  5669 13272 3580 7116 4004 12699 15394 13826
+     $ V9 : int  10306 9401 1181 2685 4433 9748 2458 1655
+     $ V10: int  5014 674 1304 5322 7924 8758 5016 582
+     $ V11: int  2188 1123 547 11109 3497 3299 757 382
+     $ V12: int  1140 2027 4170 713 4318 NA NA NA
 
-```{r glycogen standard data, include=TRUE}
+# 1 STANDARD CURVES
+
+## 1.1 Glycogen Standard Curve
+
+### 1.1.1 Extract luminescence data
+
+``` r
 # Extract glycogen standard curve data from plate layout and raw luminescence.
 # Rows F, G, H (rows 6, 7, 8) correspond to glycogen standards
 # Columns 1-5 contain the standard curve concentrations
@@ -58,7 +103,9 @@ glyc_row_G <- as.numeric(raw_luminescence[7, 1:5])  # Row 7 (G)
 glyc_row_H <- as.numeric(raw_luminescence[8, 1:5])  # Row 8 (H)
 ```
 
-```{r glycogen samples, include=TRUE}
+    [1] 20.00  2.00  0.20  0.02  0.00
+
+``` r
 #Extract glycogen sample data - wells A6-E6
 glyc_sample_cols1 <- c(1,2,3)
 glyc_A6_dilution <- as.numeric(gsub(".*-df\\.", "", plate_layout[1, 1]))
@@ -94,8 +141,7 @@ glyc_B7_dilution <- as.numeric(gsub(".*-df\\.", "", plate_layout[5, 4]))
 glyc_B7_luminescence <- as.numeric(raw_luminescence[5, glyc_sample_cols2])
 ```
 
-
-```{r glycogen summary statistics and linear regression,include=TRUE}
+``` r
 # Calculate mean and standard error for each concentration
 glyc_means <- numeric(length(glyc_concentrations))
 glyc_std_errors <- numeric(length(glyc_concentrations))
@@ -124,7 +170,7 @@ glyc_slope <- coef(lm_model)[2]
 glyc_intercept <- coef(lm_model)[1]
 ```
 
-```{r add A6 glycogen to standard curve, include=TRUE}
+``` r
 # Create sample data frame
 # Calculate glycogen concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -155,7 +201,10 @@ glyc_A6_mean_lum
 glyc_A6_mean_conc
 ```
 
-```{r add A7 glycogen to standard curve, include=TRUE}
+    [1] 44760.33
+    [1] 7.843816
+
+``` r
 # Create sample data frame
 # Calculate glycogen concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -186,7 +235,10 @@ glyc_A7_mean_lum
 glyc_A7_mean_conc
 ```
 
-```{r add A8 glycogen to standard curve, include=TRUE}
+    [1] 12494.67
+    [1] 2.222713
+
+``` r
 # Create sample data frame
 # Calculate glycogen concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -217,7 +269,10 @@ glyc_A8_mean_lum
 glyc_A8_mean_conc
 ```
 
-```{r add B1 glycogen to standard curve, include=TRUE}
+    [1] 43034.67
+    [1] 7.543182
+
+``` r
 # Create sample data frame
 # Calculate glycogen concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -248,7 +303,10 @@ glyc_B1_mean_lum
 glyc_B1_mean_conc
 ```
 
-```{r add B2 glycogen to standard curve, include=TRUE}
+    [1] 33789.67
+    [1] 5.932582
+
+``` r
 # Create sample data frame
 # Calculate glycogen concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -279,7 +337,10 @@ glyc_B2_mean_lum
 glyc_B2_mean_conc
 ```
 
-```{r add B3 glycogen to standard curve, include=TRUE}
+    [1] 63779
+    [1] 11.15712
+
+``` r
 # Create sample data frame
 # Calculate glycogen concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -310,7 +371,10 @@ glyc_B3_mean_lum
 glyc_B3_mean_conc
 ```
 
-```{r add B4 glycogen to standard curve, include=TRUE}
+    [1] 26800.67
+    [1] 4.715006
+
+``` r
 # Create sample data frame
 # Calculate glycogen concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -341,7 +405,10 @@ glyc_B4_mean_lum
 glyc_B4_mean_conc
 ```
 
-```{r add B5 glycogen to standard curve, include=TRUE}
+    [1] 87868
+    [1] 15.35374
+
+``` r
 # Create sample data frame
 # Calculate glycogen concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -372,7 +439,10 @@ glyc_B5_mean_lum
 glyc_B5_mean_conc
 ```
 
-```{r add B6 glycogen to standard curve, include=TRUE}
+    [1] 85188.67
+    [1] 14.88696
+
+``` r
 # Create sample data frame
 # Calculate glycogen concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -403,7 +473,10 @@ glyc_B6_mean_lum
 glyc_B6_mean_conc
 ```
 
-```{r add B7 glycogen to standard curve, include=TRUE}
+    [1] 43945
+    [1] 7.701774
+
+``` r
 # Create sample data frame
 # Calculate glycogen concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -434,8 +507,10 @@ glyc_B7_mean_lum
 glyc_B7_mean_conc
 ```
 
+    [1] 7633
+    [1] 1.375746
 
-```{r plot glycogen standard curve with samples, include=TRUE}
+``` r
 # Create the plot
 glyc_plot <- ggplot(glycogen_summary_data, aes(x = glyc_concentration, y = glyc_mean_luminescence)) +
   geom_smooth(aes(linetype = "Std Curve Best Fit Line"), method = "lm", se = FALSE, 
@@ -553,6 +628,11 @@ glyc_plot <- ggplot(glycogen_summary_data, aes(x = glyc_concentration, y = glyc_
 
 # Display the plot
 glyc_plot
+```
+
+![](Gen5-20260204-mgig-glycogenglo_files/figure-gfm/plot%20glycogen%20standard%20curve%20with%20samples-1.png)<!-- -->
+
+``` r
 glyc_A6_data
 glyc_A7_data
 glyc_A8_data
@@ -573,10 +653,52 @@ for (i in 1:nrow(glycogen_summary_data)) {
   cat(sprintf("  Standard Error: %.2f\n", glycogen_summary_data$se[i]))
   cat(sprintf("  CV%%: %.2f%%\n\n", glycogen_summary_data$cv[i]))
 }
-
 ```
 
-```{r, sample glycogen calculations}
+      glyc_A6_dilution_factor glyc_A6_mean_luminescence glyc_A6_se glyc_A6_conc
+    1                      20                  44760.33   315.2361     7.843816
+        label
+    1 A6df.20
+      glyc_A7_dilution_factor glyc_A7_mean_luminescence glyc_A7_se glyc_A7_conc
+    1                      20                  12494.67   643.0154     2.222713
+        label
+    1 A7df.20
+      glyc_A8_dilution_factor glyc_A8_mean_luminescence glyc_A8_se glyc_A8_conc
+    1                      20                  43034.67    741.899     7.543182
+        label
+    1 A8df.20
+      glyc_B1_dilution_factor glyc_B1_mean_luminescence glyc_B1_se glyc_B1_conc
+    1                      20                  33789.67   395.1895     5.932582
+        label
+    1 B1df.20
+      glyc_B2_dilution_factor glyc_B2_mean_luminescence glyc_B2_se glyc_B2_conc
+    1                      20                     63779   1239.057     11.15712
+        label
+    1 B2df.20
+      glyc_B3_dilution_factor glyc_B3_mean_luminescence glyc_B3_se glyc_B3_conc
+    1                      20                  26800.67   3455.881     4.715006
+        label
+    1 B3df.20
+      glyc_B4_dilution_factor glyc_B4_mean_luminescence glyc_B4_se glyc_B4_conc
+    1                      20                     87868   1350.865     15.35374
+        label
+    1 B4df.20
+      glyc_B5_dilution_factor glyc_B5_mean_luminescence glyc_B5_se glyc_B5_conc
+    1                      20                  85188.67   1627.387     14.88696
+        label
+    1 B5df.20
+      glyc_B6_dilution_factor glyc_B6_mean_luminescence glyc_B6_se glyc_B6_conc
+    1                      20                     43945   1416.536     7.701774
+        label
+    1 B6df.20
+      glyc_B7_dilution_factor glyc_B7_mean_luminescence glyc_B7_se glyc_B7_conc
+    1                      20                      7633    1673.57     1.375746
+        label
+    1 B7df.20
+    Glycogen Standard Curve Summary:
+    ==================================================
+
+``` r
 tab <- matrix(c(glyc_A6_dilution, glyc_A6_mean_lum, glyc_A6_mean_conc,  (glyc_A6_dilution*glyc_A6_mean_conc), 
                 glyc_A7_dilution, glyc_A7_mean_lum, glyc_A7_mean_conc,  (glyc_A7_dilution*glyc_A7_mean_conc), 
                 glyc_A8_dilution, glyc_A8_mean_lum, glyc_A8_mean_conc,  (glyc_A8_dilution*glyc_A8_mean_conc), 
@@ -593,11 +715,34 @@ tab <- as.table(tab)
 tab
 ```
 
-# STANDARD CURVES
+       Dilution factor Luminescence Calculated Glycogen (ug/uL)
+    A6       20.000000 44760.333333                    7.843816
+    A7       20.000000 12494.666667                    2.222713
+    A8       20.000000 43034.666667                    7.543182
+    B1       20.000000 33789.666667                    5.932582
+    B2       20.000000 63779.000000                   11.157118
+    B3       20.000000 26800.666667                    4.715006
+    B4       20.000000 87868.000000                   15.353739
+    B5       20.000000 85188.666667                   14.886963
+    B6       20.000000 43945.000000                    7.701774
+    B7       20.000000  7633.000000                    1.375746
+       Total glycogen (ug/uL)
+    A6             156.876322
+    A7              44.454253
+    A8             150.863646
+    B1             118.651634
+    B2             223.142359
+    B3              94.300120
+    B4             307.074772
+    B5             297.739269
+    B6             154.035486
+    B7              27.514927
 
-## Glucose Standard Curve
+# 2 STANDARD CURVES
 
-```{r glucose standard data, include=TRUE}
+## 2.1 Glucose Standard Curve
+
+``` r
 # Extract glycogen standard curve data from plate layout and raw luminescence.
 # Rows F, G, H (rows 6, 7, 8) correspond to glycogen standards
 # Columns 1-5 contain the standard curve concentrations
@@ -613,7 +758,9 @@ glu_row_G <- as.numeric(raw_luminescence[7, 7:11])  # Row 7 (G)
 glu_row_H <- as.numeric(raw_luminescence[8, 7:11])  # Row 8 (H)
 ```
 
-```{r glucose samples, include=TRUE}
+    [1] 100.0  10.0   1.0   0.1   0.0
+
+``` r
 #Extract glucose sample data - wells A6-E6
 glu_sample_cols1 <- c(1,2,3)
 glu_A6_dilution <- as.numeric(gsub(".*-df\\.", "", plate_layout[1, 1]))
@@ -649,8 +796,7 @@ glu_B7_dilution <- as.numeric(gsub(".*-df\\.", "", plate_layout[5, 4]))
 glu_B7_luminescence <- as.numeric(raw_luminescence[5, glu_sample_cols2])
 ```
 
-
-```{r glucose summary statistics and linear regression, include=TRUE}
+``` r
 # Calculate mean and standard error for each concentration
 glu_means <- numeric(length(glu_concentrations))
 glu_std_errors <- numeric(length(glu_concentrations))
@@ -679,7 +825,7 @@ glu_slope <- coef(lm_model)[2]
 glu_intercept <- coef(lm_model)[1]
 ```
 
-```{r add A6 glucose to standard curve, include=TRUE}
+``` r
 # Create sample data frame
 # Calculate glucose concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -710,7 +856,10 @@ glu_A6_mean_lum
 glu_A6_mean_conc
 ```
 
-```{r add A7 glucose to standard curve, include=TRUE}
+    [1] 44760.33
+    [1] 34.29686
+
+``` r
 # Create sample data frame
 # Calculate glucose concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -741,7 +890,10 @@ glu_A7_mean_lum
 glu_A7_mean_conc
 ```
 
-```{r add A8 glucose to standard curve, include=TRUE}
+    [1] 12494.67
+    [1] 7.89325
+
+``` r
 # Create sample data frame
 # Calculate glucose concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -772,7 +924,10 @@ glu_A8_mean_lum
 glu_A8_mean_conc
 ```
 
-```{r add B1 glucose to standard curve, include=TRUE}
+    [1] 43034.67
+    [1] 32.88472
+
+``` r
 # Create sample data frame
 # Calculate glucose concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -803,7 +958,10 @@ glu_B1_mean_lum
 glu_B1_mean_conc
 ```
 
-```{r add B2 glucose to standard curve, include=TRUE}
+    [1] 33789.67
+    [1] 25.31936
+
+``` r
 # Create sample data frame
 # Calculate glucose concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -834,7 +992,10 @@ glu_B2_mean_lum
 glu_B2_mean_conc
 ```
 
-```{r add B3 glucose to standard curve, include=TRUE}
+    [1] 63779
+    [1] 49.8602
+
+``` r
 # Create sample data frame
 # Calculate glucose concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -865,7 +1026,10 @@ glu_B3_mean_lum
 glu_B3_mean_conc
 ```
 
-```{r add B4 glucose to standard curve, include=TRUE}
+    [1] 26800.67
+    [1] 19.60012
+
+``` r
 # Create sample data frame
 # Calculate glucose concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -896,7 +1060,10 @@ glu_B4_mean_lum
 glu_B4_mean_conc
 ```
 
-```{r add B5 glucose to standard curve, include=TRUE}
+    [1] 87868
+    [1] 69.57269
+
+``` r
 # Create sample data frame
 # Calculate glucose concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -927,7 +1094,10 @@ glu_B5_mean_lum
 glu_B5_mean_conc
 ```
 
-```{r add B6 glucose to standard curve, include=TRUE}
+    [1] 85188.67
+    [1] 67.38014
+
+``` r
 # Create sample data frame
 # Calculate glucose concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -958,7 +1128,10 @@ glu_B6_mean_lum
 glu_B6_mean_conc
 ```
 
-```{r add B7 glucose to standard curve, include=TRUE}
+    [1] 43945
+    [1] 33.62966
+
+``` r
 # Create sample data frame
 # Calculate glucose concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -989,8 +1162,10 @@ glu_B7_mean_lum
 glu_B7_mean_conc
 ```
 
+    [1] 7633
+    [1] 3.914856
 
-```{r plot glucose standard curve with samples, include=TRUE}
+``` r
 # Create the plot
 glu_plot <- ggplot(glucose_summary_data, aes(x = glu_concentration, y = glu_mean_luminescence)) +
   geom_smooth(aes(linetype = "Std Curve Best Fit Line"), method = "lm", se = FALSE, 
@@ -1108,6 +1283,11 @@ glu_plot <- ggplot(glucose_summary_data, aes(x = glu_concentration, y = glu_mean
 
 # Display the plot
 glu_plot
+```
+
+![](Gen5-20260204-mgig-glycogenglo_files/figure-gfm/plot%20glucose%20standard%20curve%20with%20samples-1.png)<!-- -->
+
+``` r
 glu_A6_data
 glu_A7_data
 glu_A8_data
@@ -1128,10 +1308,32 @@ for (i in 1:nrow(glucose_summary_data)) {
   cat(sprintf("  Standard Error: %.2f\n", glucose_summary_data$se[i]))
   cat(sprintf("  CV%%: %.2f%%\n\n", glucose_summary_data$cv[i]))
 }
-
 ```
 
-```{r, sample glucose calculations}
+      glu_A6_dilution_factor glu_A6_mean_luminescence glu_A6_se glu_A6_conc   label
+    1                     20                 44760.33  315.2361    34.29686 A6df.20
+      glu_A7_dilution_factor glu_A7_mean_luminescence glu_A7_se glu_A7_conc   label
+    1                     20                 12494.67  643.0154     7.89325 A7df.20
+      glu_A8_dilution_factor glu_A8_mean_luminescence glu_A8_se glu_A8_conc   label
+    1                     20                 43034.67   741.899    32.88472 A8df.20
+      glu_B1_dilution_factor glu_B1_mean_luminescence glu_B1_se glu_B1_conc   label
+    1                     20                 33789.67  395.1895    25.31936 B1df.20
+      glu_B2_dilution_factor glu_B2_mean_luminescence glu_B2_se glu_B2_conc   label
+    1                     20                    63779  1239.057     49.8602 B2df.20
+      glu_B3_dilution_factor glu_B3_mean_luminescence glu_B3_se glu_B3_conc   label
+    1                     20                 26800.67  3455.881    19.60012 B3df.20
+      glu_B4_dilution_factor glu_B4_mean_luminescence glu_B4_se glu_B4_conc   label
+    1                     20                    87868  1350.865    69.57269 B4df.20
+      glu_B5_dilution_factor glu_B5_mean_luminescence glu_B5_se glu_B5_conc   label
+    1                     20                 85188.67  1627.387    67.38014 B5df.20
+      glu_B6_dilution_factor glu_B6_mean_luminescence glu_B6_se glu_B6_conc   label
+    1                     20                    43945  1416.536    33.62966 B6df.20
+      glu_B7_dilution_factor glu_B7_mean_luminescence glu_B7_se glu_B7_conc   label
+    1                     20                     7633   1673.57    3.914856 B7df.20
+    glucose Standard Curve Summary:
+    ==================================================
+
+``` r
 tab <- matrix(c(glu_A6_dilution, glu_A6_mean_lum, glu_A6_mean_conc,  (glu_A6_dilution*glu_A6_mean_conc), 
                 glu_A7_dilution, glu_A7_mean_lum, glu_A7_mean_conc,  (glu_A7_dilution*glu_A7_mean_conc), 
                 glu_A8_dilution, glu_A8_mean_lum, glu_A8_mean_conc,  (glu_A8_dilution*glu_A8_mean_conc), 
@@ -1147,3 +1349,26 @@ rownames(tab) <- c('A6','A7','A8','B1','B2','B3','B4','B5','B6','B7' )
 tab <- as.table(tab)
 tab
 ```
+
+       Dilution factor Luminescence Calculated glucose (ug/uL)
+    A6       20.000000 44760.333333                  34.296863
+    A7       20.000000 12494.666667                   7.893250
+    A8       20.000000 43034.666667                  32.884717
+    B1       20.000000 33789.666667                  25.319356
+    B2       20.000000 63779.000000                  49.860202
+    B3       20.000000 26800.666667                  19.600124
+    B4       20.000000 87868.000000                  69.572691
+    B5       20.000000 85188.666667                  67.380142
+    B6       20.000000 43945.000000                  33.629660
+    B7       20.000000  7633.000000                   3.914856
+       Total glucose (ug/uL)
+    A6            685.937258
+    A7            157.865010
+    A8            657.694337
+    B1            506.387129
+    B2            997.204034
+    B3            392.002480
+    B4           1391.453826
+    B5           1347.602832
+    B6            672.593200
+    B7             78.297113
