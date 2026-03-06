@@ -615,7 +615,7 @@ glu_row_H <- as.numeric(raw_luminescence[8, 7:11])  # Row 8 (H)
 
 ```{r glucose samples, include=TRUE}
 #Extract glucose sample data - wells A6-E6
-glu_sample_cols1 <- c(1,2,3)
+glu_sample_cols1 <- c(7,8,9)
 glu_A6_dilution <- as.numeric(gsub(".*-df\\.", "", plate_layout[1, 1]))
 glu_A6_luminescence <- as.numeric(raw_luminescence[1, glu_sample_cols1])
 
@@ -632,7 +632,7 @@ glu_B2_dilution <- as.numeric(gsub(".*-df\\.", "", plate_layout[5, 1]))
 glu_B2_luminescence <- as.numeric(raw_luminescence[5, glu_sample_cols1])
 
 
-glu_sample_cols2 <- c(4,5,6)
+glu_sample_cols2 <- c(10,11,12)
 glu_B3_dilution <- as.numeric(gsub(".*-df\\.", "", plate_layout[1, 4]))
 glu_B3_luminescence <- as.numeric(raw_luminescence[1, glu_sample_cols2])
 

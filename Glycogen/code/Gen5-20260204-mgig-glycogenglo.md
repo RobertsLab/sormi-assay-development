@@ -762,7 +762,7 @@ glu_row_H <- as.numeric(raw_luminescence[8, 7:11])  # Row 8 (H)
 
 ``` r
 #Extract glucose sample data - wells A6-E6
-glu_sample_cols1 <- c(1,2,3)
+glu_sample_cols1 <- c(7,8,9)
 glu_A6_dilution <- as.numeric(gsub(".*-df\\.", "", plate_layout[1, 1]))
 glu_A6_luminescence <- as.numeric(raw_luminescence[1, glu_sample_cols1])
 
@@ -779,7 +779,7 @@ glu_B2_dilution <- as.numeric(gsub(".*-df\\.", "", plate_layout[5, 1]))
 glu_B2_luminescence <- as.numeric(raw_luminescence[5, glu_sample_cols1])
 
 
-glu_sample_cols2 <- c(4,5,6)
+glu_sample_cols2 <- c(10,11,12)
 glu_B3_dilution <- as.numeric(gsub(".*-df\\.", "", plate_layout[1, 4]))
 glu_B3_luminescence <- as.numeric(raw_luminescence[1, glu_sample_cols2])
 
@@ -856,8 +856,8 @@ glu_A6_mean_lum
 glu_A6_mean_conc
 ```
 
-    [1] 44760.33
-    [1] 34.29686
+    [1] 7276.667
+    [1] 3.623261
 
 ``` r
 # Create sample data frame
@@ -890,8 +890,8 @@ glu_A7_mean_lum
 glu_A7_mean_conc
 ```
 
-    [1] 12494.67
-    [1] 7.89325
+    [1] 9241
+    [1] 5.230713
 
 ``` r
 # Create sample data frame
@@ -924,8 +924,8 @@ glu_A8_mean_lum
 glu_A8_mean_conc
 ```
 
-    [1] 43034.67
-    [1] 32.88472
+    [1] 3971.333
+    [1] 0.9184437
 
 ``` r
 # Create sample data frame
@@ -958,8 +958,8 @@ glu_B1_mean_lum
 glu_B1_mean_conc
 ```
 
-    [1] 33789.67
-    [1] 25.31936
+    [1] 5695
+    [1] 2.328953
 
 ``` r
 # Create sample data frame
@@ -992,8 +992,8 @@ glu_B2_mean_lum
 glu_B2_mean_conc
 ```
 
-    [1] 63779
-    [1] 49.8602
+    [1] 5491.333
+    [1] 2.162289
 
 ``` r
 # Create sample data frame
@@ -1026,8 +1026,8 @@ glu_B3_mean_lum
 glu_B3_mean_conc
 ```
 
-    [1] 26800.67
-    [1] 19.60012
+    [1] 2780.667
+    [1] -0.05590157
 
 ``` r
 # Create sample data frame
@@ -1060,8 +1060,8 @@ glu_B4_mean_lum
 glu_B4_mean_conc
 ```
 
-    [1] 87868
-    [1] 69.57269
+    [1] 1274.667
+    [1] -1.28829
 
 ``` r
 # Create sample data frame
@@ -1094,8 +1094,8 @@ glu_B5_mean_lum
 glu_B5_mean_conc
 ```
 
-    [1] 85188.67
-    [1] 67.38014
+    [1] 2007
+    [1] -0.6890078
 
 ``` r
 # Create sample data frame
@@ -1128,8 +1128,8 @@ glu_B6_mean_lum
 glu_B6_mean_conc
 ```
 
-    [1] 43945
-    [1] 33.62966
+    [1] 5714.667
+    [1] 2.345047
 
 ``` r
 # Create sample data frame
@@ -1162,8 +1162,8 @@ glu_B7_mean_lum
 glu_B7_mean_conc
 ```
 
-    [1] 7633
-    [1] 3.914856
+    [1] 5246.333
+    [1] 1.961801
 
 ``` r
 # Create the plot
@@ -1311,25 +1311,25 @@ for (i in 1:nrow(glucose_summary_data)) {
 ```
 
       glu_A6_dilution_factor glu_A6_mean_luminescence glu_A6_se glu_A6_conc   label
-    1                     20                 44760.33  315.2361    34.29686 A6df.20
+    1                     20                 7276.667  1515.618    3.623261 A6df.20
       glu_A7_dilution_factor glu_A7_mean_luminescence glu_A7_se glu_A7_conc   label
-    1                     20                 12494.67  643.0154     7.89325 A7df.20
+    1                     20                     9241  2374.835    5.230713 A7df.20
       glu_A8_dilution_factor glu_A8_mean_luminescence glu_A8_se glu_A8_conc   label
-    1                     20                 43034.67   741.899    32.88472 A8df.20
+    1                     20                 3971.333  1735.036   0.9184437 A8df.20
       glu_B1_dilution_factor glu_B1_mean_luminescence glu_B1_se glu_B1_conc   label
-    1                     20                 33789.67  395.1895    25.31936 B1df.20
+    1                     20                     5695  1505.781    2.328953 B1df.20
       glu_B2_dilution_factor glu_B2_mean_luminescence glu_B2_se glu_B2_conc   label
-    1                     20                    63779  1239.057     49.8602 B2df.20
+    1                     20                 5491.333  1278.844    2.162289 B2df.20
       glu_B3_dilution_factor glu_B3_mean_luminescence glu_B3_se glu_B3_conc   label
-    1                     20                 26800.67  3455.881    19.60012 B3df.20
+    1                     20                 2780.667  1156.923 -0.05590157 B3df.20
       glu_B4_dilution_factor glu_B4_mean_luminescence glu_B4_se glu_B4_conc   label
-    1                     20                    87868  1350.865    69.57269 B4df.20
+    1                     20                 1274.667  397.8711    -1.28829 B4df.20
       glu_B5_dilution_factor glu_B5_mean_luminescence glu_B5_se glu_B5_conc   label
-    1                     20                 85188.67  1627.387    67.38014 B5df.20
+    1                     20                     2007  1103.357  -0.6890078 B5df.20
       glu_B6_dilution_factor glu_B6_mean_luminescence glu_B6_se glu_B6_conc   label
-    1                     20                    43945  1416.536    33.62966 B6df.20
+    1                     20                 5714.667  3007.482    2.345047 B6df.20
       glu_B7_dilution_factor glu_B7_mean_luminescence glu_B7_se glu_B7_conc   label
-    1                     20                     7633   1673.57    3.914856 B7df.20
+    1                     20                 5246.333  1359.649    1.961801 B7df.20
     glucose Standard Curve Summary:
     ==================================================
 
@@ -1350,25 +1350,25 @@ tab <- as.table(tab)
 tab
 ```
 
-       Dilution factor Luminescence Calculated glucose (ug/uL)
-    A6       20.000000 44760.333333                  34.296863
-    A7       20.000000 12494.666667                   7.893250
-    A8       20.000000 43034.666667                  32.884717
-    B1       20.000000 33789.666667                  25.319356
-    B2       20.000000 63779.000000                  49.860202
-    B3       20.000000 26800.666667                  19.600124
-    B4       20.000000 87868.000000                  69.572691
-    B5       20.000000 85188.666667                  67.380142
-    B6       20.000000 43945.000000                  33.629660
-    B7       20.000000  7633.000000                   3.914856
+       Dilution factor  Luminescence Calculated glucose (ug/uL)
+    A6     20.00000000 7276.66666667                 3.62326125
+    A7     20.00000000 9241.00000000                 5.23071280
+    A8     20.00000000 3971.33333333                 0.91844374
+    B1     20.00000000 5695.00000000                 2.32895315
+    B2     20.00000000 5491.33333333                 2.16228882
+    B3     20.00000000 2780.66666667                -0.05590157
+    B4     20.00000000 1274.66666667                -1.28829019
+    B5     20.00000000 2007.00000000                -0.68900781
+    B6     20.00000000 5714.66666667                 2.34504676
+    B7     20.00000000 5246.33333333                 1.96180064
        Total glucose (ug/uL)
-    A6            685.937258
-    A7            157.865010
-    A8            657.694337
-    B1            506.387129
-    B2            997.204034
-    B3            392.002480
-    B4           1391.453826
-    B5           1347.602832
-    B6            672.593200
-    B7             78.297113
+    A6           72.46522502
+    A7          104.61425605
+    A8           18.36887483
+    B1           46.57906309
+    B2           43.24577649
+    B3           -1.11803148
+    B4          -25.76580378
+    B5          -13.78015620
+    B6           46.90093529
+    B7           39.23601273
