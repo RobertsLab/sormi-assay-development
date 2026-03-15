@@ -567,16 +567,16 @@ glyc_B2_data
 
 
 # Print summary statistics
-cat("Glycogen Standard Curve Summary:\n")
+cat("glycogen Standard Curve Summary:\n")
 cat(rep("=", 50), "\n", sep = "")
 for (i in 1:nrow(glycogen_summary_data)) {
-  cat(sprintf("Concentration: %g µg/µL\n", glycogen_summary_data$concentration[i]))
-  cat(sprintf("  Mean Luminescence: %.2f\n",glycogen_summary_data$mean_luminescence[i]))
-  cat(sprintf("  Standard Error: %.2f\n", glycogen_summary_data$se[i]))
-  cat(sprintf("  CV%%: %.2f%%\n\n", glycogen_summary_data$cv[i]))
+  cat(sprintf("Concentration: %g µg/µL\n", glycogen_summary_data$glyc_concentration[i]))
+  cat(sprintf("  Mean Luminescence: %.2f\n",glycogen_summary_data$glyc_mean_luminescence[i]))
+  cat(sprintf("  Standard Error: %.2f\n", glycogen_summary_data$glyc_se[i]))
+  cat(sprintf("  CV%%: %.2f%%\n\n", glycogen_summary_data$glyc_cv[i]))
 }
-
 ```
+
 
 ```{r, sample glycogen calculations}
 tab <- matrix(c(glyc_A1_dilution, glyc_A1_mean_lum, glyc_A1_mean_conc,  (glyc_A1_dilution*glyc_A1_mean_conc), 
@@ -1122,7 +1122,18 @@ glu_A7_data
 glu_A8_data
 glu_B1_data
 glu_B2_data
+
+# Print summary statistics
+cat("glucose Standard Curve Summary:\n")
+cat(rep("=", 50), "\n", sep = "")
+for (i in 1:nrow(glucose_summary_data)) {
+  cat(sprintf("Concentration: %g µg/µL\n", glucose_summary_data$glu_concentration[i]))
+  cat(sprintf("  Mean Luminescence: %.2f\n",glucose_summary_data$glu_mean_luminescence[i]))
+  cat(sprintf("  Standard Error: %.2f\n", glucose_summary_data$glu_se[i]))
+  cat(sprintf("  CV%%: %.2f%%\n\n", glucose_summary_data$glu_cv[i]))
+}
 ```
+
 
 ```{r, sample glucose calculations}
 tab <- matrix(c(glu_A1_dilution, glu_A1_mean_lum, glu_A1_mean_conc,  (glu_A1_dilution*glu_A1_mean_conc), 

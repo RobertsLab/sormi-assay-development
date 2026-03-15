@@ -574,18 +574,17 @@ glyc_A4_data4
 glyc_A5_data4
 
 
-
 # Print summary statistics
-cat("Glycogen Standard Curve Summary:\n")
+cat("glycogen Standard Curve Summary:\n")
 cat(rep("=", 50), "\n", sep = "")
 for (i in 1:nrow(glycogen_summary_data)) {
-  cat(sprintf("Concentration: %g µg/µL\n", glycogen_summary_data$concentration[i]))
-  cat(sprintf("  Mean Luminescence: %.2f\n",glycogen_summary_data$mean_luminescence[i]))
-  cat(sprintf("  Standard Error: %.2f\n", glycogen_summary_data$se[i]))
-  cat(sprintf("  CV%%: %.2f%%\n\n", glycogen_summary_data$cv[i]))
+  cat(sprintf("Concentration: %g µg/µL\n", glycogen_summary_data$glyc_concentration[i]))
+  cat(sprintf("  Mean Luminescence: %.2f\n",glycogen_summary_data$glyc_mean_luminescence[i]))
+  cat(sprintf("  Standard Error: %.2f\n", glycogen_summary_data$glyc_se[i]))
+  cat(sprintf("  CV%%: %.2f%%\n\n", glycogen_summary_data$glyc_cv[i]))
 }
-
 ```
+
 
 ```{r, sample glycogen calculations}
 tab <- matrix(c(glyc_A1_dilution2, glyc_A1_mean_lum2, glyc_A1_mean_conc2,  (glyc_A1_dilution2*glyc_A1_mean_conc2), 
@@ -1138,16 +1137,16 @@ glu_A5_data4
 
 
 # Print summary statistics
-cat("Glycogen Standard Curve Summary:\n")
+cat("glucose Standard Curve Summary:\n")
 cat(rep("=", 50), "\n", sep = "")
 for (i in 1:nrow(glucose_summary_data)) {
-  cat(sprintf("Concentration: %g µg/µL\n", glucose_summary_data$concentration[i]))
-  cat(sprintf("  Mean Luminescence: %.2f\n",glucose_summary_data$mean_luminescence[i]))
-  cat(sprintf("  Standard Error: %.2f\n", glucose_summary_data$se[i]))
-  cat(sprintf("  CV%%: %.2f%%\n\n", glucose_summary_data$cv[i]))
+  cat(sprintf("Concentration: %g µg/µL\n", glucose_summary_data$glu_concentration[i]))
+  cat(sprintf("  Mean Luminescence: %.2f\n",glucose_summary_data$glu_mean_luminescence[i]))
+  cat(sprintf("  Standard Error: %.2f\n", glucose_summary_data$glu_se[i]))
+  cat(sprintf("  CV%%: %.2f%%\n\n", glucose_summary_data$glu_cv[i]))
 }
-
 ```
+
 
 ```{r, sample glucose calculations}
 tab <- matrix(c(glu_A1_dilution2, glu_A1_mean_lum2, glu_A1_mean_conc2,  (glu_A1_dilution2*glu_A1_mean_conc2), 

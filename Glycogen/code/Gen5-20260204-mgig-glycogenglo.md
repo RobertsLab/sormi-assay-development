@@ -645,13 +645,13 @@ glyc_B6_data
 glyc_B7_data
 
 # Print summary statistics
-cat("Glycogen Standard Curve Summary:\n")
+cat("glycogen Standard Curve Summary:\n")
 cat(rep("=", 50), "\n", sep = "")
 for (i in 1:nrow(glycogen_summary_data)) {
-  cat(sprintf("Concentration: %g µg/µL\n", glycogen_summary_data$concentration[i]))
-  cat(sprintf("  Mean Luminescence: %.2f\n",glycogen_summary_data$mean_luminescence[i]))
-  cat(sprintf("  Standard Error: %.2f\n", glycogen_summary_data$se[i]))
-  cat(sprintf("  CV%%: %.2f%%\n\n", glycogen_summary_data$cv[i]))
+  cat(sprintf("Concentration: %g µg/µL\n", glycogen_summary_data$glyc_concentration[i]))
+  cat(sprintf("  Mean Luminescence: %.2f\n",glycogen_summary_data$glyc_mean_luminescence[i]))
+  cat(sprintf("  Standard Error: %.2f\n", glycogen_summary_data$glyc_se[i]))
+  cat(sprintf("  CV%%: %.2f%%\n\n", glycogen_summary_data$glyc_cv[i]))
 }
 ```
 
@@ -695,8 +695,32 @@ for (i in 1:nrow(glycogen_summary_data)) {
     1                      20                      7633    1673.57     1.375746
         label
     1 B7df.20
-    Glycogen Standard Curve Summary:
+    glycogen Standard Curve Summary:
     ==================================================
+    Concentration: 20 µg/µL
+      Mean Luminescence: 114864.00
+      Standard Error: 285.22
+      CV%: 0.43%
+
+    Concentration: 2 µg/µL
+      Mean Luminescence: 7889.00
+      Standard Error: 887.29
+      CV%: 19.48%
+
+    Concentration: 0.2 µg/µL
+      Mean Luminescence: 1440.67
+      Standard Error: 34.36
+      CV%: 4.13%
+
+    Concentration: 0.02 µg/µL
+      Mean Luminescence: 993.67
+      Standard Error: 18.62
+      CV%: 3.25%
+
+    Concentration: 0 µg/µL
+      Mean Luminescence: 1038.00
+      Standard Error: 110.39
+      CV%: 18.42%
 
 ``` r
 tab <- matrix(c(glyc_A6_dilution, glyc_A6_mean_lum, glyc_A6_mean_conc,  (glyc_A6_dilution*glyc_A6_mean_conc), 
@@ -1303,10 +1327,10 @@ glu_B7_data
 cat("glucose Standard Curve Summary:\n")
 cat(rep("=", 50), "\n", sep = "")
 for (i in 1:nrow(glucose_summary_data)) {
-  cat(sprintf("Concentration: %g µg/µL\n", glucose_summary_data$concentration[i]))
-  cat(sprintf("  Mean Luminescence: %.2f\n",glucose_summary_data$mean_luminescence[i]))
-  cat(sprintf("  Standard Error: %.2f\n", glucose_summary_data$se[i]))
-  cat(sprintf("  CV%%: %.2f%%\n\n", glucose_summary_data$cv[i]))
+  cat(sprintf("Concentration: %g µg/µL\n", glucose_summary_data$glu_concentration[i]))
+  cat(sprintf("  Mean Luminescence: %.2f\n",glucose_summary_data$glu_mean_luminescence[i]))
+  cat(sprintf("  Standard Error: %.2f\n", glucose_summary_data$glu_se[i]))
+  cat(sprintf("  CV%%: %.2f%%\n\n", glucose_summary_data$glu_cv[i]))
 }
 ```
 
@@ -1332,6 +1356,30 @@ for (i in 1:nrow(glucose_summary_data)) {
     1                     20                 5246.333  1359.649    1.961801 B7df.20
     glucose Standard Curve Summary:
     ==================================================
+    Concentration: 100 µg/µL
+      Mean Luminescence: 125153.00
+      Standard Error: 669.86
+      CV%: 0.93%
+
+    Concentration: 10 µg/µL
+      Mean Luminescence: 13973.00
+      Standard Error: 781.44
+      CV%: 9.69%
+
+    Concentration: 1 µg/µL
+      Mean Luminescence: 4620.33
+      Standard Error: 2574.29
+      CV%: 96.50%
+
+    Concentration: 0.1 µg/µL
+      Mean Luminescence: 4785.33
+      Standard Error: 2363.02
+      CV%: 85.53%
+
+    Concentration: 0 µg/µL
+      Mean Luminescence: 1479.33
+      Standard Error: 916.25
+      CV%: 107.28%
 
 ``` r
 tab <- matrix(c(glu_A6_dilution, glu_A6_mean_lum, glu_A6_mean_conc,  (glu_A6_dilution*glu_A6_mean_conc), 
