@@ -1175,7 +1175,7 @@ tab <- matrix(c(glu_A1_dilution2, glu_A1_mean_lum2, glu_A1_mean_conc2,  (glu_A1_
                 glu_A3_dilution4, glu_A3_mean_lum4, glu_A3_mean_conc4,  (glu_A3_dilution4*glu_A3_mean_conc4), (glu_A3_dilution4*glu_A3_mean_conc4*homogenate_volume_uL)/wt_A3,
                 glu_A4_dilution4, glu_A4_mean_lum4, glu_A4_mean_conc4,  (glu_A4_dilution4*glu_A4_mean_conc4), (glu_A4_dilution4*glu_A4_mean_conc4*homogenate_volume_uL)/wt_A4,
                 glu_A5_dilution4, glu_A5_mean_lum4, glu_A5_mean_conc4,  (glu_A5_dilution4*glu_A5_mean_conc4), (glu_A5_dilution4*glu_A5_mean_conc4*homogenate_volume_uL)/wt_A5), ncol=5, byrow=TRUE)
-colnames(tab) <- c('Dilution factor','Luminescence','Calculated Glycogen (ug/uL)', 'Total glucose (ug/uL)', 'Normalized glucose (ug/mg tissue)')
+colnames(tab) <- c('Dilution factor','Luminescence','Calculated glucose (ug/uL)', 'Total glucose (ug/uL)', 'Normalized glucose (ug/mg tissue)')
 rownames(tab) <- c('A1.df2','A2.df2','A3.df2','A4.df2','A5.df2','A1.df4','A2.df4','A3.df4','A4.df4','Af.df4' )
 tab <- as.table(tab)
 tab

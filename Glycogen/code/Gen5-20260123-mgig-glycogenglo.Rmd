@@ -1167,7 +1167,7 @@ tab <- matrix(c(glu_A1_dilution, glu_A1_mean_lum, glu_A1_mean_conc,  (glu_A1_dil
                 glu_A8_dilution, glu_A8_mean_lum, glu_A8_mean_conc,  (glu_A8_dilution*glu_A8_mean_conc), (glu_A8_dilution*glu_A8_mean_conc*homogenate_volume_uL)/wt_A8,
                 glu_B1_dilution, glu_B1_mean_lum, glu_B1_mean_conc,  (glu_B1_dilution*glu_B1_mean_conc), (glu_B1_dilution*glu_B1_mean_conc*homogenate_volume_uL)/wt_B1,
                 glu_B2_dilution, glu_B2_mean_lum, glu_B2_mean_conc,  (glu_B2_dilution*glu_B2_mean_conc), (glu_B2_dilution*glu_B2_mean_conc*homogenate_volume_uL)/wt_B2), ncol=5, byrow=TRUE)
-colnames(tab) <- c('Dilution factor','Luminescence','Calculated glucose (uM)', 'Total glucose (uM)', 'Normalized glucose (uM/mg tissue)')
+colnames(tab) <- c('Dilution factor','Luminescence','Calculated glucose (ug/uL)', 'Total glucose (ug/uL)', 'Normalized glucose (ug/mg tissue)')
 rownames(tab) <- c('A1','A2','A3','A4','A5','A6','A7','A8','B1','B2' )
 tab <- as.table(tab)
 tab
