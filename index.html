@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SORMI — Summer Oyster Resilience &amp; Mortality Index</title>
+  <style>
+    :root {
+      --bg: #f7f8fa;
+      --surface: #ffffff;
+      --text: #1a2332;
+      --muted: #556677;
+      --accent: #1b6e8a;
+      --accent-light: #e4f1f6;
+      --border: #dce3ea;
+      --highlight: #d4890a;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* --- Hero --- */
+    .hero {
+      background: linear-gradient(160deg, #0f3443 0%, #1b6e8a 55%, #34a0a4 100%);
+      color: #fff;
+      padding: 4.5rem 1.5rem 3.5rem;
+      text-align: center;
+    }
+    .hero h1 {
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.4rem;
+    }
+    .hero h1 span { color: #7dd3d8; }
+    .hero .subtitle {
+      font-size: clamp(1rem, 2.5vw, 1.35rem);
+      font-weight: 400;
+      opacity: 0.9;
+      max-width: 44rem;
+      margin: 0 auto 1.8rem;
+    }
+    .hero .tagline {
+      display: inline-block;
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.25);
+      border-radius: 2rem;
+      padding: 0.35rem 1.2rem;
+      font-size: 0.88rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    /* --- Layout --- */
+    .container {
+      max-width: 62rem;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+    section { padding: 3.5rem 0; }
+    section + section { border-top: 1px solid var(--border); }
+    .section-label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--accent);
+      margin-bottom: 0.5rem;
+    }
+    h2 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+    p + p { margin-top: 0.9rem; }
+
+    /* --- Assay Cards --- */
+    .assay-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
+      gap: 1.1rem;
+      margin-top: 1.5rem;
+    }
+    .assay-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.6rem;
+      padding: 1.4rem;
+      transition: box-shadow 0.2s;
+    }
+    .assay-card:hover {
+      box-shadow: 0 4px 14px rgba(0,0,0,0.07);
+    }
+    .assay-card .assay-name {
+      font-weight: 700;
+      font-size: 1rem;
+      margin-bottom: 0.25rem;
+    }
+    .assay-card .assay-trait {
+      font-size: 0.82rem;
+      color: var(--accent);
+      margin-bottom: 0.5rem;
+    }
+    .assay-card p {
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+    .assay-card .cost {
+      display: inline-block;
+      margin-top: 0.6rem;
+      font-size: 0.78rem;
+      background: var(--accent-light);
+      padding: 0.15rem 0.55rem;
+      border-radius: 0.3rem;
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    /* --- Objectives --- */
+    .objectives {
+      counter-reset: obj;
+      list-style: none;
+      margin-top: 1.2rem;
+    }
+    .objectives li {
+      counter-increment: obj;
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+      margin-bottom: 1.4rem;
+    }
+    .objectives li::before {
+      content: counter(obj);
+      flex-shrink: 0;
+      width: 2.2rem;
+      height: 2.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--accent);
+      color: #fff;
+      border-radius: 50%;
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+    .objectives li div strong {
+      display: block;
+      margin-bottom: 0.2rem;
+    }
+    .objectives li div p {
+      font-size: 0.92rem;
+      color: var(--muted);
+    }
+
+    /* --- Team --- */
+    .team-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+      gap: 1rem;
+      margin-top: 1.2rem;
+    }
+    .team-member {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      padding: 1rem 1.2rem;
+    }
+    .team-member .name {
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+    .team-member .role {
+      font-size: 0.82rem;
+      color: var(--accent);
+    }
+    .team-member .affiliation {
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin-top: 0.15rem;
+    }
+
+    /* --- Repo / Data --- */
+    .repo-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+      margin-top: 1.2rem;
+    }
+    .repo-links a {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.45rem;
+      padding: 0.55rem 1rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      transition: border-color 0.2s;
+    }
+    .repo-links a:hover {
+      border-color: var(--accent);
+      text-decoration: none;
+    }
+    .repo-links a svg {
+      width: 18px;
+      height: 18px;
+      fill: currentColor;
+    }
+
+    /* --- Footer --- */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 2rem 1.5rem;
+      text-align: center;
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+    footer a { color: var(--accent); }
+
+    /* --- Funding Banner --- */
+    .funding {
+      background: var(--accent-light);
+      padding: 1.2rem 1.5rem;
+      text-align: center;
+      font-size: 0.88rem;
+      color: var(--text);
+    }
+    .funding strong { color: var(--accent); }
+  </style>
+</head>
+<body>
+
+  <!-- Hero -->
+  <header class="hero">
+    <div class="container">
+      <h1><span>SORMI</span> Assay Development</h1>
+      <p class="subtitle">
+        Summer Oyster Resilience &amp; Mortality Index &mdash;
+        a quantitative tool for improving field survival of Pacific oysters
+      </p>
+      <span class="tagline">WRAC-funded &middot; Multi-institutional collaboration</span>
+    </div>
+  </header>
+
+  <!-- Funding -->
+  <div class="funding">
+    Supported by the <strong>Western Regional Aquaculture Center (WRAC)</strong> &mdash; USDA National Institute of Food and Agriculture
+  </div>
+
+  <main class="container">
+
+    <!-- About -->
+    <section>
+      <div class="section-label">About the project</div>
+      <h2>Why SORMI?</h2>
+      <p>
+        Summer mortality events are a persistent, costly challenge for Pacific oyster
+        (<em>Crassostrea (Magallana) gigas</em>) aquaculture across Washington, Oregon,
+        and California. Rather than isolating a single cause of mortality, SORMI asks a
+        different question: <strong>why do oysters survive?</strong>
+      </p>
+      <p>
+        We are developing a quantitative stress resilience index composed of rapid,
+        affordable physiological assays. The index will be used by breeding programs
+        to select for resilience and by growers to assess real-time stress in commercial stocks,
+        enabling pre-emptive harvest decisions and reducing catastrophic losses.
+      </p>
+    </section>
+
+    <!-- Assays -->
+    <section>
+      <div class="section-label">Assay Development</div>
+      <h2>Stress Resilience Assay Panel</h2>
+      <p>
+        Five candidate traits were selected based on established stress-response literature,
+        low cost (&lt;$10/sample), and compatibility with high-throughput 96-well plate formats
+        suitable for breeding programs and on-farm evaluation.
+      </p>
+      <div class="assay-grid">
+
+        <div class="assay-card">
+          <div class="assay-name">Resazurin Metabolic Rate</div>
+          <div class="assay-trait">Organismal metabolic rate</div>
+          <p>
+            Non-lethal, colorimetric measure of whole-organism metabolism.
+            Lower metabolic rate under stress and faster recovery predict field performance.
+          </p>
+          <span class="cost">&lt; $1.00 / sample</span>
+        </div>
+
+        <div class="assay-card">
+          <div class="assay-name">Na<sup>+</sup>/K<sup>+</sup> ATPase</div>
+          <div class="assay-trait">Cellular stress management</div>
+          <p>
+            Transmembrane pump activity essential for osmotic regulation.
+            Higher activity is positively associated with stress resilience.
+          </p>
+          <span class="cost">~$2.50 / sample</span>
+        </div>
+
+        <div class="assay-card">
+          <div class="assay-name">Glycogen Content</div>
+          <div class="assay-trait">Energy storage</div>
+          <p>
+            Critical carbohydrate stores fueling metabolism and reproduction.
+            Higher baseline glycogen and retention under stress correlate with survival.
+          </p>
+          <span class="cost">~$5.00 / sample</span>
+        </div>
+
+        <div class="assay-card">
+          <div class="assay-name">Citrate Synthase</div>
+          <div class="assay-trait">Aerobic metabolic capacity</div>
+          <p>
+            Marker of oxidative metabolic potential.
+            Higher activity indicates greater capacity to generate energy under stress.
+          </p>
+          <span class="cost">~$5.70 / sample</span>
+        </div>
+
+        <div class="assay-card">
+          <div class="assay-name">Lactate Dehydrogenase</div>
+          <div class="assay-trait">Anaerobic metabolic capacity</div>
+          <p>
+            Measures anaerobic energy production when oxygen is limited.
+            Higher LDH activity is expected to improve stress tolerance.
+          </p>
+          <span class="cost">~$4.10 / sample</span>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Objectives -->
+    <section>
+      <div class="section-label">Research Objectives</div>
+      <h2>Project Goals</h2>
+      <ol class="objectives">
+        <li>
+          <div>
+            <strong>Develop the Stress Resilience Index</strong>
+            <p>
+              Establish protocols for the physiological assay panel, characterize trait responses
+              to acute thermal stress, and identify traits most predictive of field survival
+              through correlation and model-selection analyses.
+            </p>
+          </div>
+        </li>
+        <li>
+          <div>
+            <strong>Evaluate in POGS Breeding Families</strong>
+            <p>
+              Apply the index to 50+ families from the USDA Pacific Oyster Genomic Selection
+              (POGS) program deployed in Willapa Bay, WA and Tomales Bay, CA.
+              Quantify heritability and the genetic correlation between stress resilience
+              and market survival.
+            </p>
+          </div>
+        </li>
+        <li>
+          <div>
+            <strong>Regional Community of Practice</strong>
+            <p>
+              Engage commercial growers across WA, OR, CA, and AK through workshops,
+              farm visits, and sample evaluation services &mdash; building capacity
+              for data-influenced management decisions.
+            </p>
+          </div>
+        </li>
+      </ol>
+    </section>
+
+    <!-- Data & Code -->
+    <section>
+      <div class="section-label">Open Science</div>
+      <h2>Data &amp; Protocols</h2>
+      <p>
+        All assay development data, analysis code, and protocols are shared openly.
+        Current work includes glycogen (Glycogen-Glo), Na<sup>+</sup>/K<sup>+</sup> ATPase,
+        and resazurin assay optimization for <em>M.&nbsp;gigas</em>.
+      </p>
+      <div class="repo-links">
+        <a href="https://github.com/RobertsLab/sormi-assay-development" target="_blank" rel="noopener">
+          <svg viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+          GitHub Repository
+        </a>
+        <a href="https://github.com/RobertsLab/sormi-assay-development/tree/main/Glycogen" target="_blank" rel="noopener">
+          Glycogen Assay
+        </a>
+        <a href="https://github.com/RobertsLab/sormi-assay-development/tree/main/Na-K%20ATPase" target="_blank" rel="noopener">
+          Na/K ATPase
+        </a>
+        <a href="https://github.com/RobertsLab/sormi-assay-development/tree/main/Resazurin" target="_blank" rel="noopener">
+          Resazurin
+        </a>
+      </div>
+    </section>
+
+    <!-- Team -->
+    <section>
+      <div class="section-label">Investigators</div>
+      <h2>Project Team</h2>
+      <div class="team-grid">
+        <div class="team-member">
+          <div class="name">Bobbi Hudson, M.Sc.</div>
+          <div class="role">Lead PI</div>
+          <div class="affiliation">Pacific Shellfish Institute</div>
+        </div>
+        <div class="team-member">
+          <div class="name">Steven Roberts, Ph.D.</div>
+          <div class="role">Co-PI &mdash; Assay Development</div>
+          <div class="affiliation">University of Washington, SAFS</div>
+        </div>
+        <div class="team-member">
+          <div class="name">Neil Thompson, Ph.D.</div>
+          <div class="role">Co-PI &mdash; POGS Breeding</div>
+          <div class="affiliation">USDA-ARS, Pacific Shellfish Breeding Center</div>
+        </div>
+        <div class="team-member">
+          <div class="name">Mackenzie Gavery, Ph.D.</div>
+          <div class="role">Co-PI</div>
+          <div class="affiliation">NOAA Northwest Fisheries Science Center</div>
+        </div>
+        <div class="team-member">
+          <div class="name">Kevin Marquez Johnson, Ph.D.</div>
+          <div class="role">Extension &amp; Outreach</div>
+          <div class="affiliation">Cal Poly &amp; California Sea Grant</div>
+        </div>
+        <div class="team-member">
+          <div class="name">Louis Plough, Ph.D.</div>
+          <div class="role">Collaborator</div>
+          <div class="affiliation">USDA ARS</div>
+        </div>
+        <div class="team-member">
+          <div class="name">Sam Gurr, Ph.D.</div>
+          <div class="role">Collaborator</div>
+          <div class="affiliation">Oregon State University</div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer>
+    <p>
+      SORMI &mdash; Development of a Summer Oyster Resilience &amp; Mortality Index
+      &nbsp;&middot;&nbsp;
+      <a href="https://github.com/RobertsLab/sormi-assay-development" target="_blank" rel="noopener">Source on GitHub</a>
+    </p>
+    <p style="margin-top:0.4rem;">
+      Funded by WRAC / USDA-NIFA &nbsp;&middot;&nbsp; 2025&ndash;2029
+    </p>
+  </footer>
+
+</body>
+</html>
