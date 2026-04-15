@@ -1,193 +1,193 @@
-plate_ID	plate_well	is_blank	family_ID	sample_ID	width_mm.measurement	length_mm.measurement	weight_mg.measurement		treatment_group	area_mm2.measurement		imageJ_ID
-	A01											
-	A02											
-	A03											
-	A04											
-	A05											
-	A06											
-	A07											
-	A08											
-	A09											
-	A10											
-	A11											
-	A12											
-	B01											
-	B02											
-	B03											
-	B04											
-	B05											
-	B06											
-	B07											
-	B08											
-	B09											
-	B10											
-	B11											
-	B12											
-	C01											
-	C02											
-	C03											
-	C04											
-	C05											
-	C06											
-	C07											
-	C08											
-	C09											
-	C10											
-	C11											
-	C12											
-	D01											
-	D02											
-	D03											
-	D04											
-	D05											
-	D06											
-	D07											
-	D08											
-	D09											
-	D10											
-	D11											
-	D12											
-	E01											
-	E02											
-	E03											
-	E04											
-	E05											
-	E06											
-	E07											
-	E08											
-	E09											
-	E10											
-	E11											
-	E12											
-	F01											
-	F02											
-	F03											
-	F04											
-	F05											
-	F06											
-	F07											
-	F08											
-	F09											
-	F10											
-	F11											
-	F12											
-	G01											
-	G02											
-	G03											
-	G04											
-	G05											
-	G06											
-	G07											
-	G08											
-	G09											
-	G10											
-	G11											
-	G12											
-	H01											
-	H02											
-	H03											
-	H04											
-	H05											
-	H06											
-	H07											
-	H08											
-	H09											
-	H10											
-	H11											
-	H12											
-	A01											
-	A02											
-	A03											
-	A04											
-	A05											
-	A06											
-	A07											
-	A08											
-	A09											
-	A10											
-	A11											
-	A12											
-	B01											
-	B02											
-	B03											
-	B04											
-	B05											
-	B06											
-	B07											
-	B08											
-	B09											
-	B10											
-	B11											
-	B12											
-	C01											
-	C02											
-	C03											
-	C04											
-	C05											
-	C06											
-	C07											
-	C08											
-	C09											
-	C10											
-	C11											
-	C12											
-	D01											
-	D02											
-	D03											
-	D04											
-	D05											
-	D06											
-	D07											
-	D08											
-	D09											
-	D10											
-	D11											
-	D12											
-	E01											
-	E02											
-	E03											
-	E04											
-	E05											
-	E06											
-	E07											
-	E08											
-	E09											
-	E10											
-	E11											
-	E12											
-	F01											
-	F02											
-	F03											
-	F04											
-	F05											
-	F06											
-	F07											
-	F08											
-	F09											
-	F10											
-	F11											
-	F12											
-	G01											
-	G02											
-	G03											
-	G04											
-	G05											
-	G06											
-	G07											
-	G08											
-	G09											
-	G10											
-	G11											
-	G12											
-	H01											
-	H02											
-	H03											
-	H04											
-	H05											
-	H06											
-	H07											
-	H08											
-	H09											
-	H10											
-	H11											
-	H12											
+plate_ID	plate_well	is_blank	family_ID	sample_ID	weight_g.measurement	width_mm.measurement	length_mm.measurement		treatment_group	area_mm2.measurement	imageJ_ID
+plate-A	A01			47							
+plate-A	A02			38							
+plate-A	A03			52							
+plate-A	A04			57							
+plate-A	A05			1							
+plate-A	A06			120							
+plate-A	A07			105							
+plate-A	A08			108							
+plate-A	A09			83							
+plate-A	A10			110							
+plate-A	A11			45							
+plate-A	A12			104							
+plate-A	B01			42							
+plate-A	B02			102							
+plate-A	B03			21							
+plate-A	B04			78							
+plate-A	B05			112							
+plate-A	B06			15							
+plate-A	B07			46							
+plate-A	B08			73							
+plate-A	B09			116							
+plate-A	B10			44							
+plate-A	B11			55							
+plate-A	B12			87							
+plate-A	C01			114							
+plate-A	C02			117							
+plate-A	C03			75							
+plate-A	C04			51							
+plate-A	C05			26							
+plate-A	C06			81							
+plate-A	C07			113							
+plate-A	C08			66							
+plate-A	C09			16							
+plate-A	C10			58							
+plate-A	C11			37							
+plate-A	C12			106							
+plate-A	D01			20							
+plate-A	D02			56							
+plate-A	D03			68							
+plate-A	D04			103							
+plate-A	D05			84							
+plate-A	D06			64							
+plate-A	D07			39							
+plate-A	D08			70							
+plate-A	D09			65							
+plate-A	D10			22							
+plate-A	D11			35							
+plate-A	D12			69							
+plate-A	E01			62							
+plate-A	E02			31							
+plate-A	E03			67							
+plate-A	E04			34							
+plate-A	E05			100							
+plate-A	E06			40							
+plate-A	E07			61							
+plate-A	E08			32							
+plate-A	E09			36							
+plate-A	E10			33							
+plate-A	E11			134							
+plate-A	E12			63							
+plate-A	F01			139							
+plate-A	F02			138							
+plate-A	F03			18							
+plate-A	F04			74							
+plate-A	F05			140							
+plate-A	F06			136							
+plate-A	F07			137							
+plate-A	F08			135							
+plate-A	F09			24							
+plate-A	F10			49							
+plate-A	F11			111							
+plate-A	F12			107							
+plate-A	G01			23							
+plate-A	G02			60							
+plate-A	G03			19							
+plate-A	G04			41							
+plate-A	G05			14							
+plate-A	G06			29							
+plate-A	G07			90							
+plate-A	G08			13							
+plate-A	G09			109							
+plate-A	G10			79							
+plate-A	G11			118							
+plate-A	G12			89							
+plate-A	H01			72							
+plate-A	H02			88							
+plate-A	H03			48							
+plate-A	H04			27							
+plate-A	H05			59							
+plate-A	H06			153							
+plate-A	H07			149							
+plate-A	H08			151							
+plate-A	H09			147							
+plate-A	H10			144							
+plate-A	H11			148							
+plate-A	H12			blank							
+plate-B	A01			143							
+plate-B	A02			139							
+plate-B	A03			136							
+plate-B	A04			134							
+plate-B	A05			150							
+plate-B	A06			152							
+plate-B	A07			137							
+plate-B	A08			138							
+plate-B	A09			135							
+plate-B	A10			141							
+plate-B	A11			140							
+plate-B	A12			142							
+plate-B	B01			170							
+plate-B	B02			167							
+plate-B	B03			166							
+plate-B	B04			168							
+plate-B	B05			169							
+plate-B	B06			171							
+plate-B	B07			146							
+plate-B	B08			145							
+plate-B	B09			164							
+plate-B	B10			165							
+plate-B	B11			162							
+plate-B	B12			163							
+plate-B	C01			119							
+plate-B	C02			76							
+plate-B	C03			77							
+plate-B	C04			53							
+plate-B	C05			28							
+plate-B	C06			17							
+plate-B	C07			25							
+plate-B	C08			101							
+plate-B	C09			115							
+plate-B	C10			43							
+plate-B	C11			86							
+plate-B	C12			174							
+plate-B	D01			172							
+plate-B	D02			161							
+plate-B	D03			175							
+plate-B	D04			133							
+plate-B	D05			132							
+plate-B	D06			160							
+plate-B	D07			131							
+plate-B	D08			173							
+plate-B	D09			130							
+plate-B	D10			blank							
+plate-B	D11										
+plate-B	D12										
+plate-B	E01										
+plate-B	E02										
+plate-B	E03										
+plate-B	E04										
+plate-B	E05										
+plate-B	E06										
+plate-B	E07										
+plate-B	E08										
+plate-B	E09										
+plate-B	E10										
+plate-B	E11										
+plate-B	E12										
+plate-B	F01										
+plate-B	F02										
+plate-B	F03										
+plate-B	F04										
+plate-B	F05										
+plate-B	F06										
+plate-B	F07										
+plate-B	F08										
+plate-B	F09										
+plate-B	F10										
+plate-B	F11										
+plate-B	F12										
+plate-B	G01										
+plate-B	G02										
+plate-B	G03										
+plate-B	G04										
+plate-B	G05										
+plate-B	G06										
+plate-B	G07										
+plate-B	G08										
+plate-B	G09										
+plate-B	G10										
+plate-B	G11										
+plate-B	G12										
+plate-B	H01										
+plate-B	H02										
+plate-B	H03										
+plate-B	H04										
+plate-B	H05										
+plate-B	H06										
+plate-B	H07										
+plate-B	H08										
+plate-B	H09										
+plate-B	H10										
+plate-B	H11										
+plate-B	H12										
