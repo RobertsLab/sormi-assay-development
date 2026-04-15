@@ -33,7 +33,7 @@ jobs:
 
       - name: Install R packages
         run: |
-          Rscript -e 'install.packages(c("dplyr","purrr","readr","stringr","tidyr","tibble","lubridate","ggplot2","knitr"), repos="https://cloud.r-project.org")'
+          Rscript -e 'install.packages(c("dplyr","purrr","readr","stringr","tidyr","tibble","lubridate","ggplot2","knitr","rmarkdown"), repos="https://cloud.r-project.org")'
 
       - name: Setup Quarto
         uses: quarto-dev/quarto-actions/setup@v2
