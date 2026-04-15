@@ -575,148 +575,148 @@ plate-F	H09
 plate-F	H10										
 plate-F	H11										
 plate-F	H12										
-plate-G	A01										
-plate-G	A02										
-plate-G	A03										
-plate-G	A04										
-plate-G	A05										
-plate-G	A06										
-plate-G	A07										
-plate-G	A08										
-plate-G	A09										
-plate-G	A10										
-plate-G	A11										
-plate-G	A12										
-plate-G	B01										
-plate-G	B02										
-plate-G	B03										
-plate-G	B04										
-plate-G	B05										
-plate-G	B06										
-plate-G	B07										
-plate-G	B08										
-plate-G	B09										
-plate-G	B10										
-plate-G	B11										
-plate-G	B12										
-plate-G	C01										
-plate-G	C02										
-plate-G	C03										
-plate-G	C04										
-plate-G	C05										
-plate-G	C06										
-plate-G	C07										
-plate-G	C08										
-plate-G	C09										
-plate-G	C10										
-plate-G	C11										
-plate-G	C12										
-plate-G	D01										
-plate-G	D02										
-plate-G	D03										
-plate-G	D04										
-plate-G	D05										
-plate-G	D06										
-plate-G	D07										
-plate-G	D08										
-plate-G	D09										
-plate-G	D10										
-plate-G	D11										
-plate-G	D12										
-plate-G	E01										
-plate-G	E02										
-plate-G	E03										
-plate-G	E04										
-plate-G	E05										
-plate-G	E06										
-plate-G	E07										
-plate-G	E08										
-plate-G	E09										
-plate-G	E10										
-plate-G	E11										
-plate-G	E12										
-plate-G	F01										
-plate-G	F02										
-plate-G	F03										
-plate-G	F04										
-plate-G	F05										
-plate-G	F06										
-plate-G	F07										
-plate-G	F08										
-plate-G	F09										
-plate-G	F10										
-plate-G	F11										
-plate-G	F12										
-plate-G	G01										
-plate-G	G02										
-plate-G	G03										
-plate-G	G04										
-plate-G	G05										
-plate-G	G06										
-plate-G	G07										
-plate-G	G08										
-plate-G	G09										
-plate-G	G10										
-plate-G	G11										
-plate-G	G12										
-plate-G	H01										
-plate-G	H02										
-plate-G	H03										
-plate-G	H04										
-plate-G	H05										
-plate-G	H06										
-plate-G	H07										
-plate-G	H08										
-plate-G	H09										
-plate-G	H10										
-plate-G	H11										
-plate-G	H12										
-plate-H	A01										
-plate-H	A02										
-plate-H	A03										
-plate-H	A04										
-plate-H	A05										
-plate-H	A06										
-plate-H	A07										
-plate-H	A08										
-plate-H	A09										
-plate-H	A10										
-plate-H	A11										
-plate-H	A12										
-plate-H	B01										
-plate-H	B02										
-plate-H	B03										
-plate-H	B04										
-plate-H	B05										
-plate-H	B06										
-plate-H	B07										
-plate-H	B08										
-plate-H	B09										
-plate-H	B10										
-plate-H	B11										
-plate-H	B12										
-plate-H	C01										
-plate-H	C02										
-plate-H	C03										
-plate-H	C04										
-plate-H	C05										
-plate-H	C06										
-plate-H	C07										
-plate-H	C08										
-plate-H	C09										
-plate-H	C10										
-plate-H	C11										
-plate-H	C12										
-plate-H	D01										
-plate-H	D02										
-plate-H	D03										
-plate-H	D04										
-plate-H	D05										
-plate-H	D06										
-plate-H	D07										
-plate-H	D08										
-plate-H	D09										
-plate-H	D10										
+plate-G	A01			15							
+plate-G	A02			87							
+plate-G	A03			110							
+plate-G	A04			113							
+plate-G	A05			116							
+plate-G	A06			114							
+plate-G	A07			112							
+plate-G	A08			45							
+plate-G	A09			83							
+plate-G	A10			52							
+plate-G	A11			38							
+plate-G	A12			117							
+plate-G	B01			58							
+plate-G	B02			78							
+plate-G	B03			75							
+plate-G	B04			44							
+plate-G	B05			81							
+plate-G	B06			51							
+plate-G	B07			26							
+plate-G	B08			47							
+plate-G	B09			105							
+plate-G	B10			42							
+plate-G	B11			55							
+plate-G	B12			21							
+plate-G	C01			66							
+plate-G	C02			104							
+plate-G	C03			102							
+plate-G	C04			57							
+plate-G	C05			1							
+plate-G	C06			108							
+plate-G	C07			46							
+plate-G	C08			120							
+plate-G	C09			73							
+plate-G	C10			16							
+plate-G	C11			74							
+plate-G	C12			39							
+plate-G	D01			20							
+plate-G	D02			106							
+plate-G	D03			103							
+plate-G	D04			56							
+plate-G	D05			67							
+plate-G	D06			40							
+plate-G	D07			31							
+plate-G	D08			33							
+plate-G	D09			18							
+plate-G	D10			140							
+plate-G	D11			65							
+plate-G	D12			64							
+plate-G	E01			139							
+plate-G	E02			70							
+plate-G	E03			32							
+plate-G	E04			69							
+plate-G	E05			34							
+plate-G	E06			136							
+plate-G	E07			62							
+plate-G	E08			138							
+plate-G	E09			84							
+plate-G	E10			100							
+plate-G	E11			135							
+plate-G	E12			35							
+plate-G	F01			61							
+plate-G	F02			36							
+plate-G	F03			137							
+plate-G	F04			134							
+plate-G	F05			63							
+plate-G	F06			22							
+plate-G	F07			68							
+plate-G	F08			37							
+plate-G	F09			23							
+plate-G	F10			29							
+plate-G	F11			88							
+plate-G	F12			79							
+plate-G	G01			72							
+plate-G	G02			60							
+plate-G	G03			13							
+plate-G	G04			118							
+plate-G	G05			49							
+plate-G	G06			24							
+plate-G	G07			48							
+plate-G	G08			59							
+plate-G	G09			107							
+plate-G	G10			90							
+plate-G	G11			109							
+plate-G	G12			27							
+plate-G	H01			14							
+plate-G	H02			19							
+plate-G	H03			89							
+plate-G	H04			41							
+plate-G	H05			111							
+plate-G	H06			blank							
+plate-G	H07			138							
+plate-G	H08			139							
+plate-G	H09			151							
+plate-G	H10			144							
+plate-G	H11			147							
+plate-G	H12			142							
+plate-H	A01			148							
+plate-H	A02			143							
+plate-H	A03			141							
+plate-H	A04			149							
+plate-H	A05			152							
+plate-H	A06			140							
+plate-H	A07			134							
+plate-H	A08			136							
+plate-H	A09			135							
+plate-H	A10			153							
+plate-H	A11			137							
+plate-H	A12			150							
+plate-H	B01			101							
+plate-H	B02			164							
+plate-H	B03			166							
+plate-H	B04			168							
+plate-H	B05			163							
+plate-H	B06			171							
+plate-H	B07			170							
+plate-H	B08			17							
+plate-H	B09			172							
+plate-H	B10			119							
+plate-H	B11			115							
+plate-H	B12			174							
+plate-H	C01			145							
+plate-H	C02			77							
+plate-H	C03			28							
+plate-H	C04			86							
+plate-H	C05			53							
+plate-H	C06			167							
+plate-H	C07			162							
+plate-H	C08			169							
+plate-H	C09			43							
+plate-H	C10			76							
+plate-H	C11			132							
+plate-H	C12			25							
+plate-H	D01			131							
+plate-H	D02			165							
+plate-H	D03			161							
+plate-H	D04			133							
+plate-H	D05			160							
+plate-H	D06			146							
+plate-H	D07			175							
+plate-H	D08			130							
+plate-H	D09			173							
+plate-H	D10			blank							
 plate-H	D11										
 plate-H	D12										
 plate-H	E01										
