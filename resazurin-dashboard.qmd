@@ -1,0 +1,281 @@
+---
+title: "SORMI Resazurin Dashboard"
+subtitle: "Auto-updated from plate exports in Resazurin"
+format: html
+resources:
+  - output/resazurin/dashboard-data.csv
+---
+
+```{=html}
+<style>
+/* Ensure source code blocks remain hidden in rendered dashboard output. */
+.cell-code.hidden,
+.sourceCode.hidden,
+pre.sourceCode.hidden,
+div.cell-code.hidden {
+  display: none !important;
+}
+</style>
+```
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+
+library(dplyr)
+library(readr)
+library(knitr)
+
+data_path <- file.path("output", "resazurin", "dashboard-data.csv")
+
+if (!file.exists(data_path)) {
+  cat("## No dashboard data yet\n\n")
+  cat("Run scripts/resazurin/build_resazurin_dashboard_data.R to generate data.\n")
+  knitr::knit_exit()
+}
+
+dat <- readr::read_csv(data_path, show_col_types = FALSE)
+
+if (nrow(dat) == 0) {
+  cat("## Dashboard dataset is empty\n\n")
+  cat("No matching plate files were discovered under Resazurin/.\n")
+  knitr::knit_exit()
+}
+```
+
+## What This Shows
+
+- Interactive exploration of trajectories across experiments, plates, and wells.
+- Optional filtering by any non-empty `*.group` metadata column.
+- Four data views: raw fluorescence, delta fluorescence, blank-normalized fluorescence, and measurement-normalized fluorescence.
+
+## Interactive Explorer
+
+Use these selectors to focus on one experiment, one plate, or specific wells.
+
+```{ojs}
+//| echo: false
+dashboard = await FileAttachment("output/resazurin/dashboard-data.csv").csv({typed: true})
+
+cleanDashboard = dashboard.filter(d =>
+  d.experiment_dir != null &&
+  d.plate_id != null &&
+  d.well_id != null &&
+  d.well_id !== "" &&
+  Number.isFinite(d.time_hr) &&
+  Number.isFinite(d.value)
+)
+
+experimentValues = [...new Set(cleanDashboard.map(d => d.experiment_dir))]
+
+experimentSortKey = (name) => {
+  const m = /^([0-9]{8})/.exec(name)
+  if (!m) return Number.NEGATIVE_INFINITY
+  return Number.parseInt(m[1], 10)
+}
+
+mostRecentExperiment = experimentValues
+  .slice()
+  .sort((a, b) => {
+    const ka = experimentSortKey(a)
+    const kb = experimentSortKey(b)
+    if (ka !== kb) return kb - ka
+    return a.localeCompare(b)
+  })[0]
+
+experiments = ["All", ...experimentValues]
+viewof experimentSel = Inputs.select(experiments, {
+  label: "Experiment",
+  value: mostRecentExperiment || "All"
+})
+
+activeExperimentSel = experiments.includes(experimentSel) ? experimentSel : (mostRecentExperiment || "All")
+
+plateCandidates = cleanDashboard
+  .filter(d => activeExperimentSel === "All" || d.experiment_dir === activeExperimentSel)
+plates = ["All", ...new Set(plateCandidates.map(d => d.plate_id))]
+defaultPlateSel = plates.length > 1 ? plates[1] : "All"
+viewof plateSel = Inputs.select(plates, {
+  label: "Plate",
+  value: defaultPlateSel
+})
+
+activePlateSel = plates.includes(plateSel) ? plateSel : "All"
+
+selectionRows = cleanDashboard
+  .filter(d => (activeExperimentSel === "All" || d.experiment_dir === activeExperimentSel) &&
+               (activePlateSel === "All" || d.plate_id === activePlateSel))
+
+wells = [...new Set(selectionRows.map(d => d.well_id))].sort()
+defaultWells = wells.slice(0, Math.min(6, wells.length))
+
+viewof wellSel = Inputs.select(wells, {
+  label: "Well(s)",
+  multiple: true,
+  value: defaultWells
+})
+
+nonEmptyString = v => v != null && `${v}`.trim() !== ""
+
+groupColumns = cleanDashboard.length > 0
+  ? Object.keys(cleanDashboard[0]).filter(k => /_group$/.test(k) && cleanDashboard.some(d => nonEmptyString(d[k])))
+  : []
+
+viewof groupColSel = Inputs.select(
+  ["(none)", ...groupColumns],
+  {
+    label: "Group column",
+    value: "(none)"
+  }
+)
+
+activeGroupCol = groupColumns.includes(groupColSel) ? groupColSel : null
+
+groupValues = activeGroupCol === null
+  ? []
+  : [...new Set(selectionRows.map(d => d[activeGroupCol]).filter(nonEmptyString))].sort((a, b) => `${a}`.localeCompare(`${b}`))
+
+viewof groupValSel = Inputs.select(
+  ["All", ...groupValues],
+  {
+    label: "Group value",
+    value: "All"
+  }
+)
+
+activeGroupVal = groupValues.includes(groupValSel) ? groupValSel : "All"
+
+measurementColumns = cleanDashboard.length > 0
+  ? Object.keys(cleanDashboard[0]).filter(
+      k => /_measur(?:e)?ment$/.test(k) && cleanDashboard.some(d => Number.isFinite(d[k]))
+    )
+  : []
+
+viewof measurementColSel = Inputs.select(
+  measurementColumns.length > 0 ? measurementColumns : ["(none available)"],
+  {
+    label: "Measurement column",
+    value: measurementColumns.length > 0 ? measurementColumns[0] : "(none available)"
+  }
+)
+
+activeMeasurementCol = measurementColumns.includes(measurementColSel) ? measurementColSel : null
+
+viewModes = ["Raw fluorescence", "Delta fluorescence", "Normalized fluorescence", "Measurement-normalized fluorescence"]
+viewof dataViewSel = Inputs.select(viewModes, {
+  label: "Data view",
+  value: "Raw fluorescence"
+})
+
+selectedWells = (wellSel || []).filter(w => wells.includes(w))
+filtered = selectionRows.filter(d =>
+  (selectedWells.length === 0 || selectedWells.includes(d.well_id)) &&
+  (activeGroupCol === null || activeGroupVal === "All" || `${d[activeGroupCol]}` === `${activeGroupVal}`)
+)
+
+allPlateMessage = activePlateSel === "All"
+  ? "**Plate = All:** lines include wells from multiple plates. Select a specific plate for one trajectory per well."
+  : ""
+
+yField = dataViewSel === "Delta fluorescence"
+  ? "delta_value"
+  : (dataViewSel === "Normalized fluorescence"
+      ? "normalized_value"
+      : (dataViewSel === "Measurement-normalized fluorescence" ? "measurement_normalized_value" : "value"))
+
+yLabel = dataViewSel === "Delta fluorescence"
+  ? "Delta fluorescence (current - previous timepoint)"
+  : (dataViewSel === "Normalized fluorescence"
+      ? "Normalized fluorescence (value / mean blank at same plate and time)"
+      : (dataViewSel === "Measurement-normalized fluorescence"
+          ? `Fluorescence normalized by ${activeMeasurementCol || "selected measurement"}`
+          : "Fluorescence"))
+
+isBlank = d => d.is_blank === true || d.is_blank === "TRUE" || d.is_blank === 1 || d.is_blank === "1"
+seriesKey = d => isBlank(d) ? "Blank" : d.well_id
+traceKey = d => `${d.experiment_dir}|${d.plate_id}|${d.well_id}`
+
+measurementReady = dataViewSel !== "Measurement-normalized fluorescence" || activeMeasurementCol !== null
+
+plottedBase = dataViewSel === "Measurement-normalized fluorescence"
+  ? filtered.map(d => {
+      const denom = activeMeasurementCol === null ? NaN : d[activeMeasurementCol]
+      const valid = Number.isFinite(d.value) && Number.isFinite(denom) && denom !== 0
+      return {
+        ...d,
+        measurement_normalized_value: valid ? d.value / denom : NaN
+      }
+    })
+  : filtered
+
+plotted = plottedBase.filter(d => Number.isFinite(d[yField]))
+plottedSorted = plotted
+  .slice()
+  .sort((a, b) =>
+    traceKey(a).localeCompare(traceKey(b)) ||
+    (a.time_hr - b.time_hr)
+  )
+
+presentSeries = [...new Set(plottedSorted.map(seriesKey))]
+nonBlankKeys = presentSeries.filter(k => k !== "Blank").sort()
+hasBlankSeries = presentSeries.includes("Blank")
+colorDomain = hasBlankSeries ? ["Blank", ...nonBlankKeys] : nonBlankKeys
+
+tableau = d3.schemeTableau10
+nonBlankColors = nonBlankKeys.map((_, i) => tableau[i % tableau.length])
+colorRange = hasBlankSeries
+  ? ["#000000", ...nonBlankColors.slice(0, nonBlankKeys.length)]
+  : nonBlankColors.slice(0, nonBlankKeys.length)
+
+tooltipTitle = d => {
+  const yVal = Number.isFinite(d[yField]) ? d[yField].toFixed(2) : "NA"
+  return `${d.experiment_dir} | Plate ${d.plate_id} | Well ${d.well_id} | Time ${d.time_hr} h | ${yLabel}: ${yVal}`
+}
+
+normalizedUnavailable = dataViewSel === "Normalized fluorescence" && plottedSorted.length === 0
+measurementUnavailable = dataViewSel === "Measurement-normalized fluorescence" && (!measurementReady || plottedSorted.length === 0)
+
+normalizedUnavailable
+  ? "Normalized fluorescence unavailable for this selection. Add a layout.txt with blank wells marked (is_blank = TRUE), then rebuild dashboard data."
+  : measurementUnavailable
+    ? "Measurement-normalized fluorescence unavailable for this selection. Ensure a non-zero numeric value exists in the selected *.measurement (or *.measurment) column for these wells."
+  : Plot.plot({
+    height: 420,
+    subtitle: allPlateMessage === "" ? null : "Plate = All: lines include wells from multiple plates. Select a specific plate for one trajectory per well.",
+    style: {
+      color: "#111827",
+      background: "#ffffff"
+    },
+    x: {label: "Time (hours)"},
+    y: {label: yLabel},
+    color: {
+      legend: true,
+      label: "Well",
+      domain: colorDomain,
+      range: colorRange
+    },
+    marks: [
+      Plot.gridX({stroke: "#d1d5db", strokeOpacity: 1}),
+      Plot.gridY({stroke: "#d1d5db", strokeOpacity: 1}),
+      Plot.line(plottedSorted, {
+        x: "time_hr",
+        y: yField,
+        stroke: seriesKey,
+        z: traceKey,
+        strokeWidth: 2.2,
+        strokeOpacity: 1,
+        curve: "linear"
+      }),
+      Plot.dot(plottedSorted, {
+        x: "time_hr",
+        y: yField,
+        fill: seriesKey,
+        r: 2.5,
+        opacity: 0.9,
+        title: tooltipTitle,
+        tip: true
+      })
+    ]
+  })
+```
