@@ -108,13 +108,20 @@ selectionRows = cleanDashboard
                (activePlateSel === "All" || d.plate_id === activePlateSel))
 
 wells = [...new Set(selectionRows.map(d => d.well_id))].sort()
-defaultWells = wells.slice(0, Math.min(6, wells.length))
+wellsWithAll = ["All", ...wells]
 
-viewof wellSel = Inputs.select(wells, {
+viewof wellSel = Inputs.select(wellsWithAll, {
   label: "Well(s)",
   multiple: true,
-  value: defaultWells
+  value: ["All"]
 })
+
+rawWellSel = Array.isArray(wellSel) ? wellSel : [wellSel]
+validWellSel = rawWellSel.filter(w => wellsWithAll.includes(w))
+allWellsSelected = validWellSel.length === 0 || validWellSel.includes("All")
+selectedWells = allWellsSelected
+  ? wells
+  : validWellSel.filter(w => w !== "All")
 
 nonEmptyString = v => v != null && `${v}`.trim() !== ""
 
@@ -168,9 +175,8 @@ viewof dataViewSel = Inputs.select(viewModes, {
   value: "Raw fluorescence"
 })
 
-selectedWells = (wellSel || []).filter(w => wells.includes(w))
 filtered = selectionRows.filter(d =>
-  (selectedWells.length === 0 || selectedWells.includes(d.well_id)) &&
+  (allWellsSelected || selectedWells.includes(d.well_id)) &&
   (activeGroupCol === null || activeGroupVal === "All" || `${d[activeGroupCol]}` === `${activeGroupVal}`)
 )
 
