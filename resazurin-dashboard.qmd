@@ -6,6 +6,8 @@ resources:
   - output/resazurin/dashboard-data.csv
 ---
 
+<!-- deploy trigger -->
+
 ```{=html}
 <style>
 /* Ensure source code blocks remain hidden in rendered dashboard output. */
