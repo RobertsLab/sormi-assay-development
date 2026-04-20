@@ -210,10 +210,43 @@ plottedBase = dataViewSel === "Measurement-normalized fluorescence"
   : filtered
 
 plotted = plottedBase.filter(d => Number.isFinite(d[yField]))
-plottedSorted = plotted
+
+// When plotting across all plates, collapse same-time replicate plates to one
+// point per experiment+well+time so trajectories progress over time by well.
+plottedEffective = activePlateSel === "All"
+  ? (() => {
+      const groups = new Map()
+      for (const d of plotted) {
+        const key = `${d.experiment_dir}|${d.well_id}|${d.time_hr}`
+        if (!groups.has(key)) {
+          groups.set(key, {
+            experiment_dir: d.experiment_dir,
+            plate_id: "all",
+            well_id: d.well_id,
+            time_hr: d.time_hr,
+            is_blank: isBlank(d),
+            values: [d[yField]]
+          })
+        } else {
+          groups.get(key).values.push(d[yField])
+        }
+      }
+
+      return [...groups.values()].map(g => ({
+        ...g,
+        [yField]: d3.mean(g.values)
+      }))
+    })()
+  : plotted
+
+traceKeyEffective = d => activePlateSel === "All"
+  ? `${d.experiment_dir}|${d.well_id}`
+  : traceKey(d)
+
+plottedSorted = plottedEffective
   .slice()
   .sort((a, b) =>
-    traceKey(a).localeCompare(traceKey(b)) ||
+    traceKeyEffective(a).localeCompare(traceKeyEffective(b)) ||
     (a.time_hr - b.time_hr)
   )
 
@@ -262,7 +295,7 @@ normalizedUnavailable
         x: "time_hr",
         y: yField,
         stroke: seriesKey,
-        z: traceKey,
+        z: traceKeyEffective,
         strokeWidth: 2.2,
         strokeOpacity: 1,
         curve: "linear"
