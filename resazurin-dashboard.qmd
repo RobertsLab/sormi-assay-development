@@ -199,8 +199,17 @@ yLabel = dataViewSel === "Delta fluorescence"
           : "Fluorescence"))
 
 isBlank = d => d.is_blank === true || d.is_blank === "TRUE" || d.is_blank === 1 || d.is_blank === "1"
-seriesKey = d => isBlank(d) ? "Blank" : d.well_id
-traceKey = d => `${d.experiment_dir}|${d.plate_id}|${d.well_id}`
+groupMode = activeGroupCol !== null
+groupValue = d => nonEmptyString(d[activeGroupCol]) ? `${d[activeGroupCol]}` : "(unassigned)"
+seriesLabel = groupMode ? `Group (${activeGroupCol})` : "Well"
+seriesKey = d => {
+  if (nonEmptyString(d.series_id)) return `${d.series_id}`
+  if (isBlank(d)) return "Blank"
+  return groupMode ? groupValue(d) : d.well_id
+}
+traceKey = d => groupMode
+  ? `${d.experiment_dir}|${d.plate_id}|${seriesKey(d)}`
+  : `${d.experiment_dir}|${d.plate_id}|${d.well_id}`
 
 measurementReady = dataViewSel !== "Measurement-normalized fluorescence" || activeMeasurementCol !== null
 
@@ -223,11 +232,13 @@ plottedEffective = activePlateSel === "All"
   ? (() => {
       const groups = new Map()
       for (const d of plotted) {
-        const key = `${d.experiment_dir}|${d.well_id}|${d.time_hr}`
+        const sid = seriesKey(d)
+        const key = `${d.experiment_dir}|${sid}|${d.time_hr}`
         if (!groups.has(key)) {
           groups.set(key, {
             experiment_dir: d.experiment_dir,
             plate_id: "all",
+            series_id: sid,
             well_id: d.well_id,
             time_hr: d.time_hr,
             is_blank: isBlank(d),
@@ -246,7 +257,7 @@ plottedEffective = activePlateSel === "All"
   : plotted
 
 traceKeyEffective = d => activePlateSel === "All"
-  ? `${d.experiment_dir}|${d.well_id}`
+  ? `${d.experiment_dir}|${seriesKey(d)}`
   : traceKey(d)
 
 plottedSorted = plottedEffective
@@ -269,7 +280,7 @@ colorRange = hasBlankSeries
 
 tooltipTitle = d => {
   const yVal = Number.isFinite(d[yField]) ? d[yField].toFixed(2) : "NA"
-  return `${d.experiment_dir} | Plate ${d.plate_id} | Well ${d.well_id} | Time ${d.time_hr} h | ${yLabel}: ${yVal}`
+  return `${d.experiment_dir} | Plate ${d.plate_id} | ${seriesLabel}: ${seriesKey(d)} | Time ${d.time_hr} h | ${yLabel}: ${yVal}`
 }
 
 normalizedUnavailable = dataViewSel === "Normalized fluorescence" && plottedSorted.length === 0
@@ -290,7 +301,7 @@ normalizedUnavailable
     y: {label: yLabel},
     color: {
       legend: true,
-      label: "Well",
+      label: seriesLabel,
       domain: colorDomain,
       range: colorRange
     },
