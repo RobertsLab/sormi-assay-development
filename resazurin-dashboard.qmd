@@ -184,11 +184,11 @@ allPlateMessage = activePlateSel === "All"
   ? "**Plate = All:** lines include wells from multiple plates. Select a specific plate for one trajectory per well."
   : ""
 
-yField = dataViewSel === "Delta fluorescence"
-  ? "delta_value"
-  : (dataViewSel === "Normalized fluorescence"
+yField = dataViewSel === "Normalized fluorescence"
       ? "normalized_value"
-      : (dataViewSel === "Measurement-normalized fluorescence" ? "measurement_normalized_value" : "value"))
+  : (dataViewSel === "Measurement-normalized fluorescence" ? "measurement_normalized_value" : "value")
+metricField = dataViewSel === "Delta fluorescence" ? "value" : yField
+plotYField = "plot_y"
 
 yLabel = dataViewSel === "Delta fluorescence"
   ? "Delta fluorescence (current - previous timepoint)"
@@ -224,7 +224,7 @@ plottedBase = dataViewSel === "Measurement-normalized fluorescence"
     })
   : filtered
 
-plotted = plottedBase.filter(d => Number.isFinite(d[yField]))
+plotted = plottedBase.filter(d => Number.isFinite(d[metricField]))
 
 // When plotting across all plates, collapse same-time replicate plates to one
 // point per experiment+well+time so trajectories progress over time by well.
@@ -242,16 +242,16 @@ plottedEffective = activePlateSel === "All"
             well_id: d.well_id,
             time_hr: d.time_hr,
             is_blank: isBlank(d),
-            values: [d[yField]]
+            values: [d[metricField]]
           })
         } else {
-          groups.get(key).values.push(d[yField])
+          groups.get(key).values.push(d[metricField])
         }
       }
 
       return [...groups.values()].map(g => ({
         ...g,
-        [yField]: d3.mean(g.values)
+        [metricField]: d3.mean(g.values)
       }))
     })()
   : plotted
@@ -260,12 +260,32 @@ traceKeyEffective = d => activePlateSel === "All"
   ? `${d.experiment_dir}|${seriesKey(d)}`
   : traceKey(d)
 
-plottedSorted = plottedEffective
+sortedEffective = plottedEffective
   .slice()
   .sort((a, b) =>
     traceKeyEffective(a).localeCompare(traceKeyEffective(b)) ||
     (a.time_hr - b.time_hr)
   )
+
+plottedSorted = dataViewSel === "Delta fluorescence"
+  ? (() => {
+      const prevByTrace = new Map()
+      return sortedEffective.map(d => {
+        const tkey = traceKeyEffective(d)
+        const prev = prevByTrace.get(tkey)
+        const cur = d[metricField]
+        const delta = Number.isFinite(prev) ? (cur - prev) : 0
+        prevByTrace.set(tkey, cur)
+        return {
+          ...d,
+          [plotYField]: delta
+        }
+      })
+    })()
+  : sortedEffective.map(d => ({
+      ...d,
+      [plotYField]: d[metricField]
+    }))
 
 presentSeries = [...new Set(plottedSorted.map(seriesKey))]
 nonBlankKeys = presentSeries.filter(k => k !== "Blank").sort()
@@ -279,7 +299,7 @@ colorRange = hasBlankSeries
   : nonBlankColors.slice(0, nonBlankKeys.length)
 
 tooltipTitle = d => {
-  const yVal = Number.isFinite(d[yField]) ? d[yField].toFixed(2) : "NA"
+  const yVal = Number.isFinite(d[plotYField]) ? d[plotYField].toFixed(2) : "NA"
   return `${d.experiment_dir} | Plate ${d.plate_id} | ${seriesLabel}: ${seriesKey(d)} | Time ${d.time_hr} h | ${yLabel}: ${yVal}`
 }
 
@@ -310,7 +330,7 @@ normalizedUnavailable
       Plot.gridY({stroke: "#d1d5db", strokeOpacity: 1}),
       Plot.line(plottedSorted, {
         x: "time_hr",
-        y: yField,
+        y: plotYField,
         stroke: seriesKey,
         z: traceKeyEffective,
         strokeWidth: 2.2,
@@ -319,7 +339,7 @@ normalizedUnavailable
       }),
       Plot.dot(plottedSorted, {
         x: "time_hr",
-        y: yField,
+        y: plotYField,
         fill: seriesKey,
         r: 2.5,
         opacity: 0.9,
