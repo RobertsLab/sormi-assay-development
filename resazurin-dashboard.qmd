@@ -240,44 +240,42 @@ plottedBase = dataViewSel === "Measurement-normalized fluorescence"
 
 plotted = plottedBase.filter(d => Number.isFinite(d[metricField]))
 
-// When plotting across all plates, collapse same-time replicate plates to one
-// point per experiment+well+time so trajectories progress over time by well.
-plottedEffective = activePlateSel === "All"
-  ? (() => {
-      const groups = new Map()
-      for (const d of plotted) {
-        const sid = seriesKey(d)
-        const key = `${d.experiment_dir}|${sid}|${d.time_hr}`
-        if (!groups.has(key)) {
-          groups.set(key, {
-            experiment_dir: d.experiment_dir,
-            plate_id: "all",
-            series_id: sid,
-            well_id: d.well_id,
-            time_hr: d.time_hr,
-            is_blank: isBlank(d),
-            values: [d[metricField]]
-          })
-        } else {
-          groups.get(key).values.push(d[metricField])
-        }
-      }
-
-      return [...groups.values()].map(g => ({
-        ...g,
-        [metricField]: d3.mean(g.values)
-      }))
-    })()
-  : plotted
-
 traceKeyEffective = d => activePlateSel === "All"
   ? `${d.experiment_dir}|${seriesKey(d)}`
   : traceKey(d)
 
+// Ensure one point per trace+time before plotting/delta. This avoids
+// within-time subtraction artifacts when grouping collapses multiple wells.
+plottedEffective = (() => {
+  const groups = new Map()
+  for (const d of plotted) {
+    const traceId = traceKeyEffective(d)
+    const sid = seriesKey(d)
+    const key = `${traceId}|${d.time_hr}`
+    if (!groups.has(key)) {
+      groups.set(key, {
+        ...d,
+        trace_id: traceId,
+        series_id: sid,
+        plate_id: activePlateSel === "All" ? "all" : d.plate_id,
+        well_id: groupMode ? sid : d.well_id,
+        values: [d[metricField]]
+      })
+    } else {
+      groups.get(key).values.push(d[metricField])
+    }
+  }
+
+  return [...groups.values()].map(g => ({
+    ...g,
+    [metricField]: d3.mean(g.values)
+  }))
+})()
+
 sortedEffective = plottedEffective
   .slice()
   .sort((a, b) =>
-    traceKeyEffective(a).localeCompare(traceKeyEffective(b)) ||
+    a.trace_id.localeCompare(b.trace_id) ||
     (a.time_hr - b.time_hr)
   )
 
@@ -285,7 +283,7 @@ plottedSorted = dataViewSel === "Delta fluorescence"
   ? (() => {
       const prevByTrace = new Map()
       return sortedEffective.map(d => {
-        const tkey = traceKeyEffective(d)
+        const tkey = d.trace_id
         const prev = prevByTrace.get(tkey)
         const cur = d[metricField]
         const delta = Number.isFinite(prev) ? (cur - prev) : 0
@@ -349,7 +347,7 @@ groupUnavailable
         x: "time_hr",
         y: plotYField,
         stroke: seriesKey,
-        z: traceKeyEffective,
+        z: d => d.trace_id,
         strokeWidth: 2.2,
         strokeOpacity: 1,
         curve: "linear"
