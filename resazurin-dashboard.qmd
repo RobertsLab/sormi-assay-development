@@ -124,9 +124,15 @@ selectedWells = allWellsSelected
   : validWellSel.filter(w => w !== "All")
 
 nonEmptyString = v => v != null && `${v}`.trim() !== ""
+invalidGroupTokens = new Set(["NA", "N/A", "NULL", "NAN", "<NA>"])
+validGroupValue = v => {
+  if (!nonEmptyString(v)) return false
+  const norm = `${v}`.trim().toUpperCase()
+  return !invalidGroupTokens.has(norm)
+}
 
 groupColumns = cleanDashboard.length > 0
-  ? Object.keys(cleanDashboard[0]).filter(k => /_group$/.test(k) && cleanDashboard.some(d => nonEmptyString(d[k])))
+  ? Object.keys(cleanDashboard[0]).filter(k => /_group$/.test(k) && cleanDashboard.some(d => validGroupValue(d[k])))
   : []
 
 viewof groupColSel = Inputs.select(
@@ -146,7 +152,7 @@ naturalCompare = (a, b) => `${a}`.localeCompare(`${b}`, undefined, {
 
 groupValues = activeGroupCol === null
   ? []
-  : [...new Set(selectionRows.map(d => d[activeGroupCol]).filter(nonEmptyString))].sort(naturalCompare)
+  : [...new Set(selectionRows.map(d => `${d[activeGroupCol]}`.trim()).filter(validGroupValue))].sort(naturalCompare)
 
 viewof groupValSel = Inputs.select(
   ["All", ...groupValues],
@@ -182,7 +188,7 @@ viewof dataViewSel = Inputs.select(viewModes, {
 
 filtered = selectionRows.filter(d =>
   (allWellsSelected || selectedWells.includes(d.well_id)) &&
-  (activeGroupCol === null || nonEmptyString(d[activeGroupCol])) &&
+  (activeGroupCol === null || validGroupValue(d[activeGroupCol])) &&
   (activeGroupCol === null || activeGroupVal === "All" || `${d[activeGroupCol]}` === `${activeGroupVal}`)
 )
 
@@ -206,7 +212,7 @@ yLabel = dataViewSel === "Delta fluorescence"
 
 isBlank = d => d.is_blank === true || d.is_blank === "TRUE" || d.is_blank === 1 || d.is_blank === "1"
 groupMode = activeGroupCol !== null
-groupValue = d => `${d[activeGroupCol]}`
+groupValue = d => `${d[activeGroupCol]}`.trim()
 seriesLabel = groupMode ? `Group (${activeGroupCol})` : "Well"
 seriesKey = d => {
   if (nonEmptyString(d.series_id)) return `${d.series_id}`
@@ -311,8 +317,11 @@ tooltipTitle = d => {
 
 normalizedUnavailable = dataViewSel === "Normalized fluorescence" && plottedSorted.length === 0
 measurementUnavailable = dataViewSel === "Measurement-normalized fluorescence" && (!measurementReady || plottedSorted.length === 0)
+groupUnavailable = activeGroupCol !== null && filtered.length === 0
 
-normalizedUnavailable
+groupUnavailable
+  ? `No data available for ${activeGroupCol} under the current selection. Choose a different Group column/value or adjust Experiment, Plate, and Well filters.`
+  : normalizedUnavailable
   ? "Normalized fluorescence unavailable for this selection. Add a layout.txt with blank wells marked (is_blank = TRUE), then rebuild dashboard data."
   : measurementUnavailable
     ? "Measurement-normalized fluorescence unavailable for this selection. Ensure a non-zero numeric value exists in the selected *.measurement (or *.measurment) column for these wells."
