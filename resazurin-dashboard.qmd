@@ -95,7 +95,7 @@ activeExperimentSel = experiments.includes(experimentSel) ? experimentSel : (mos
 plateCandidates = cleanDashboard
   .filter(d => activeExperimentSel === "All" || d.experiment_dir === activeExperimentSel)
 plates = ["All", ...new Set(plateCandidates.map(d => d.plate_id))]
-defaultPlateSel = plates.length > 1 ? plates[1] : "All"
+defaultPlateSel = "All"
 viewof plateSel = Inputs.select(plates, {
   label: "Plate",
   value: defaultPlateSel
@@ -139,9 +139,14 @@ viewof groupColSel = Inputs.select(
 
 activeGroupCol = groupColumns.includes(groupColSel) ? groupColSel : null
 
+naturalCompare = (a, b) => `${a}`.localeCompare(`${b}`, undefined, {
+  numeric: true,
+  sensitivity: "base"
+})
+
 groupValues = activeGroupCol === null
   ? []
-  : [...new Set(selectionRows.map(d => d[activeGroupCol]).filter(nonEmptyString))].sort((a, b) => `${a}`.localeCompare(`${b}`))
+  : [...new Set(selectionRows.map(d => d[activeGroupCol]).filter(nonEmptyString))].sort(naturalCompare)
 
 viewof groupValSel = Inputs.select(
   ["All", ...groupValues],
@@ -177,6 +182,7 @@ viewof dataViewSel = Inputs.select(viewModes, {
 
 filtered = selectionRows.filter(d =>
   (allWellsSelected || selectedWells.includes(d.well_id)) &&
+  (activeGroupCol === null || nonEmptyString(d[activeGroupCol])) &&
   (activeGroupCol === null || activeGroupVal === "All" || `${d[activeGroupCol]}` === `${activeGroupVal}`)
 )
 
@@ -200,7 +206,7 @@ yLabel = dataViewSel === "Delta fluorescence"
 
 isBlank = d => d.is_blank === true || d.is_blank === "TRUE" || d.is_blank === 1 || d.is_blank === "1"
 groupMode = activeGroupCol !== null
-groupValue = d => nonEmptyString(d[activeGroupCol]) ? `${d[activeGroupCol]}` : "(unassigned)"
+groupValue = d => `${d[activeGroupCol]}`
 seriesLabel = groupMode ? `Group (${activeGroupCol})` : "Well"
 seriesKey = d => {
   if (nonEmptyString(d.series_id)) return `${d.series_id}`
