@@ -357,52 +357,74 @@ groupUnavailable
   ? "Normalized fluorescence unavailable for this selection. Add a layout.txt with blank wells marked (is_blank = TRUE), then rebuild dashboard data."
   : measurementUnavailable
     ? "Measurement-normalized fluorescence unavailable for this selection. Ensure a non-zero numeric value exists in the selected *.measurement (or *.measurment) column for these wells."
-  : Plot.plot({
-    height: 420,
-    subtitle: plotSubtitle,
-    style: {
-      color: "#111827",
-      background: "#ffffff"
-    },
-    x: {label: "Time (hours)"},
-    y: {label: yLabel},
-    color: {
-      legend: true,
-      label: seriesLabel,
-      domain: colorDomain,
-      range: colorRange
-    },
-    marks: [
-      Plot.gridX({stroke: "#d1d5db", strokeOpacity: 1}),
-      Plot.gridY({stroke: "#d1d5db", strokeOpacity: 1}),
-      ...(showErrorBars
-        ? [Plot.ruleX(errorBarData, {
+  : (() => {
+      const plotWrap = document.createElement("div")
+      const subtitleWrap = document.createElement("div")
+      subtitleWrap.style.marginBottom = "0.35rem"
+      subtitleWrap.style.color = "#374151"
+      subtitleWrap.style.fontSize = "0.95rem"
+      subtitleWrap.style.lineHeight = "1.35"
+      subtitleWrap.style.fontWeight = "600"
+
+      const groupingLine = document.createElement("div")
+      groupingLine.textContent = groupingMessage
+      subtitleWrap.appendChild(groupingLine)
+
+      if (allPlateMessage !== null) {
+        const plateLine = document.createElement("div")
+        plateLine.textContent = allPlateMessage
+        plateLine.style.fontWeight = "400"
+        subtitleWrap.appendChild(plateLine)
+      }
+
+      plotWrap.appendChild(subtitleWrap)
+      plotWrap.appendChild(Plot.plot({
+        height: 420,
+        style: {
+          color: "#111827",
+          background: "#ffffff"
+        },
+        x: {label: "Time (hours)"},
+        y: {label: yLabel},
+        color: {
+          legend: true,
+          label: seriesLabel,
+          domain: colorDomain,
+          range: colorRange
+        },
+        marks: [
+          Plot.gridX({stroke: "#d1d5db", strokeOpacity: 1}),
+          Plot.gridY({stroke: "#d1d5db", strokeOpacity: 1}),
+          ...(showErrorBars
+            ? [Plot.ruleX(errorBarData, {
+                x: "time_hr",
+                y1: d => d[plotYField] - d.plot_se,
+                y2: d => d[plotYField] + d.plot_se,
+                stroke: seriesKey,
+                strokeOpacity: 0.6,
+                strokeWidth: 1.2
+              })]
+            : []),
+          Plot.line(plottedSorted, {
             x: "time_hr",
-            y1: d => d[plotYField] - d.plot_se,
-            y2: d => d[plotYField] + d.plot_se,
+            y: plotYField,
             stroke: seriesKey,
-            strokeOpacity: 0.6,
-            strokeWidth: 1.2
-          })]
-        : []),
-      Plot.line(plottedSorted, {
-        x: "time_hr",
-        y: plotYField,
-        stroke: seriesKey,
-        z: d => d.trace_id,
-        strokeWidth: 2.2,
-        strokeOpacity: 1,
-        curve: "linear"
-      }),
-      Plot.dot(plottedSorted, {
-        x: "time_hr",
-        y: plotYField,
-        fill: seriesKey,
-        r: 2.5,
-        opacity: 0.9,
-        title: tooltipTitle,
-        tip: true
-      })
-    ]
-  })
+            z: d => d.trace_id,
+            strokeWidth: 2.2,
+            strokeOpacity: 1,
+            curve: "linear"
+          }),
+          Plot.dot(plottedSorted, {
+            x: "time_hr",
+            y: plotYField,
+            fill: seriesKey,
+            r: 2.5,
+            opacity: 0.9,
+            title: tooltipTitle,
+            tip: true
+          })
+        ]
+      }))
+      return plotWrap
+    })()
 ```
