@@ -137,11 +137,13 @@ groupColumns = cleanDashboard.length > 0
   ? Object.keys(cleanDashboard[0]).filter(k => /_group$/.test(k) && cleanDashboard.some(d => validGroupValue(d[k])))
   : []
 
+noneGroupOption = "None (plot by well)"
+
 viewof groupColSel = Inputs.select(
-  ["(none)", ...groupColumns],
+  [noneGroupOption, ...groupColumns],
   {
     label: "Group column",
-    value: "(none)"
+    value: noneGroupOption
   }
 )
 
@@ -194,9 +196,17 @@ filtered = selectionRows.filter(d =>
   (activeGroupCol === null || activeGroupVal === "All" || `${d[activeGroupCol]}` === `${activeGroupVal}`)
 )
 
+groupingMessage = activeGroupCol === null
+  ? "Grouping: Well (no group column selected)"
+  : `Grouping: ${activeGroupCol}`
+
 allPlateMessage = activePlateSel === "All"
-  ? "**Plate = All:** lines include wells from multiple plates. Select a specific plate for one trajectory per well."
-  : ""
+  ? "Plate = All: lines include wells from multiple plates. Select a specific plate for one trajectory per well."
+  : null
+
+plotSubtitle = allPlateMessage === null
+  ? groupingMessage
+  : `${groupingMessage} | ${allPlateMessage}`
 
 yField = dataViewSel === "Normalized fluorescence"
       ? "normalized_value"
@@ -327,7 +337,7 @@ groupUnavailable
     ? "Measurement-normalized fluorescence unavailable for this selection. Ensure a non-zero numeric value exists in the selected *.measurement (or *.measurment) column for these wells."
   : Plot.plot({
     height: 420,
-    subtitle: allPlateMessage === "" ? null : "Plate = All: lines include wells from multiple plates. Select a specific plate for one trajectory per well.",
+    subtitle: plotSubtitle,
     style: {
       color: "#111827",
       background: "#ffffff"
