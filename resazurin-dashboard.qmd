@@ -190,6 +190,11 @@ viewof dataViewSel = Inputs.select(viewModes, {
   value: "Raw fluorescence"
 })
 
+viewof errorBarSel = Inputs.select(["Hide error bars", "Show error bars"], {
+  label: "Error bars",
+  value: "Hide error bars"
+})
+
 filtered = selectionRows.filter(d =>
   (allWellsSelected || selectedWells.includes(d.well_id)) &&
   (activeGroupCol === null || validGroupValue(d[activeGroupCol])) &&
@@ -206,7 +211,7 @@ allPlateMessage = activePlateSel === "All"
 
 plotSubtitle = allPlateMessage === null
   ? groupingMessage
-  : `${groupingMessage} | ${allPlateMessage}`
+  : `${groupingMessage}\n${allPlateMessage}`
 
 yField = dataViewSel === "Normalized fluorescence"
       ? "normalized_value"
@@ -278,7 +283,9 @@ plottedEffective = (() => {
 
   return [...groups.values()].map(g => ({
     ...g,
-    [metricField]: d3.mean(g.values)
+    rep_count: g.values.length,
+    [metricField]: d3.mean(g.values),
+    metric_se: g.values.length > 1 ? d3.deviation(g.values) / Math.sqrt(g.values.length) : NaN
   }))
 })()
 
@@ -296,21 +303,36 @@ plottedSorted = dataViewSel === "Delta fluorescence"
         const tkey = d.trace_id
         const prev = prevByTrace.get(tkey)
         const cur = d[metricField]
-        const delta = Number.isFinite(prev) ? (cur - prev) : 0
-        prevByTrace.set(tkey, cur)
+        const delta = prev && Number.isFinite(prev.mean) ? (cur - prev.mean) : 0
+        const curSe = d.metric_se
+        const deltaSe = prev && Number.isFinite(curSe) && Number.isFinite(prev.se)
+          ? Math.sqrt((curSe * curSe) + (prev.se * prev.se))
+          : NaN
+        prevByTrace.set(tkey, {mean: cur, se: curSe})
         return {
           ...d,
-          [plotYField]: delta
+          [plotYField]: delta,
+          plot_se: deltaSe
         }
       })
     })()
   : sortedEffective.map(d => ({
       ...d,
-      [plotYField]: d[metricField]
+      [plotYField]: d[metricField],
+      plot_se: d.metric_se
     }))
 
+errorBarData = plottedSorted.filter(d =>
+  d.rep_count > 1 &&
+  Number.isFinite(d[plotYField]) &&
+  Number.isFinite(d.plot_se) &&
+  d.plot_se > 0
+)
+
+showErrorBars = errorBarSel === "Show error bars" && errorBarData.length > 0
+
 presentSeries = [...new Set(plottedSorted.map(seriesKey))]
-nonBlankKeys = presentSeries.filter(k => k !== "Blank").sort()
+nonBlankKeys = presentSeries.filter(k => k !== "Blank").sort(naturalCompare)
 hasBlankSeries = presentSeries.includes("Blank")
 colorDomain = hasBlankSeries ? ["Blank", ...nonBlankKeys] : nonBlankKeys
 
@@ -353,6 +375,16 @@ groupUnavailable
     marks: [
       Plot.gridX({stroke: "#d1d5db", strokeOpacity: 1}),
       Plot.gridY({stroke: "#d1d5db", strokeOpacity: 1}),
+      ...(showErrorBars
+        ? [Plot.ruleX(errorBarData, {
+            x: "time_hr",
+            y1: d => d[plotYField] - d.plot_se,
+            y2: d => d[plotYField] + d.plot_se,
+            stroke: seriesKey,
+            strokeOpacity: 0.6,
+            strokeWidth: 1.2
+          })]
+        : []),
       Plot.line(plottedSorted, {
         x: "time_hr",
         y: plotYField,
