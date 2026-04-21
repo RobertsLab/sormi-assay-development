@@ -166,6 +166,12 @@ viewof groupValSel = Inputs.select(
   }
 )
 
+viewof aggregationSel = Inputs.radio(["Mean", "Individual replicates"], {
+  label: "Group display",
+  value: "Mean",
+  disabled: activeGroupCol === null // Only relevant when grouping
+})
+
 activeGroupVal = groupValues.includes(groupValSel) ? groupValSel : "All"
 
 measurementColumns = cleanDashboard.length > 0
@@ -236,11 +242,21 @@ isBlank = d => d.is_blank === true || d.is_blank === "TRUE" || d.is_blank === 1 
 groupMode = activeGroupCol !== null
 groupValue = d => `${d[activeGroupCol]}`.trim()
 seriesLabel = groupMode ? `Group (${activeGroupCol})` : "Well"
+sampleTraceKey = d => nonEmptyString(d.sample_id_group)
+  ? `${d.sample_id_group}`.trim()
+  : `${d.well_id}`.trim()
+
 seriesKey = d => {
-  if (nonEmptyString(d.series_id)) return `${d.series_id}`
-  if (isBlank(d)) return "Blank"
-  return groupMode ? groupValue(d) : d.well_id
+  const rawGroupVal = activeGroupCol === null ? "All" : d[activeGroupCol]
+  const groupVal = nonEmptyString(rawGroupVal) ? `${rawGroupVal}`.trim() : "NA"
+  if (groupVal.toUpperCase() === "BLANK") return "Blank"
+
+  if (aggregationSel === "Individual replicates" && activeGroupCol !== null) {
+    return `${groupVal}: ${sampleTraceKey(d)}`
+  }
+  return groupVal
 }
+
 traceKey = d => groupMode
   ? `${d.experiment_dir}|${d.plate_id}|${seriesKey(d)}`
   : `${d.experiment_dir}|${d.plate_id}|${d.well_id}`
@@ -268,30 +284,46 @@ traceKeyEffective = d => activePlateSel === "All"
 // within-time subtraction artifacts when grouping collapses multiple wells.
 plottedEffective = (() => {
   const groups = new Map()
+  const showIndiv = aggregationSel === "Individual replicates" && activeGroupCol !== null
+
   for (const d of plotted) {
-    const traceId = traceKeyEffective(d)
-    const sid = seriesKey(d)
+    // If showIndiv is true, prefer connecting samples across plates when Plate = All,
+    // otherwise keep traces scoped to the current plate. Fall back to `well_id` when
+    // `sample_id_group` is missing.
+    const sampleKey = sampleTraceKey(d)
+    const traceId = showIndiv
+      ? (activePlateSel === "All"
+        ? `${d.experiment_dir}|${sampleKey}`
+        : `${d.experiment_dir}|${d.plate_id}|${sampleKey}`)
+      : traceKeyEffective(d)
+    
     const key = `${traceId}|${d.time_hr}`
+    
     if (!groups.has(key)) {
       groups.set(key, {
         ...d,
         trace_id: traceId,
-        series_id: sid,
-        plate_id: activePlateSel === "All" ? "all" : d.plate_id,
-        well_id: groupMode ? sid : d.well_id,
+        well_ids: [d.well_id],
         values: [d[metricField]]
       })
     } else {
-      groups.get(key).values.push(d[metricField])
+      const g = groups.get(key)
+      g.values.push(d[metricField])
+      if (!g.well_ids.includes(d.well_id)) g.well_ids.push(d.well_id)
     }
   }
 
-  return [...groups.values()].map(g => ({
-    ...g,
-    rep_count: g.values.length,
-    [metricField]: d3.mean(g.values),
-    metric_se: g.values.length > 1 ? d3.deviation(g.values) / Math.sqrt(g.values.length) : NaN
-  }))
+  return [...groups.values()].map(g => {
+    const sId = seriesKey(g)
+    return {
+      ...g,
+      series_id: sId,
+      rep_count: g.values.length,
+      [metricField]: d3.mean(g.values),
+      well_id: g.well_ids.join(", "),
+      metric_se: g.values.length > 1 ? d3.deviation(g.values) / Math.sqrt(g.values.length) : NaN
+    }
+  })
 })()
 
 sortedEffective = plottedEffective
@@ -345,26 +377,96 @@ hashString = s => {
   return hash >>> 0
 }
 
-timeValues = [...new Set(plottedSorted.map(d => d.time_hr))]
+// 1. Create the numeric version for math (no const, no semicolons)
+numericTimes = [...new Set(plottedSorted.map(d => d.time_hr))]
   .filter(Number.isFinite)
   .sort((a, b) => a - b)
 
-timeSpacing = timeValues.length > 1
-  ? Math.min(...timeValues.slice(1).map((t, i) => t - timeValues[i]).filter(d => Number.isFinite(d) && d > 0))
+// 2. Main timeValues for the Axis (Strings)
+timeValues = numericTimes.map(String)
+
+// 3. Use numericTimes for the spacing calculation
+timeSpacing = numericTimes.length > 1
+  ? Math.min(...numericTimes.slice(1).map((t, i) => t - numericTimes[i]).filter(d => d > 0))
   : 1
 
-jitterSpan = Math.max(0.03, Math.min(0.18, (Number.isFinite(timeSpacing) ? timeSpacing : 1) * 0.12))
+boxValueField = dataViewSel === "Delta fluorescence" ? "box_delta_value" : metricField
+
+boxPlotData = dataViewSel === "Delta fluorescence"
+  ? (() => {
+      const prevByWell = new Map()
+      const sortedRaw = plottedBase
+        .filter(d => Number.isFinite(d.value))
+        .slice()
+        .sort((a, b) =>
+          a.experiment_dir.localeCompare(b.experiment_dir) ||
+          a.plate_id.localeCompare(b.plate_id) ||
+          a.well_id.localeCompare(b.well_id) ||
+          a.time_hr - b.time_hr
+        )
+
+      return sortedRaw.map(d => {
+        const key = `${d.experiment_dir}|${d.plate_id}|${d.well_id}`
+        const prev = prevByWell.get(key)
+        const deltaValue = prev && Number.isFinite(prev.value) ? (d.value - prev.value) : NaN
+        
+        prevByWell.set(key, {value: d.value})
+        
+        // Construct the object first, then add the dynamic property
+        const result = {
+          ...d,
+          series_id: seriesKey(d)
+        }
+        result[boxValueField] = deltaValue
+        
+        return result
+      }).filter(d => Number.isFinite(d[boxValueField]))
+    })()
+  : plottedBase
+      .filter(d => Number.isFinite(d[metricField]))
+      .map(d => ({
+        ...d,
+        series_id: seriesKey(d),
+        [boxValueField]: d[metricField]
+      }))
+
+
+// Get all unique series_ids present in the CURRENT data
+presentSeries = [...new Set(plottedSorted.map(d => String(d.series_id)))]
+
+// Separate blanks and non-blanks
+nonBlankKeys = presentSeries.filter(k => k !== "Blank").sort(naturalCompare)
+hasBlankSeries = presentSeries.includes("Blank")
+
+// Final domain for the color scale
+colorDomain = hasBlankSeries ? ["Blank", ...nonBlankKeys] : nonBlankKeys
+
+// colorRange: defined later using the Tableau palette and explicit blank color
+
+// Use boxPlotData here instead of boxSummaryData
+boxPresentSeries = [...new Set(boxPlotData.map(d => d.series_id))]
+boxNonBlankKeys = boxPresentSeries.filter(k => k !== "Blank").sort(naturalCompare)
+boxHasBlankSeries = boxPresentSeries.includes("Blank")
+boxSeriesOrder = boxHasBlankSeries ?
+["Blank", ...boxNonBlankKeys] : boxNonBlankKeys
+
+groupedSpan = Math.max(0.14, Math.min(0.9, (Number.isFinite(timeSpacing) ? timeSpacing : 1) * 0.85))
+groupStep = boxSeriesOrder.length > 1 ? groupedSpan / (boxSeriesOrder.length - 1) : 0
+seriesOffset = new Map(
+  boxSeriesOrder.map((key, idx) => [key, (idx - (boxSeriesOrder.length - 1) / 2) * groupStep])
+)
+
+groupOffset = d => seriesOffset.get(d.series_id ?? seriesKey(d)) ?? 0
+
+jitterRadius = boxSeriesOrder.length > 1
+  ? Math.max(0.01, groupStep * 0.32)
+  : Math.max(0.03, (Number.isFinite(timeSpacing) ? timeSpacing : 1) * 0.06)
 
 jitterOffset = d => {
   const seed = `${d.trace_id}|${d.series_id}|${d.time_hr}|${d.well_id}`
   const value = hashString(seed) / 4294967295
-  return (value - 0.5) * jitterSpan * 2
+  return (value - 0.5) * jitterRadius * 2
 }
-
-presentSeries = [...new Set(plottedSorted.map(seriesKey))]
-nonBlankKeys = presentSeries.filter(k => k !== "Blank").sort(naturalCompare)
-hasBlankSeries = presentSeries.includes("Blank")
-colorDomain = hasBlankSeries ? ["Blank", ...nonBlankKeys] : nonBlankKeys
 
 tableau = d3.schemeTableau10
 nonBlankColors = nonBlankKeys.map((_, i) => tableau[i % tableau.length])
@@ -373,8 +475,24 @@ colorRange = hasBlankSeries
   : nonBlankColors.slice(0, nonBlankKeys.length)
 
 tooltipTitle = d => {
-  const yVal = Number.isFinite(d[plotYField]) ? d[plotYField].toFixed(2) : "NA"
-  return `${d.experiment_dir} | Plate ${d.plate_id} | ${seriesLabel}: ${seriesKey(d)} | Time ${d.time_hr} h | ${yLabel}: ${yVal}`
+  const parts = [
+    `Experiment: ${d.experiment_dir}`,
+    `Sample: ${d.sample_id_group}`,
+    `Wells: ${d.well_id}`, // Now shows all wells contributing to this sample line
+    `Time: ${d.time_hr}h`,
+    `${metricField}: ${d[metricField]?.toFixed(2)}`
+  ];
+  
+  if (activeGroupCol) {
+    parts.unshift(`${activeGroupCol}: ${d[activeGroupCol]}`);
+  }
+
+  // Show if this line is an average of multiple technical replicates (wells)
+  if (d.rep_count > 1) {
+    parts.push(`Wells averaged: ${d.rep_count}`);
+  }
+  
+  return parts.join("\n");
 }
 
 normalizedUnavailable = dataViewSel === "Normalized fluorescence" && plottedSorted.length === 0
@@ -408,77 +526,113 @@ groupUnavailable
       }
 
       plotWrap.appendChild(subtitleWrap)
-      plotWrap.appendChild(Plot.plot({
-        height: 420,
-        style: {
-          color: "#111827",
-          background: "#ffffff"
-        },
-        x: {label: "Time (hours)"},
-        y: {label: yLabel},
-        color: {
-          legend: true,
-          label: seriesLabel,
-          domain: colorDomain,
-          range: colorRange
-        },
-        marks: [
-          Plot.gridX({stroke: "#d1d5db", strokeOpacity: 1}),
-          Plot.gridY({stroke: "#d1d5db", strokeOpacity: 1}),
-          ...(boxPlotMode
-            ? [
-                Plot.boxY(plottedSorted, {
+      plotWrap.innerHTML = ""; 
+           plotWrap.appendChild(subtitleWrap); // Re-add the subtitle after clearing
+if (boxPlotMode) {
+        plotWrap.appendChild(Plot.plot({
+          height: 420,
+          style: {
+            color: "#111827",
+            background: "#ffffff"
+          },
+          // fx creates the 'Time' columns as categorical buckets
+          fx: {
+            label: "Time (hours)",
+            domain: timeValues, // Ensure this is using the string array
+            padding: 0.1
+          },
+          // x handles the internal grouping of series within each time bucket
+          x: {
+            type: "band",
+            domain: boxSeriesOrder,
+            axis: null 
+          },
+          y: {
+            label: yLabel,
+            grid: true,
+            zero: true,  // Ensures the axis includes 0
+            nice: true   // Rounds the axis range up to accommodate the highest data points
+          },
+          color: {
+            legend: true,
+            label: seriesLabel,
+            domain: colorDomain,
+            range: colorRange
+          },
+          marks: [
+            Plot.boxY(boxPlotData, {
+              // Convert time_hr to a string to force categorical buckets
+              fx: d => `${d.time_hr}`,    
+              x: "series_id",   
+              y: boxValueField,
+              fill: "series_id",
+              fillOpacity: 0.4,
+              stroke: "series_id",
+              strokeWidth: 1.5
+            }),
+// Dots are now centered exactly on the series group
+            Plot.dot(boxPlotData, {
+              fx: d => `${d.time_hr}`,
+              x: "series_id",
+              y: boxValueField,
+              fill: "series_id",
+              r: 3,
+              opacity: 0.7,
+              stroke: "#ffffff",
+              strokeWidth: 0.5,
+              title: tooltipTitle,
+              tip: true
+            })
+          ]
+        }))
+      } else {
+        plotWrap.appendChild(Plot.plot({
+          height: 420,
+          style: {
+            color: "#111827",
+            background: "#ffffff"
+          },
+          x: {label: "Time (hours)", tickValues: timeValues},
+          y: {label: yLabel},
+          color: {
+            legend: true,
+            label: seriesLabel,
+            domain: colorDomain,
+            range: colorRange
+          },
+          marks: [
+            Plot.gridX({stroke: "#d1d5db", strokeOpacity: 1}),
+            Plot.gridY({stroke: "#d1d5db", strokeOpacity: 1}),
+            ...(showErrorBars
+              ? [Plot.ruleX(errorBarData, {
                   x: "time_hr",
-                  y: plotYField,
-                  fill: seriesKey,
+                  y1: d => d[plotYField] - d.plot_se,
+                  y2: d => d[plotYField] + d.plot_se,
                   stroke: seriesKey,
-                  fillOpacity: 0.22,
-                  strokeOpacity: 0.75
-                }),
-                Plot.dot(plottedSorted, {
-                  x: d => d.time_hr + jitterOffset(d),
-                  y: plotYField,
-                  fill: seriesKey,
-                  stroke: "#ffffff",
-                  strokeWidth: 0.5,
-                  r: 2.8,
-                  opacity: 0.82,
-                  title: tooltipTitle,
-                  tip: true
-                })
-              ]
-            : [
-                ...(showErrorBars
-                  ? [Plot.ruleX(errorBarData, {
-                      x: "time_hr",
-                      y1: d => d[plotYField] - d.plot_se,
-                      y2: d => d[plotYField] + d.plot_se,
-                      stroke: seriesKey,
-                      strokeOpacity: 0.6,
-                      strokeWidth: 1.2
-                    })]
-                  : []),
-                Plot.line(plottedSorted, {
-                  x: "time_hr",
-                  y: plotYField,
-                  stroke: seriesKey,
-                  z: d => d.trace_id,
-                  strokeWidth: 2.2,
-                  strokeOpacity: 1,
-                  curve: "linear"
-                }),
-                Plot.dot(plottedSorted, {
-                  x: "time_hr",
-                  y: plotYField,
-                  fill: seriesKey,
-                  r: 2.5,
-                  opacity: 0.9,
-                  title: tooltipTitle,
-                  tip: true
-                })
-              ])
-        ]
-      }))
+                  strokeOpacity: 0.6,
+                  strokeWidth: 1.2
+                })]
+              : []),
+            Plot.line(plottedSorted, {
+              x: "time_hr",
+              y: plotYField,
+              stroke: "series_id", // Use the string key name
+              z: "trace_id",       // Use the string key name
+              strokeWidth: aggregationSel === "Individual replicates" ? 1.2 : 2.2,
+              strokeOpacity: aggregationSel === "Individual replicates" ? 0.6 : 1.0,
+              curve: "linear"
+            }),
+            Plot.dot(plottedSorted, {
+              x: "time_hr",
+              y: plotYField,
+              fill: "series_id",
+              r: 2.5,
+              title: tooltipTitle,
+              tip: true
+            })
+          ]
+        }))
+      }
       return plotWrap
     })()
 ```
