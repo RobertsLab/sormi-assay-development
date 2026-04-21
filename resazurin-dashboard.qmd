@@ -195,6 +195,11 @@ viewof errorBarSel = Inputs.select(["Hide error bars", "Show error bars"], {
   value: "Hide error bars"
 })
 
+viewof plotStyleSel = Inputs.select(["Line plot", "Box plot"], {
+  label: "Plot style",
+  value: "Line plot"
+})
+
 filtered = selectionRows.filter(d =>
   (allWellsSelected || selectedWells.includes(d.well_id)) &&
   (activeGroupCol === null || validGroupValue(d[activeGroupCol])) &&
@@ -206,7 +211,7 @@ groupingMessage = activeGroupCol === null
   : `Grouping: ${activeGroupCol}`
 
 allPlateMessage = activePlateSel === "All"
-  ? "Plate = All: lines include wells from multiple plates. Select a specific plate for one trajectory per well."
+  ? "Plate = All: data include wells from multiple plates. Select a specific plate for one trajectory per well."
   : null
 
 plotSubtitle = allPlateMessage === null
@@ -330,6 +335,31 @@ errorBarData = plottedSorted.filter(d =>
 )
 
 showErrorBars = errorBarSel === "Show error bars" && errorBarData.length > 0
+boxPlotMode = plotStyleSel === "Box plot"
+
+hashString = s => {
+  let hash = 0
+  for (const ch of `${s}`) {
+    hash = Math.imul(31, hash) + ch.charCodeAt(0) | 0
+  }
+  return hash >>> 0
+}
+
+timeValues = [...new Set(plottedSorted.map(d => d.time_hr))]
+  .filter(Number.isFinite)
+  .sort((a, b) => a - b)
+
+timeSpacing = timeValues.length > 1
+  ? Math.min(...timeValues.slice(1).map((t, i) => t - timeValues[i]).filter(d => Number.isFinite(d) && d > 0))
+  : 1
+
+jitterSpan = Math.max(0.03, Math.min(0.18, (Number.isFinite(timeSpacing) ? timeSpacing : 1) * 0.12))
+
+jitterOffset = d => {
+  const seed = `${d.trace_id}|${d.series_id}|${d.time_hr}|${d.well_id}`
+  const value = hashString(seed) / 4294967295
+  return (value - 0.5) * jitterSpan * 2
+}
 
 presentSeries = [...new Set(plottedSorted.map(seriesKey))]
 nonBlankKeys = presentSeries.filter(k => k !== "Blank").sort(naturalCompare)
@@ -395,34 +425,58 @@ groupUnavailable
         marks: [
           Plot.gridX({stroke: "#d1d5db", strokeOpacity: 1}),
           Plot.gridY({stroke: "#d1d5db", strokeOpacity: 1}),
-          ...(showErrorBars
-            ? [Plot.ruleX(errorBarData, {
-                x: "time_hr",
-                y1: d => d[plotYField] - d.plot_se,
-                y2: d => d[plotYField] + d.plot_se,
-                stroke: seriesKey,
-                strokeOpacity: 0.6,
-                strokeWidth: 1.2
-              })]
-            : []),
-          Plot.line(plottedSorted, {
-            x: "time_hr",
-            y: plotYField,
-            stroke: seriesKey,
-            z: d => d.trace_id,
-            strokeWidth: 2.2,
-            strokeOpacity: 1,
-            curve: "linear"
-          }),
-          Plot.dot(plottedSorted, {
-            x: "time_hr",
-            y: plotYField,
-            fill: seriesKey,
-            r: 2.5,
-            opacity: 0.9,
-            title: tooltipTitle,
-            tip: true
-          })
+          ...(boxPlotMode
+            ? [
+                Plot.boxY(plottedSorted, {
+                  x: "time_hr",
+                  y: plotYField,
+                  fill: seriesKey,
+                  stroke: seriesKey,
+                  fillOpacity: 0.22,
+                  strokeOpacity: 0.75
+                }),
+                Plot.dot(plottedSorted, {
+                  x: d => d.time_hr + jitterOffset(d),
+                  y: plotYField,
+                  fill: seriesKey,
+                  stroke: "#ffffff",
+                  strokeWidth: 0.5,
+                  r: 2.8,
+                  opacity: 0.82,
+                  title: tooltipTitle,
+                  tip: true
+                })
+              ]
+            : [
+                ...(showErrorBars
+                  ? [Plot.ruleX(errorBarData, {
+                      x: "time_hr",
+                      y1: d => d[plotYField] - d.plot_se,
+                      y2: d => d[plotYField] + d.plot_se,
+                      stroke: seriesKey,
+                      strokeOpacity: 0.6,
+                      strokeWidth: 1.2
+                    })]
+                  : []),
+                Plot.line(plottedSorted, {
+                  x: "time_hr",
+                  y: plotYField,
+                  stroke: seriesKey,
+                  z: d => d.trace_id,
+                  strokeWidth: 2.2,
+                  strokeOpacity: 1,
+                  curve: "linear"
+                }),
+                Plot.dot(plottedSorted, {
+                  x: "time_hr",
+                  y: plotYField,
+                  fill: seriesKey,
+                  r: 2.5,
+                  opacity: 0.9,
+                  title: tooltipTitle,
+                  tip: true
+                })
+              ])
         ]
       }))
       return plotWrap
