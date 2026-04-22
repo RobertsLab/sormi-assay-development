@@ -2,6 +2,8 @@
 
 Resazurin experiments directory.
 
+Assays were conducted following the [Roberts Lab resazurin assay protocol](https://robertslab.github.io/resources/protocols/resazurin-assay/), which is also detailed in "From Blue to Pink: Resazurin as a High-Throughput Proxy for Metabolic Rate in Oysters", Huffmyer et. al. 2025: https://doi.org/10.1101/2025.11.06.686367.
+
 
 ## How to use
 
