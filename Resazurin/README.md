@@ -3,7 +3,7 @@
 Resazurin experiments directory.
 
 
-### How to use
+## How to use
 
 Subdirectories created here can be automatically parsed and have the data plotted, as long as the directories contain the following:
 
@@ -14,6 +14,9 @@ Subdirectories created here can be automatically parsed and have the data plotte
 Visit https://sormi.science/resazurin-dashboard.html to view plots.
 
 ---
+
+
+### FILES
 
 - [`example-layout.txt`](https://github.com/RobertsLab/sormi-assay-development/blob/main/Resazurin/example-layout.txt): This is an example/template file for use with the automatic plotting of data found in experiment subdirectories.
 
