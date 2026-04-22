@@ -3,13 +3,6 @@ name: Update Resazurin dashboard
 on:
   push:
     branches: [main, resazurin-dashboard-dev]
-    paths:
-      - "Resazurin/**/*.txt"
-      - "scripts/resazurin/**/*.R"
-      - "resazurin-dashboard.qmd"
-      - "index.html"
-      - "CNAME"
-      - ".github/workflows/update-resazurin-dashboard.yml"
   workflow_dispatch:
 
 env:
