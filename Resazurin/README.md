@@ -22,3 +22,5 @@ Visit https://sormi.science/resazurin-dashboard.html to view plots.
     - `*.group`: These columns represent groupings you'd like to have. You can add additional column names, as long as they end with `.group`.
     - `*.measurement`: These columns allow for normalization of different organism measurements. You an add additional columns as long as they end with `.measurement`.
     - `imageJ_ID`: Used if organism area (or other measurements) were calculated with ImageJ and will allow for easy data joining of ImageJ data to the rest of the experiment data.
+
+- [`BIORXIV-2025-686367v1-Huffmyer.pdf`](https://github.com/RobertsLab/sormi-assay-development/blob/main/Resazurin/BIORXIV-2025-686367v1-Huffmyer.pdf): Preprint version of "From Blue to Pink: Resazurin as a High-Throughput Proxy for Metabolic Rate in Oysters", Huffmyer et. al. 2025: https://doi.org/10.1101/2025.11.06.686367
