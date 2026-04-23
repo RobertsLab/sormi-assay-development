@@ -133,8 +133,8 @@ validGroupValue = v => {
   return !invalidGroupTokens.has(norm)
 }
 
-groupColumns = cleanDashboard.length > 0
-  ? Object.keys(cleanDashboard[0]).filter(k => /_group$/.test(k) && cleanDashboard.some(d => validGroupValue(d[k])))
+groupColumns = selectionRows.length > 0
+  ? Object.keys(selectionRows[0]).filter(k => /_group$/.test(k) && selectionRows.some(d => validGroupValue(d[k])))
   : []
 
 noneGroupOption = "None (plot by well)"
@@ -174,9 +174,9 @@ viewof aggregationSel = Inputs.radio(["Mean", "Individual replicates"], {
 
 activeGroupVal = groupValues.includes(groupValSel) ? groupValSel : "All"
 
-measurementColumns = cleanDashboard.length > 0
-  ? Object.keys(cleanDashboard[0]).filter(
-      k => /_measur(?:e)?ment$/.test(k) && cleanDashboard.some(d => Number.isFinite(d[k]))
+measurementColumns = selectionRows.length > 0
+  ? Object.keys(selectionRows[0]).filter(
+      k => /_measur(?:e)?ment$/.test(k) && selectionRows.some(d => Number.isFinite(d[k]))
     )
   : []
 
