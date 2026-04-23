@@ -394,7 +394,6 @@ errorBarData = plottedSorted.filter(d =>
 )
 
 showErrorBars = errorBarSel === "Show error bars" && errorBarData.length > 0
-boxPlotMode = plotStyleSel === "Box plot"
 
 hashString = s => {
   let hash = 0
