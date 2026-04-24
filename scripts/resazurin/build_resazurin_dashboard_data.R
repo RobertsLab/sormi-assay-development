@@ -86,6 +86,8 @@ if (nrow(layout_data) == 0) {
       treatment_group = NA_character_,
       size_mm = NA_real_,
       weight_mg = NA_real_,
+      exclude_from_analysis = FALSE,
+      exclude_reason = NA_character_,
       is_blank = NA,
       layout_status = "missing",
       layout_file = NA_character_,
@@ -125,6 +127,8 @@ if (nrow(layout_data) == 0) {
           treatment_group,
           size_mm,
           weight_mg,
+          exclude_from_analysis,
+          exclude_reason,
           any_of(dynamic_group_cols),
           any_of(measurement_cols),
           is_blank,
@@ -169,11 +173,18 @@ plate_data <- plate_data %>%
     is_blank = case_when(
       is.na(is_blank) ~ FALSE,
       TRUE ~ as.logical(is_blank)
+    ),
+    exclude_from_analysis = case_when(
+      is.na(exclude_from_analysis) ~ FALSE,
+      TRUE ~ as.logical(exclude_from_analysis)
     )
   )
 
+analysis_data <- plate_data %>%
+  filter(!exclude_from_analysis)
+
 # Add simple duplicate-timepoint flag by experiment + plate + well.
-dup_flags <- plate_data %>%
+dup_flags <- analysis_data %>%
   count(experiment_dir, plate_id, well_id, time_hr, name = "n_at_time") %>%
   mutate(duplicate_timepoint = n_at_time > 1)
 
@@ -184,12 +195,12 @@ plate_data <- plate_data %>%
   )
 
 # Compute mean blank fluorescence by plate and timepoint.
-blank_ref <- plate_data %>%
+blank_ref <- analysis_data %>%
   filter(is_blank) %>%
   group_by(experiment_dir, plate_id, time_hr) %>%
   summarise(mean_blank_value = mean(value, na.rm = TRUE), .groups = "drop")
 
-plate_data <- plate_data %>%
+analysis_data <- analysis_data %>%
   left_join(blank_ref, by = c("experiment_dir", "plate_id", "time_hr")) %>%
   mutate(
     normalized_value = if_else(
@@ -200,7 +211,7 @@ plate_data <- plate_data %>%
   )
 
 # Compute point-to-point delta fluorescence for each well trajectory.
-plate_data <- plate_data %>%
+analysis_data <- analysis_data %>%
   group_by(experiment_dir, plate_id, well_id) %>%
   arrange(time_hr, read_datetime, source_name, .by_group = TRUE) %>%
   mutate(
@@ -211,6 +222,33 @@ plate_data <- plate_data %>%
     )
   ) %>%
   ungroup()
+
+analysis_cols <- analysis_data %>%
+  select(
+    experiment_dir,
+    source_file,
+    plate_id,
+    well_id,
+    time_hr,
+    duplicate_timepoint,
+    mean_blank_value,
+    normalized_value,
+    delta_value
+  )
+
+plate_data <- plate_data %>%
+  left_join(
+    analysis_cols,
+    by = c("experiment_dir", "source_file", "plate_id", "well_id", "time_hr"),
+    suffix = c("", "_analysis")
+  ) %>%
+  mutate(
+    duplicate_timepoint = coalesce(duplicate_timepoint, duplicate_timepoint_analysis),
+    mean_blank_value = coalesce(mean_blank_value, mean_blank_value_analysis),
+    normalized_value = coalesce(normalized_value, normalized_value_analysis),
+    delta_value = coalesce(delta_value, delta_value_analysis)
+  ) %>%
+  select(-duplicate_timepoint_analysis, -mean_blank_value_analysis, -normalized_value_analysis, -delta_value_analysis)
 
 qc_success <- plate_data %>%
   group_by(experiment_dir, source_file) %>%
@@ -248,6 +286,8 @@ plate_data_out <- plate_data %>%
     treatment_group,
     size_mm,
     weight_mg,
+    exclude_from_analysis,
+    exclude_reason,
     any_of(dynamic_group_cols),
     any_of(measurement_cols),
     is_blank,

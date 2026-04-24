@@ -140,6 +140,13 @@ validGroupValue = v => {
   return !invalidGroupTokens.has(norm)
 }
 
+isExcluded = d => {
+  const raw = d.exclude_from_analysis
+  if (raw === true || raw === 1) return true
+  const txt = normalizeTextValue(raw).toUpperCase()
+  return ["TRUE", "T", "1", "YES", "Y"].includes(txt)
+}
+
 groupColumns = selectionRows.length > 0
   ? Object.keys(selectionRows[0]).filter(k => /_group$/.test(k) && selectionRows.some(d => validGroupValue(d[k])))
   : []
@@ -254,7 +261,8 @@ seriesRows = selectionRows.filter(d =>
   (activeGroupCol === null || validGroupValue(d[activeGroupCol])) &&
   (activeGroupCol === null ||
     activeGroupVal === "All" ||
-    normalizeTextValue(d[activeGroupCol]) === normalizeTextValue(activeGroupVal))
+    normalizeTextValue(d[activeGroupCol]) === normalizeTextValue(activeGroupVal)) &&
+  !isExcluded(d)
 )
 
 effectiveSeriesValues = effectiveSeriesCol === null
@@ -285,7 +293,47 @@ filtered = selectionRows.filter(d =>
     ((boxPlotMode || aucPlotMode)
       ? allGroupsDisplayed || selectedDisplayGroups.includes(normalizeTextValue(d[effectiveSeriesCol]))
       : true))
+  && !isExcluded(d)
 )
+
+excludedCandidateRows = selectionRows.filter(d =>
+  (allWellsSelected || selectedWells.includes(d.well_id)) &&
+  (activeGroupCol === null || validGroupValue(d[activeGroupCol])) &&
+  (activeGroupCol === null || activeGroupVal === "All" ||
+    normalizeTextValue(d[activeGroupCol]) === normalizeTextValue(activeGroupVal)) &&
+  (effectiveSeriesCol === null || validGroupValue(d[effectiveSeriesCol])) &&
+  (effectiveSeriesCol === null ||
+    ((boxPlotMode || aucPlotMode)
+      ? allGroupsDisplayed || selectedDisplayGroups.includes(normalizeTextValue(d[effectiveSeriesCol]))
+      : true)) &&
+  isExcluded(d)
+)
+
+excludedSummaries = (() => {
+  const byWell = new Map()
+  for (const d of excludedCandidateRows) {
+    const key = `${d.experiment_dir}|${d.plate_id}|${d.well_id}`
+    if (!byWell.has(key)) {
+      byWell.set(key, {
+        plate_id: d.plate_id,
+        well_id: d.well_id,
+        sample: normalizeTextValue(d.sample_label) || normalizeTextValue(d.sample_id_group) || "(no sample label)",
+        reason: normalizeTextValue(d.exclude_reason) || "no reason provided"
+      })
+    }
+  }
+  return [...byWell.values()].sort((a, b) => `${a.plate_id}|${a.well_id}`.localeCompare(`${b.plate_id}|${b.well_id}`, undefined, {numeric: true, sensitivity: "base"}))
+})()
+
+excludedCount = excludedSummaries.length
+excludedPreview = excludedSummaries
+  .slice(0, 8)
+  .map(d => `${d.plate_id}:${d.well_id} (${d.sample}; ${d.reason})`)
+  .join(", ")
+excludedOverflow = Math.max(0, excludedCount - 8)
+excludedMessage = excludedCount > 0
+  ? `Not analyzed (${excludedCount} well${excludedCount === 1 ? "" : "s"}): ${excludedPreview}${excludedOverflow > 0 ? `, +${excludedOverflow} more` : ""}`
+  : null
 
 groupingMessage = activeGroupCol === null
   ? "Grouping: Well (no group column selected)"
@@ -779,9 +827,12 @@ paperUnavailable = dataViewSel === "Paper metabolism (fold-change / selected mea
 aucUnavailable = aucPlotMode && aucData.length === 0
 cumAucUnavailable = cumAucPlotMode && cumulativeAucData.length === 0
 groupUnavailable = activeGroupCol !== null && filtered.length === 0
+excludedOnlyUnavailable = excludedCandidateRows.length > 0 && filtered.length === 0
 
 groupUnavailable
   ? `No data available for ${activeGroupCol} under the current selection. Choose a different Group column/value or adjust Experiment, Plate, and Well filters.`
+  : excludedOnlyUnavailable
+    ? "All wells matching this selection are marked exclude_from_analysis in layout metadata."
   : normalizedUnavailable
   ? "Normalized fluorescence unavailable for this selection. Add a layout.txt with blank wells marked (is_blank = TRUE), then rebuild dashboard data."
   : measurementUnavailable
@@ -810,6 +861,14 @@ groupUnavailable
         plateLine.textContent = allPlateMessage
         plateLine.style.fontWeight = "400"
         subtitleWrap.appendChild(plateLine)
+      }
+
+      if (excludedMessage !== null) {
+        const excludedLine = document.createElement("div")
+        excludedLine.textContent = excludedMessage
+        excludedLine.style.fontWeight = "400"
+        excludedLine.style.color = "#7c2d12"
+        subtitleWrap.appendChild(excludedLine)
       }
 
       plotWrap.appendChild(subtitleWrap)

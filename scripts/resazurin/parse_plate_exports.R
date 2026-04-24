@@ -188,11 +188,32 @@ parse_plate_export <- function(path) {
 }
 
 parse_layout_txt <- function(layout_path) {
+  parse_logical_flag <- function(x) {
+    vals <- toupper(trimws(as.character(x)))
+    case_when(
+      vals %in% c("TRUE", "T", "1", "YES", "Y") ~ TRUE,
+      vals %in% c("FALSE", "F", "0", "NO", "N") ~ FALSE,
+      TRUE ~ NA
+    )
+  }
+
   # Preferred mode: tabular layout with explicit columns.
-  tabular <- tryCatch(
-    read_tsv(layout_path, show_col_types = FALSE, col_types = cols(.default = "c")),
-    error = function(e) NULL
-  )
+  read_layout_tabular <- function(path) {
+    for (delim in c(",", "\t", ";")) {
+      tabular <- tryCatch(
+        read_delim(path, delim = delim, show_col_types = FALSE, col_types = cols(.default = "c")),
+        error = function(e) NULL
+      )
+
+      if (!is.null(tabular) && nrow(tabular) > 0 && ncol(tabular) > 1) {
+        return(tabular)
+      }
+    }
+
+    NULL
+  }
+
+  tabular <- read_layout_tabular(layout_path)
 
   if (!is.null(tabular) && nrow(tabular) > 0) {
     names(tabular) <- names(tabular) %>%
@@ -211,6 +232,28 @@ parse_layout_txt <- function(layout_path) {
 
     measurement_cols <- names(tabular)[str_detect(names(tabular), "_measur(?:e)?ment$")]
     group_cols <- names(tabular)[str_detect(names(tabular), "_group$")]
+    exclude_col_candidates <- c("exclude_from_analysis", "exclude", "omit", "not_analyzed")
+    include_col_candidates <- c("include_in_analysis", "analyze", "include")
+    reason_col_candidates <- c("exclude_reason", "outlier_reason", "qc_reason", "analysis_note", "notes", "note")
+
+    exclude_col <- intersect(exclude_col_candidates, names(tabular))[1]
+    include_col <- intersect(include_col_candidates, names(tabular))[1]
+    reason_col <- intersect(reason_col_candidates, names(tabular))[1]
+
+    exclude_vals <- if (!is.na(exclude_col)) {
+      parse_logical_flag(tabular[[exclude_col]])
+    } else if (!is.na(include_col)) {
+      include_vals <- parse_logical_flag(tabular[[include_col]])
+      if_else(is.na(include_vals), NA, !include_vals)
+    } else {
+      rep(NA, nrow(tabular))
+    }
+
+    exclude_reason_vals <- if (!is.na(reason_col)) {
+      na_if(trimws(as.character(tabular[[reason_col]])), "")
+    } else {
+      rep(NA_character_, nrow(tabular))
+    }
 
     if (all(c("plate_well") %in% names(tabular))) {
       plate_col <- if ("plate_id" %in% names(tabular)) "plate_id" else NA_character_
@@ -230,6 +273,8 @@ parse_layout_txt <- function(layout_path) {
         treatment_group = if (!is.na(treatment_col)) tabular[[treatment_col]] else NA_character_,
         size_mm = suppressWarnings(as.numeric(if (!is.na(size_col)) tabular[[size_col]] else NA_character_)),
         weight_mg = suppressWarnings(as.numeric(if (!is.na(weight_col)) tabular[[weight_col]] else NA_character_)),
+        exclude_from_analysis = exclude_vals,
+        exclude_reason = exclude_reason_vals,
         is_blank = if (!is.na(blank_col)) {
           toupper(tabular[[blank_col]]) %in% c("TRUE", "T", "1", "YES", "Y")
         } else {
@@ -275,6 +320,8 @@ parse_layout_txt <- function(layout_path) {
       treatment_group = character(),
       size_mm = numeric(),
       weight_mg = numeric(),
+      exclude_from_analysis = logical(),
+      exclude_reason = character(),
       is_blank = logical(),
       layout_status = character(),
       layout_raw = character()
@@ -296,6 +343,8 @@ parse_layout_txt <- function(layout_path) {
         treatment_group = ifelse(length(p) >= 3, p[3], NA_character_),
         size_mm = NA_real_,
         weight_mg = NA_real_,
+        exclude_from_analysis = NA,
+        exclude_reason = NA_character_,
         is_blank = NA,
         layout_status = "parsed_explicit",
         layout_raw = paste(parts, collapse = "\t")
@@ -333,6 +382,8 @@ parse_layout_txt <- function(layout_path) {
         treatment_group = NA_character_,
         size_mm = NA_real_,
         weight_mg = NA_real_,
+        exclude_from_analysis = NA,
+        exclude_reason = NA_character_,
         is_blank = NA,
         layout_status = "parsed_matrix",
         layout_raw = paste(parts, collapse = "\t")
@@ -353,6 +404,8 @@ parse_layout_txt <- function(layout_path) {
     treatment_group = NA_character_,
     size_mm = NA_real_,
     weight_mg = NA_real_,
+    exclude_from_analysis = NA,
+    exclude_reason = NA_character_,
     is_blank = NA,
     layout_status = "unparsed",
     layout_raw = paste(lines, collapse = " || ")
@@ -371,6 +424,8 @@ parse_layout_for_experiment <- function(experiment_dir_path) {
       treatment_group = character(),
       size_mm = numeric(),
       weight_mg = numeric(),
+      exclude_from_analysis = logical(),
+      exclude_reason = character(),
       is_blank = logical(),
       layout_status = character(),
       layout_raw = character(),
