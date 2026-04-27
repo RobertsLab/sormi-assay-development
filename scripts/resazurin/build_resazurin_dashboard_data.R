@@ -188,7 +188,7 @@ dup_flags <- analysis_data %>%
   count(experiment_dir, plate_id, well_id, time_hr, name = "n_at_time") %>%
   mutate(duplicate_timepoint = n_at_time > 1)
 
-plate_data <- plate_data %>%
+analysis_data <- analysis_data %>%
   left_join(
     dup_flags %>% select(experiment_dir, plate_id, well_id, time_hr, duplicate_timepoint),
     by = c("experiment_dir", "plate_id", "well_id", "time_hr")
@@ -239,16 +239,11 @@ analysis_cols <- analysis_data %>%
 plate_data <- plate_data %>%
   left_join(
     analysis_cols,
-    by = c("experiment_dir", "source_file", "plate_id", "well_id", "time_hr"),
-    suffix = c("", "_analysis")
+    by = c("experiment_dir", "source_file", "plate_id", "well_id", "time_hr")
   ) %>%
   mutate(
-    duplicate_timepoint = coalesce(duplicate_timepoint, duplicate_timepoint_analysis),
-    mean_blank_value = coalesce(mean_blank_value, mean_blank_value_analysis),
-    normalized_value = coalesce(normalized_value, normalized_value_analysis),
-    delta_value = coalesce(delta_value, delta_value_analysis)
-  ) %>%
-  select(-duplicate_timepoint_analysis, -mean_blank_value_analysis, -normalized_value_analysis, -delta_value_analysis)
+    duplicate_timepoint = coalesce(duplicate_timepoint, FALSE)
+  )
 
 qc_success <- plate_data %>%
   group_by(experiment_dir, source_file) %>%

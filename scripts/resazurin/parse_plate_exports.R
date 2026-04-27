@@ -216,7 +216,18 @@ parse_layout_txt <- function(layout_path) {
   tabular <- read_layout_tabular(layout_path)
 
   if (!is.null(tabular) && nrow(tabular) > 0) {
-    names(tabular) <- names(tabular) %>%
+    raw_names <- names(tabular)
+    merged_exclude_idx <- which(str_detect(raw_names, "exclude_from_analysis.*exclude_reason"))
+    if (length(merged_exclude_idx) == 1 && merged_exclude_idx < length(raw_names)) {
+      next_name <- raw_names[merged_exclude_idx + 1]
+      next_name_is_placeholder <- is.na(next_name) || next_name == "" || str_detect(next_name, "^\\.\\.\\.[0-9]+$")
+      if (next_name_is_placeholder) {
+        raw_names[merged_exclude_idx] <- "exclude_from_analysis"
+        raw_names[merged_exclude_idx + 1] <- "exclude_reason"
+      }
+    }
+
+    names(tabular) <- raw_names %>%
       str_to_lower() %>%
       str_replace_all("[^a-z0-9]+", "_") %>%
       str_replace_all("_+", "_") %>%
