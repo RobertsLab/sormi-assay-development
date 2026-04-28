@@ -4,3 +4,6 @@
 ### Description
 
 Images of oysters with cup labels, USDA family label, and ruler.
+
+
+NOTE: USDA family 6 has two images assiciated with it. The second image clarifies cup assignments that were unclear in the first image.
