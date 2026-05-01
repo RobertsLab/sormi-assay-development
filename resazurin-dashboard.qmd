@@ -874,8 +874,118 @@ groupUnavailable
       plotWrap.appendChild(subtitleWrap)
       plotWrap.innerHTML = ""
       plotWrap.appendChild(subtitleWrap)
+
+      const attachHoverEmphasis = plotNode => {
+        let svg = null
+        if (plotNode && plotNode.tagName && plotNode.tagName.toLowerCase() === "svg") {
+          svg = plotNode
+        } else {
+          const svgs = [...(plotNode?.querySelectorAll?.("svg") || [])]
+          svg = svgs.sort(
+            (a, b) => b.querySelectorAll("path, line, polyline, rect, circle").length - a.querySelectorAll("path, line, polyline, rect, circle").length
+          )[0] || null
+        }
+        if (!svg) return
+
+        const selectableMarks = () => {
+          const preferred = [...svg.querySelectorAll(
+            "g[aria-label='line'] path, g[aria-label='dot'] circle"
+          )]
+          if (preferred.length > 0) return preferred
+          return [...svg.querySelectorAll("path, line, polyline, rect, circle")]
+        }
+
+        const bindListeners = (attempt = 0) => {
+          const marks = selectableMarks()
+          if (marks.length < 2 && attempt < 120) {
+            setTimeout(() => bindListeners(attempt + 1), 50)
+            return
+          }
+          if (marks.length === 0) return
+          marks.forEach(node => {
+            node.style.pointerEvents = "all"
+          })
+
+          const linePaths = marks.filter(node => node.tagName.toLowerCase() === "path" && Array.isArray(node.__data__))
+
+          const emphasizeSeries = seriesPath => {
+            const seriesIndices = new Set(seriesPath.__data__ || [])
+            marks.forEach(node => {
+              const tag = node.tagName.toLowerCase()
+              const match =
+                (tag === "path" && node === seriesPath) ||
+                (tag === "circle" && seriesIndices.has(node.__data__))
+              node.style.transition = "opacity 120ms, stroke-width 120ms"
+              node.style.opacity = match ? "1" : "0.12"
+              if (tag !== "circle") {
+                node.style.strokeWidth = match ? "3.5px" : ""
+              }
+            })
+          }
+
+          const resolveSeriesPath = node => {
+            if (!node) return null
+            const tag = node.tagName.toLowerCase()
+            if (tag === "path" && Array.isArray(node.__data__)) {
+              return node
+            }
+            if (tag === "circle" && typeof node.__data__ === "number") {
+              return linePaths.find(path => Array.isArray(path.__data__) && path.__data__.includes(node.__data__)) || null
+            }
+            return null
+          }
+
+          const clear = () => {
+            marks.forEach(node => {
+              node.style.opacity = ""
+              node.style.strokeWidth = ""
+            })
+          }
+
+          const markSet = new Set(marks)
+          let lastKey = ""
+
+          const activateSeries = hovered => {
+            const seriesPath = resolveSeriesPath(hovered)
+            if (!seriesPath) return
+
+            const nextKey = JSON.stringify(seriesPath.__data__ || [])
+            if (nextKey === lastKey) return
+            lastKey = nextKey
+            emphasizeSeries(seriesPath)
+          }
+
+          const onMove = ev => {
+            const stack = document.elementsFromPoint(ev.clientX, ev.clientY)
+            const hovered = stack.find(el => markSet.has(el))
+            if (!hovered) {
+              if (lastKey !== "") {
+                lastKey = ""
+                clear()
+              }
+              return
+            }
+
+            activateSeries(hovered)
+          }
+
+          marks.forEach(node => {
+            node.addEventListener("pointerenter", () => {
+              activateSeries(node)
+            })
+          })
+
+          document.addEventListener("pointermove", onMove)
+          svg.addEventListener("mouseleave", () => {
+            lastKey = ""
+            clear()
+          })
+        }
+
+        setTimeout(() => bindListeners(), 0)
+      }
       if (aucPlotMode) {
-        plotWrap.appendChild(Plot.plot({
+        const plotNode = Plot.plot({
           height: 420,
           style: {
             color: "#111827",
@@ -919,9 +1029,11 @@ groupUnavailable
               tip: true
             })
           ]
-        }))
+        })
+        plotWrap.appendChild(plotNode)
+        attachHoverEmphasis(plotNode)
       } else if (cumAucPlotMode) {
-        plotWrap.appendChild(Plot.plot({
+        const plotNode = Plot.plot({
           height: 420,
           style: {
             color: "#111827",
@@ -956,7 +1068,9 @@ groupUnavailable
               tip: true
             })
           ]
-        }))
+        })
+        plotWrap.appendChild(plotNode)
+        attachHoverEmphasis(plotNode)
       } else if (boxPlotMode) {
         plotWrap.appendChild(Plot.plot({
           height: 420,
@@ -1015,7 +1129,7 @@ groupUnavailable
           ]
         }))
       } else {
-        plotWrap.appendChild(Plot.plot({
+        const plotNode = Plot.plot({
           height: 420,
           style: {
             color: "#111827",
@@ -1060,7 +1174,9 @@ groupUnavailable
               tip: true
             })
           ]
-        }))
+        })
+        plotWrap.appendChild(plotNode)
+        attachHoverEmphasis(plotNode)
       }
       return plotWrap
     })()
