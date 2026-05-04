@@ -232,14 +232,14 @@ viewof errorBarSel = Inputs.select(["Hide error bars", "Show error bars"], {
   value: "Hide error bars"
 })
 
-viewof plotStyleSel = Inputs.select(["Line plot", "Box plot", "AUC summary", "Cumulative AUC over time"], {
+viewof plotStyleSel = Inputs.select(["Line plot", "Box plot", "AUC summary (total area per trajectory)", "Cumulative AUC over time (running area)"], {
   label: "Plot style",
   value: "Line plot"
 })
 
 boxPlotMode = plotStyleSel === "Box plot"
-aucPlotMode = plotStyleSel === "AUC summary"
-cumAucPlotMode = plotStyleSel === "Cumulative AUC over time"
+aucPlotMode = plotStyleSel === "AUC summary (total area per trajectory)"
+cumAucPlotMode = plotStyleSel === "Cumulative AUC over time (running area)"
 
 viewof aggregationSel = (boxPlotMode || aucPlotMode)
   ? Inputs.select(["All", ...effectiveSeriesValues], {
@@ -531,6 +531,27 @@ plottedSorted = dataViewSel === "Delta fluorescence"
     }))
 
 aucData = (() => {
+  // Prefer precomputed `auc_value` if present in the CSV rows.
+  const hasPrecomputedAuc = plottedSorted.some(d => d.auc_value !== undefined && d.auc_value !== null && Number.isFinite(d.auc_value))
+  if (hasPrecomputedAuc) {
+    const byTrace = new Map()
+    for (const d of plottedSorted) {
+      if (d.auc_value === null || d.auc_value === undefined || !Number.isFinite(d.auc_value)) continue
+      if (!byTrace.has(d.trace_id)) {
+        byTrace.set(d.trace_id, {
+          ...d,
+          trace_id: d.trace_id,
+          auc_value: d.auc_value,
+          n_timepoints: 1
+        })
+      } else {
+        byTrace.get(d.trace_id).n_timepoints += 1
+      }
+    }
+    return [...byTrace.values()]
+  }
+
+  // Fallback: compute on-the-fly (original behavior)
   const byTrace = new Map()
 
   for (const d of plottedSorted) {
@@ -571,6 +592,17 @@ aucData = (() => {
 })()
 
 cumulativeAucData = (() => {
+  // Prefer precomputed `cumulative_auc` if present in the CSV rows.
+  const hasPrecomputedCum = plottedSorted.some(d => d.cumulative_auc !== undefined && d.cumulative_auc !== null && Number.isFinite(d.cumulative_auc))
+  if (hasPrecomputedCum) {
+    // Use precomputed cumulative values directly (ensure sorted ordering)
+    return plottedSorted
+      .filter(d => Number.isFinite(d.cumulative_auc) && Number.isFinite(d.time_hr))
+      .slice()
+      .sort((a, b) => a.trace_id.localeCompare(b.trace_id) || a.time_hr - b.time_hr)
+      .map(d => ({ ...d, trace_id: d.trace_id, cumulative_auc: d.cumulative_auc }))
+  }
+
   const byTrace = new Map()
 
   for (const d of plottedSorted) {
@@ -753,6 +785,23 @@ formatAucValue = v => {
   return v.toFixed(2)
 }
 
+aucUsesPrecomputed = plottedSorted.some(d => Number.isFinite(d.auc_value))
+cumAucUsesPrecomputed = plottedSorted.some(d => Number.isFinite(d.cumulative_auc))
+
+aucMetricDescription = aucUsesPrecomputed
+  ? "blank-normalized fluorescence"
+  : (dataViewSel === "Delta fluorescence"
+    ? "delta fluorescence"
+    : (dataViewSel === "Measurement-normalized fluorescence"
+      ? "measurement-normalized fluorescence"
+      : (dataViewSel === "Paper metabolism (fold-change / selected measurement)"
+        ? "paper metabolism"
+        : (dataViewSel === "Normalized fluorescence"
+          ? "normalized fluorescence"
+          : "fluorescence"))))
+
+cumAucMetricDescription = cumAucUsesPrecomputed ? "blank-normalized fluorescence" : aucMetricDescription
+
 tooltipTitle = d => {
   const parts = [
     `Experiment: ${d.experiment_dir}`,
@@ -785,7 +834,9 @@ aucTooltipTitle = d => {
     `Plate: ${d.plate_id}`,
     `Sample: ${d.sample_id_group}`,
     `Wells: ${d.well_id}`,
-    `AUC: ${formatAucValue(d.auc_value)}`,
+    `Total AUC: ${formatAucValue(d.auc_value)}`,
+    `Integrated metric: ${aucMetricDescription}`,
+    `Integration window: first to last available timepoint`,
     `Timepoints used: ${d.n_timepoints}`
   ]
 
@@ -807,7 +858,8 @@ cumAucTooltipTitle = d => {
     `Sample: ${d.sample_id_group}`,
     `Wells: ${d.well_id}`,
     `Time: ${d.time_hr}h`,
-    `Cumulative AUC: ${formatAucValue(d.cumulative_auc)}`
+    `Running cumulative AUC: ${formatAucValue(d.cumulative_auc)}`,
+    `Integrated metric: ${cumAucMetricDescription}`
   ]
 
   if (activeGroupCol) {
@@ -840,9 +892,9 @@ groupUnavailable
   : paperUnavailable
     ? "Paper metabolism unavailable for this selection. Choose a numeric non-zero Measurement column and ensure selected wells have valid initial values."
   : aucUnavailable
-    ? "AUC summary unavailable for this selection. At least two finite timepoints per trajectory are required after filtering."
+    ? "AUC summary unavailable. This view plots total area under each trajectory from first to last available timepoint; at least two finite timepoints per trajectory are required."
   : cumAucUnavailable
-    ? "Cumulative AUC over time unavailable for this selection. Ensure finite values exist for the selected metric."
+    ? "Cumulative AUC unavailable. This view plots running area under each trajectory across time; ensure finite values exist for the integrated metric."
   : (() => {
       const plotWrap = document.createElement("div")
       const subtitleWrap = document.createElement("div")
@@ -869,6 +921,22 @@ groupUnavailable
         excludedLine.style.fontWeight = "400"
         excludedLine.style.color = "#7c2d12"
         subtitleWrap.appendChild(excludedLine)
+      }
+
+      if (aucPlotMode) {
+        const aucLine = document.createElement("div")
+        aucLine.textContent = `AUC summary: each dot is one trajectory's total area (trapezoidal integration) of ${aucMetricDescription} from first to last available timepoint.`
+        aucLine.style.fontWeight = "400"
+        aucLine.style.color = "#1f2937"
+        subtitleWrap.appendChild(aucLine)
+      }
+
+      if (cumAucPlotMode) {
+        const cumAucLine = document.createElement("div")
+        cumAucLine.textContent = `Cumulative AUC: each line shows running integrated area (trapezoidal) of ${cumAucMetricDescription} over time for each trajectory.`
+        cumAucLine.style.fontWeight = "400"
+        cumAucLine.style.color = "#1f2937"
+        subtitleWrap.appendChild(cumAucLine)
       }
 
       plotWrap.appendChild(subtitleWrap)
@@ -1204,7 +1272,7 @@ groupUnavailable
             label: seriesLabel
           },
           y: {
-            label: "Metabolism (AUC)",
+            label: `Total AUC (${aucMetricDescription})`,
             grid: true,
             zero: true,
             nice: true
@@ -1247,7 +1315,7 @@ groupUnavailable
             background: "#ffffff"
           },
           x: {label: "Time (hours)", tickValues: timeValues},
-          y: {label: "Metabolism (Cumulative AUC)"},
+          y: {label: `Running cumulative AUC (${cumAucMetricDescription})`},
           color: {
             legend: true,
             label: seriesLabel,

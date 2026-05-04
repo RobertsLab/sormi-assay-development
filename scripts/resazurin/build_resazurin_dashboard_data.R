@@ -223,6 +223,56 @@ analysis_data <- analysis_data %>%
   ) %>%
   ungroup()
 
+# Compute cumulative and total AUC per well using blank-normalized values.
+# We compute incremental trapezoidal areas between successive valid timepoints
+# where `normalized_value` and `time_hr` are finite. We expose two columns:
+# - `cumulative_auc`: cumulative area up to that timepoint (0 for the first point)
+# - `auc_value`: total AUC for the trajectory (NA if fewer than 2 valid points)
+auc_cumulative <- analysis_data %>%
+  filter(!is.na(time_hr)) %>%
+  group_by(experiment_dir, plate_id, well_id) %>%
+  arrange(time_hr, read_datetime, source_name, .by_group = TRUE) %>%
+  mutate(
+    valid_for_auc = (!is.na(normalized_value) & is.finite(normalized_value) & !is.na(time_hr) & is.finite(time_hr)),
+    next_time = lead(time_hr),
+    next_val = lead(normalized_value)
+  ) %>%
+  mutate(
+    inc_area = if_else(
+      valid_for_auc & !is.na(next_time) & is.finite(next_time) & (next_time > time_hr) & !is.na(next_val) & is.finite(next_val),
+      (next_time - time_hr) * ((normalized_value + next_val) / 2),
+      0
+    )
+  ) %>%
+  mutate(
+    cumulative_auc = cumsum(replace_na(inc_area, 0))
+  ) %>%
+  ungroup() %>%
+  select(experiment_dir, plate_id, well_id, time_hr, cumulative_auc)
+
+# Number of valid points per well (needed to determine availability)
+valid_counts <- analysis_data %>%
+  group_by(experiment_dir, plate_id, well_id) %>%
+  summarise(n_valid_for_auc = sum(!is.na(normalized_value) & is.finite(normalized_value) & !is.na(time_hr) & is.finite(time_hr)), .groups = "drop")
+
+# Derive final auc_value per well (NA if fewer than 2 valid points)
+auc_value_per_well <- auc_cumulative %>%
+  left_join(valid_counts, by = c("experiment_dir", "plate_id", "well_id")) %>%
+  group_by(experiment_dir, plate_id, well_id) %>%
+  summarise(
+    auc_value = if_else(n_valid_for_auc >= 2, max(cumulative_auc, na.rm = TRUE), NA_real_),
+    .groups = "drop"
+  )
+
+# Ensure unique one-row-per-well to avoid many-to-many joins downstream
+auc_value_per_well <- auc_value_per_well %>%
+  distinct(experiment_dir, plate_id, well_id, .keep_all = TRUE)
+
+# Join cumulative_auc (per timepoint) and auc_value (per well) back into analysis_data
+analysis_data <- analysis_data %>%
+  left_join(auc_cumulative, by = c("experiment_dir", "plate_id", "well_id", "time_hr")) %>%
+  left_join(auc_value_per_well, by = c("experiment_dir", "plate_id", "well_id"))
+
 analysis_cols <- analysis_data %>%
   select(
     experiment_dir,
