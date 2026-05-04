@@ -191,7 +191,13 @@ naturalCompare = (a, b) => `${a}`.localeCompare(`${b}`, undefined, {
 
 groupValues = activeGroupCol === null
   ? []
-  : [...new Set(selectionRows.map(d => normalizeTextValue(d[activeGroupCol])).filter(validGroupValue))].sort(naturalCompare)
+  : [...new Set(
+      // Exclude wells marked as blanks when constructing available group values
+      selectionRows
+        .filter(d => !isBlank(d))
+        .map(d => normalizeTextValue(d[activeGroupCol]))
+        .filter(validGroupValue)
+    )].sort(naturalCompare)
 
 viewof groupValSel = Inputs.select(
   ["All", ...groupValues],
@@ -269,8 +275,13 @@ seriesRows = selectionRows.filter(d =>
 
 effectiveSeriesValues = effectiveSeriesCol === null
   ? []
-  : [...new Set(seriesRows.map(d => normalizeTextValue(d[effectiveSeriesCol])).filter(validGroupValue))]
-      .sort(naturalCompare)
+  : [...new Set(
+      // Exclude wells explicitly marked as blanks when constructing group values
+      seriesRows
+        .filter(d => !isBlank(d))
+        .map(d => normalizeTextValue(d[effectiveSeriesCol]))
+        .filter(validGroupValue)
+    )].sort(naturalCompare)
 
 rawGroupDisplaySel = Array.isArray(aggregationSel) ? aggregationSel : [aggregationSel]
 validGroupDisplaySel = rawGroupDisplaySel.filter(v => v === "All" || effectiveSeriesValues.includes(v))
@@ -293,7 +304,12 @@ filtered = selectionRows.filter(d =>
   (effectiveSeriesCol === null || validGroupValue(d[effectiveSeriesCol])) &&
   (effectiveSeriesCol === null ||
     ((boxPlotMode || aucPlotMode)
-      ? allGroupsDisplayed || selectedDisplayGroups.includes(normalizeTextValue(d[effectiveSeriesCol]))
+      // When "All" is selected, interpret that as "all effective series values" (which
+      // already excludes blank wells via `effectiveSeriesValues`) rather than literally
+      // allowing every raw group value.
+      ? (allGroupsDisplayed
+          ? effectiveSeriesValues.includes(normalizeTextValue(d[effectiveSeriesCol]))
+          : selectedDisplayGroups.includes(normalizeTextValue(d[effectiveSeriesCol])))
       : true))
   && !isExcluded(d)
 )
@@ -306,7 +322,9 @@ excludedCandidateRows = selectionRows.filter(d =>
   (effectiveSeriesCol === null || validGroupValue(d[effectiveSeriesCol])) &&
   (effectiveSeriesCol === null ||
     ((boxPlotMode || aucPlotMode)
-      ? allGroupsDisplayed || selectedDisplayGroups.includes(normalizeTextValue(d[effectiveSeriesCol]))
+      ? (allGroupsDisplayed
+          ? effectiveSeriesValues.includes(normalizeTextValue(d[effectiveSeriesCol]))
+          : selectedDisplayGroups.includes(normalizeTextValue(d[effectiveSeriesCol])))
       : true)) &&
   isExcluded(d)
 )
@@ -451,7 +469,11 @@ plottedBase = dataViewSel === "Measurement-normalized fluorescence"
 plotted = plottedBase.filter(d => Number.isFinite(d[metricField]))
 
 traceKeyEffective = d => activePlateSel === "All"
-  ? `${d.experiment_dir}|${seriesKey(d)}`
+  ? (aucPlotMode || cumAucPlotMode)
+    ? (validGroupValue(d.sample_id_group)
+      ? `${d.experiment_dir}|${normalizeTextValue(d.sample_id_group)}`
+      : `${d.experiment_dir}|${seriesKey(d)}`)
+    : `${d.experiment_dir}|${seriesKey(d)}`
   : traceKey(d)
 
 // Ensure one point per trace+time before plotting/delta. This avoids
@@ -723,7 +745,9 @@ presentSeries = aucPlotMode
 
 // Separate blanks and non-blanks
 nonBlankKeys = presentSeries.filter(k => k !== "Blank").sort(naturalCompare)
-hasBlankSeries = presentSeries.includes("Blank")
+// Only treat a present "Blank" series as a real series when NOT grouping by a group column.
+// When grouping (groupMode === true) we want blanks to be excluded from the group domain.
+hasBlankSeries = presentSeries.includes("Blank") && !groupMode
 
 // Final domain for the color scale
 colorDomain = hasBlankSeries ? ["Blank", ...nonBlankKeys] : nonBlankKeys
@@ -733,7 +757,8 @@ colorDomain = hasBlankSeries ? ["Blank", ...nonBlankKeys] : nonBlankKeys
 // Use boxPlotData here instead of boxSummaryData
 boxPresentSeries = [...new Set(boxPlotData.map(d => d.series_id))]
 boxNonBlankKeys = boxPresentSeries.filter(k => k !== "Blank").sort(naturalCompare)
-boxHasBlankSeries = boxPresentSeries.includes("Blank")
+// Same rule for box plots: only show explicit "Blank" group when NOT grouping mode.
+boxHasBlankSeries = boxPresentSeries.includes("Blank") && !groupMode
 boxSeriesOrder = boxHasBlankSeries ?
 ["Blank", ...boxNonBlankKeys] : boxNonBlankKeys
 
@@ -786,6 +811,139 @@ formatAucValue = v => {
   }
   return v.toFixed(2)
 }
+
+significanceLabelForIndex = index => {
+  const alphabet = "abcdefghijklmnopqrstuvwxyz"
+  let n = index
+  let label = ""
+
+  do {
+    label = alphabet[n % 26] + label
+    n = Math.floor(n / 26) - 1
+  } while (n >= 0)
+
+  return label
+}
+
+aucStatsContext = (() => {
+  const statsArr = Array.isArray(stats) ? stats : Array.from(stats || [])
+  const statsGroupCol = activeGroupCol || (groupColumns.length > 0 ? groupColumns[0] : null)
+  const relevantStats = statsArr.filter(s => {
+    if (!statsGroupCol) return false
+    if (String(s.group_col) !== String(statsGroupCol)) return false
+    if (activeExperimentSel !== "All" && String(s.experiment_dir) !== String(activeExperimentSel)) return false
+    if (activePlateSel !== "All" && s.plate_id && String(s.plate_id) !== String(activePlateSel)) return false
+    return true
+  })
+
+  const kwStats = relevantStats.filter(r => r.comparison === "Kruskal-Wallis")
+  const pairwiseStats = relevantStats.filter(r => r.comparison === "Wilcoxon")
+  const significantPairs = pairwiseStats.filter(r => Number.isFinite(Number(r.p_adj)) && Number(r.p_adj) <= 0.05)
+  const kwBest = kwStats[0] || null
+  const analysisUnitType = relevantStats.find(r => r.analysis_unit_type)?.analysis_unit_type || (statsGroupCol ? "sample_id / well" : "unknown")
+
+  const formatP = v => {
+    if (v == null || v === "" || Number.isNaN(Number(v))) return "NA"
+    const n = Number(v)
+    if (!Number.isFinite(n)) return "NA"
+    if (n < 0.001) return n.toExponential(2)
+    return n.toFixed(3)
+  }
+
+  const aucSignificanceLabels = (() => {
+    if (!aucPlotMode) return []
+    if (!activeGroupCol || activeWithinGroupCol !== null || activeAggregationMode === "Individual replicates") return []
+    if (significantPairs.length === 0 || aucData.length === 0) return []
+
+    const aucSeriesIds = [...new Set(aucData.map(d => String(d.series_id)).filter(v => v !== "" && v !== "Blank"))]
+    if (aucSeriesIds.length < 2) return []
+
+    const pairKey = (a, b) => [a, b].sort(naturalCompare).join("||")
+          const aucBySeries = new Map()
+          const significantPairSet = new Set()
+
+          for (const row of significantPairs) {
+            significantPairSet.add(pairKey(String(row.group1), String(row.group2)))
+          }
+
+          for (const row of aucData) {
+            const seriesId = String(row.series_id)
+            if (!aucBySeries.has(seriesId)) aucBySeries.set(seriesId, [])
+            aucBySeries.get(seriesId).push(Number(row.auc_value))
+          }
+
+          const significantDegree = new Map(aucSeriesIds.map(seriesId => [seriesId, 0]))
+          for (const row of significantPairs) {
+            const group1 = String(row.group1)
+            const group2 = String(row.group2)
+            if (significantDegree.has(group1)) significantDegree.set(group1, significantDegree.get(group1) + 1)
+            if (significantDegree.has(group2)) significantDegree.set(group2, significantDegree.get(group2) + 1)
+          }
+
+          const orderedSeries = aucSeriesIds
+            .slice()
+            .sort((a, b) => {
+              const degreeA = significantDegree.get(a) || 0
+              const degreeB = significantDegree.get(b) || 0
+              if (degreeA !== degreeB) return degreeB - degreeA
+              const medianA = d3.median(aucBySeries.get(a) || []) ?? Number.POSITIVE_INFINITY
+              const medianB = d3.median(aucBySeries.get(b) || []) ?? Number.POSITIVE_INFINITY
+              if (medianA !== medianB) return medianA - medianB
+              return naturalCompare(a, b)
+            })
+
+          const letterGroups = []
+          const lettersBySeries = new Map(aucSeriesIds.map(seriesId => [seriesId, []]))
+
+          for (const seriesId of orderedSeries) {
+            const compatibleLetters = letterGroups.filter(letterGroup =>
+              [...letterGroup.members].every(member => !significantPairSet.has(pairKey(seriesId, member)))
+            )
+
+            if (compatibleLetters.length === 0) {
+              const label = significanceLabelForIndex(letterGroups.length)
+              const newLetterGroup = {label, members: new Set([seriesId])}
+              letterGroups.push(newLetterGroup)
+              lettersBySeries.get(seriesId)?.push(label)
+            } else {
+              compatibleLetters.forEach(letterGroup => {
+                letterGroup.members.add(seriesId)
+                lettersBySeries.get(seriesId)?.push(letterGroup.label)
+              })
+            }
+          }
+
+          const aucMax = d3.max(aucData, d => Number(d.auc_value))
+          const aucMin = d3.min(aucData, d => Number(d.auc_value))
+          const aucSpan = Number.isFinite(aucMax) && Number.isFinite(aucMin) ? Math.max(aucMax - aucMin, Math.abs(aucMax) || 1) : 1
+          const labelY = Number.isFinite(aucMax) ? aucMax + aucSpan * 0.08 : 1
+          const labelStep = aucSpan * 0.018
+
+          return orderedSeries.map((seriesId, index) => ({
+            series_id: seriesId,
+            sig_label: (lettersBySeries.get(seriesId) || []).join(""),
+            label_y: labelY + index * labelStep
+          }))
+  })()
+
+  const aucSignificanceNote = aucSignificanceLabels.length > 0
+    ? `Significance notation: groups sharing a letter are not significantly different after BH-adjusted pairwise Wilcoxon tests (p_adj > 0.05). Different letters indicate at least one significant pairwise difference (p_adj <= 0.05).`
+    : null
+
+  return {
+    statsArr,
+    statsGroupCol,
+    relevantStats,
+    kwStats,
+    pairwiseStats,
+    significantPairs,
+    kwBest,
+    analysisUnitType,
+    formatP,
+    aucSignificanceLabels,
+    aucSignificanceNote
+  }
+})()
 
 aucUsesPrecomputed = plottedSorted.some(d => Number.isFinite(d.auc_value))
 cumAucUsesPrecomputed = plottedSorted.some(d => Number.isFinite(d.cumulative_auc))
@@ -936,6 +1094,14 @@ groupUnavailable
         aucLine.style.fontWeight = "400"
         aucLine.style.color = "#1f2937"
         subtitleWrap.appendChild(aucLine)
+
+        if (aucStatsContext.aucSignificanceNote !== null) {
+          const sigLine = document.createElement("div")
+          sigLine.textContent = aucStatsContext.aucSignificanceNote
+          sigLine.style.fontWeight = "400"
+          sigLine.style.color = "#1f2937"
+          subtitleWrap.appendChild(sigLine)
+        }
       }
 
       if (cumAucPlotMode) {
@@ -1309,7 +1475,18 @@ groupUnavailable
               strokeWidth: 0.5,
               title: aucTooltipTitle,
               tip: true
-            })
+            }),
+            ...(aucStatsContext.aucSignificanceLabels.length > 0
+              ? [Plot.text(aucStatsContext.aucSignificanceLabels, {
+                  x: "series_id",
+                  y: "label_y",
+                  text: "sig_label",
+                  fill: "#111827",
+                  fontWeight: 700,
+                  textAnchor: "middle",
+                  dy: -6
+                })]
+              : [])
           ]
         })
         plotWrap.appendChild(plotNode)
@@ -1479,31 +1656,107 @@ groupUnavailable
       statDesc.style.color = "#374151"
       statDesc.style.fontSize = "0.92rem"
       statDesc.style.lineHeight = "1.4"
-      statDesc.innerHTML = `<strong>Tests computed:</strong> Kruskal-Wallis (omnibus test across all groups), and pairwise Wilcoxon rank-sum tests with Benjamini–Hochberg p-value adjustment (blanks excluded). The summary below answers whether the groups differ overall, and which group pairs differ after adjustment.`
+      statDesc.innerHTML = `<strong>Tests computed:</strong> Kruskal-Wallis (omnibus test across all groups), and pairwise Wilcoxon rank-sum tests with Benjamini–Hochberg p-value adjustment (blanks excluded). The replicate unit is <code>sample_id</code> when available; otherwise the analysis falls back to wells. The summary below answers whether the groups differ overall, and which group pairs differ after adjustment.`
       statsWrap.appendChild(statDesc)
 
-      const statsArr = Array.isArray(stats) ? stats : Array.from(stats || [])
-      const statsGroupCol = activeGroupCol || (groupColumns.length > 0 ? groupColumns[0] : null)
-      const relevantStats = statsArr.filter(s => {
-        if (!statsGroupCol) return false
-        if (String(s.group_col) !== String(statsGroupCol)) return false
-        if (activeExperimentSel !== "All" && String(s.experiment_dir) !== String(activeExperimentSel)) return false
-        if (activePlateSel !== "All" && s.plate_id && String(s.plate_id) !== String(activePlateSel)) return false
-        return true
-      })
+        const statsArr = Array.isArray(stats) ? stats : Array.from(stats || [])
+        const statsGroupCol = activeGroupCol || (groupColumns.length > 0 ? groupColumns[0] : null)
+        const relevantStats = statsArr.filter(s => {
+          if (!statsGroupCol) return false
+          if (String(s.group_col) !== String(statsGroupCol)) return false
+          if (activeExperimentSel !== "All" && String(s.experiment_dir) !== String(activeExperimentSel)) return false
+          if (activePlateSel !== "All" && s.plate_id && String(s.plate_id) !== String(activePlateSel)) return false
+          return true
+        })
 
-      const kwStats = relevantStats.filter(r => r.comparison === "Kruskal-Wallis")
-      const pairwiseStats = relevantStats.filter(r => r.comparison === "Wilcoxon")
-      const significantPairs = pairwiseStats.filter(r => Number.isFinite(Number(r.p_adj)) && Number(r.p_adj) < 0.05)
-      const kwBest = kwStats[0] || null
+        const kwStats = relevantStats.filter(r => r.comparison === "Kruskal-Wallis")
+        const pairwiseStats = relevantStats.filter(r => r.comparison === "Wilcoxon")
+        const significantPairs = pairwiseStats.filter(r => Number.isFinite(Number(r.p_adj)) && Number(r.p_adj) <= 0.05)
+        const kwBest = kwStats[0] || null
+        const analysisUnitType = relevantStats.find(r => r.analysis_unit_type)?.analysis_unit_type || (statsGroupCol ? "sample_id / well" : "unknown")
+        const formatP = v => {
+          if (v == null || v === "" || Number.isNaN(Number(v))) return "NA"
+          const n = Number(v)
+          if (!Number.isFinite(n)) return "NA"
+          if (n < 0.001) return n.toExponential(2)
+          return n.toFixed(3)
+        }
 
-      const formatP = v => {
-        if (v == null || v === "" || Number.isNaN(Number(v))) return "NA"
-        const n = Number(v)
-        if (!Number.isFinite(n)) return "NA"
-        if (n < 0.001) return n.toExponential(2)
-        return n.toFixed(3)
-      }
+        const aucSignificanceLabels = (() => {
+          if (!aucPlotMode) return []
+          if (!activeGroupCol || activeWithinGroupCol !== null || activeAggregationMode === "Individual replicates") return []
+          if (significantPairs.length === 0 || aucData.length === 0) return []
+
+          const aucSeriesIds = [...new Set(aucData.map(d => String(d.series_id)).filter(v => v !== "" && v !== "Blank"))]
+          if (aucSeriesIds.length < 2) return []
+
+          const pairKey = (a, b) => [a, b].sort(naturalCompare).join("||")
+          const aucBySeries = new Map()
+          const significantPairSet = new Set(significantPairs.map(r => pairKey(String(r.group1), String(r.group2))))
+
+          for (const row of aucData) {
+            const seriesId = String(row.series_id)
+            if (!aucBySeries.has(seriesId)) aucBySeries.set(seriesId, [])
+            aucBySeries.get(seriesId).push(Number(row.auc_value))
+          }
+
+          const significantDegree = new Map(aucSeriesIds.map(seriesId => [seriesId, 0]))
+          for (const row of significantPairs) {
+            const group1 = String(row.group1)
+            const group2 = String(row.group2)
+            if (significantDegree.has(group1)) significantDegree.set(group1, significantDegree.get(group1) + 1)
+            if (significantDegree.has(group2)) significantDegree.set(group2, significantDegree.get(group2) + 1)
+          }
+
+          const orderedSeries = aucSeriesIds
+            .slice()
+            .sort((a, b) => {
+              const degreeA = significantDegree.get(a) || 0
+              const degreeB = significantDegree.get(b) || 0
+              if (degreeA !== degreeB) return degreeB - degreeA
+              const medianA = d3.median(aucBySeries.get(a) || []) ?? Number.POSITIVE_INFINITY
+              const medianB = d3.median(aucBySeries.get(b) || []) ?? Number.POSITIVE_INFINITY
+              if (medianA !== medianB) return medianA - medianB
+              return naturalCompare(a, b)
+            })
+
+          const letterGroups = []
+          const lettersBySeries = new Map(aucSeriesIds.map(seriesId => [seriesId, []]))
+
+          for (const seriesId of orderedSeries) {
+            const compatibleLetters = letterGroups.filter(letterGroup =>
+              [...letterGroup.members].every(member => !significantPairSet.has(pairKey(seriesId, member)))
+            )
+
+            if (compatibleLetters.length === 0) {
+              const label = significanceLabelForIndex(letterGroups.length)
+              const newLetterGroup = {label, members: new Set([seriesId])}
+              letterGroups.push(newLetterGroup)
+              lettersBySeries.get(seriesId)?.push(label)
+            } else {
+              compatibleLetters.forEach(letterGroup => {
+                letterGroup.members.add(seriesId)
+                lettersBySeries.get(seriesId)?.push(letterGroup.label)
+              })
+            }
+          }
+
+          const aucMax = d3.max(aucData, d => Number(d.auc_value))
+          const aucMin = d3.min(aucData, d => Number(d.auc_value))
+          const aucSpan = Number.isFinite(aucMax) && Number.isFinite(aucMin) ? Math.max(aucMax - aucMin, Math.abs(aucMax) || 1) : 1
+          const labelY = Number.isFinite(aucMax) ? aucMax + aucSpan * 0.08 : 1
+          const labelStep = aucSpan * 0.018
+
+          return aucSeriesIds.map((seriesId, index) => ({
+            series_id: seriesId,
+            sig_label: (lettersBySeries.get(seriesId) || []).join(""),
+            label_y: labelY + index * labelStep
+          }))
+        })()
+
+        const aucSignificanceNote = aucSignificanceLabels.length > 0
+          ? `Significance notation: groups sharing a letter are not significantly different after BH-adjusted pairwise Wilcoxon tests (p_adj > 0.05). Different letters indicate at least one significant pairwise difference (p_adj <= 0.05).`
+          : null
 
       if (relevantStats.length === 0) {
         const none = document.createElement("div")
@@ -1529,7 +1782,7 @@ groupUnavailable
           ? `Pairwise differences after BH correction: ${significantPairs.map(r => `${r.group1} vs ${r.group2} (p_adj = ${formatP(r.p_adj)})`).join(", ")}.`
           : "Pairwise differences after BH correction: none detected at the 0.05 threshold."
 
-        summary.innerHTML = `<strong>${kwText}</strong><br>${sigPairText}<br><span style="color:#6b7280">These tests treat wells as replicates within the selected group column.</span>`
+        summary.innerHTML = `<strong>${kwText}</strong><br>${sigPairText}<br><span style="color:#6b7280">Analysis unit: ${analysisUnitType}.</span>`
         statsWrap.appendChild(summary)
 
         if (!activeGroupCol && statsGroupCol) {
@@ -1556,8 +1809,11 @@ groupUnavailable
         })
         tbl.appendChild(hdr)
 
-        relevantStats.forEach(r => {
+        pairwiseStats.forEach(r => {
           const tr = document.createElement("tr")
+          if (Number.isFinite(Number(r.p_adj)) && Number(r.p_adj) <= 0.05) {
+            tr.style.fontWeight = "700"
+          }
           const values = [r.comparison, r.group1 || "-", r.group2 || "-", formatP(r.p_value), formatP(r.p_adj), r.n1 || "-", r.n2 || "-", (r.median1 != null ? Number(r.median1).toFixed(4) : "-"), (r.median2 != null ? Number(r.median2).toFixed(4) : "-")]
           values.forEach(v => {
             const td = document.createElement("td")

@@ -223,55 +223,110 @@ analysis_data <- analysis_data %>%
   ) %>%
   ungroup()
 
-# Compute cumulative and total AUC per well using blank-normalized values.
-# We compute incremental trapezoidal areas between successive valid timepoints
-# where `normalized_value` and `time_hr` are finite. We expose two columns:
-# - `cumulative_auc`: cumulative area up to that timepoint (0 for the first point)
-# - `auc_value`: total AUC for the trajectory (NA if fewer than 2 valid points)
-auc_cumulative <- analysis_data %>%
-  filter(!is.na(time_hr)) %>%
-  group_by(experiment_dir, plate_id, well_id) %>%
-  arrange(time_hr, read_datetime, source_name, .by_group = TRUE) %>%
-  mutate(
-    valid_for_auc = (!is.na(normalized_value) & is.finite(normalized_value) & !is.na(time_hr) & is.finite(time_hr)),
-    next_time = lead(time_hr),
-    next_val = lead(normalized_value)
-  ) %>%
-  mutate(
-    inc_area = if_else(
-      valid_for_auc & !is.na(next_time) & is.finite(next_time) & (next_time > time_hr) & !is.na(next_val) & is.finite(next_val),
-      (next_time - time_hr) * ((normalized_value + next_val) / 2),
-      0
+# Compute cumulative and total AUC using sample_id when available, otherwise fall back to wells.
+# Sample-level AUC collapses technical wells within each sample/timepoint before trapezoidal integration.
+compute_auc_tables <- function(data, unit_cols, unit_type) {
+  if (nrow(data) == 0) {
+    return(list(
+      cumulative = tibble(),
+      values = tibble()
+    ))
+  }
+
+  point_data <- data %>%
+    filter(!is.na(.data$time_hr)) %>%
+    group_by(across(all_of(unit_cols)), time_hr = .data$time_hr) %>%
+    summarise(
+      normalized_value = mean(.data$normalized_value, na.rm = TRUE),
+      n_measurements = dplyr::n(),
+      .groups = "drop"
     )
+
+  cumulative <- point_data %>%
+    group_by(across(all_of(unit_cols))) %>%
+    arrange(.data$time_hr, .by_group = TRUE) %>%
+    mutate(
+      valid_for_auc = (!is.na(.data$normalized_value) & is.finite(.data$normalized_value) & !is.na(.data$time_hr) & is.finite(.data$time_hr)),
+      next_time = lead(.data$time_hr),
+      next_val = lead(.data$normalized_value)
+    ) %>%
+    mutate(
+      inc_area = if_else(
+        .data$valid_for_auc & !is.na(.data$next_time) & is.finite(.data$next_time) & (.data$next_time > .data$time_hr) & !is.na(.data$next_val) & is.finite(.data$next_val),
+        (.data$next_time - .data$time_hr) * ((.data$normalized_value + .data$next_val) / 2),
+        0
+      ),
+      cumulative_auc = cumsum(replace_na(.data$inc_area, 0))
+    ) %>%
+    ungroup() %>%
+    select(all_of(unit_cols), .data$time_hr, .data$cumulative_auc)
+
+  values <- cumulative %>%
+    left_join(
+      point_data %>%
+        group_by(across(all_of(unit_cols))) %>%
+        summarise(n_valid_for_auc = sum(!is.na(.data$normalized_value) & is.finite(.data$normalized_value) & !is.na(.data$time_hr) & is.finite(.data$time_hr)), .groups = "drop"),
+      by = unit_cols
+    ) %>%
+    group_by(across(all_of(unit_cols))) %>%
+    summarise(
+      auc_value = if (first(.data$n_valid_for_auc) >= 2) max(.data$cumulative_auc, na.rm = TRUE) else NA_real_,
+      n_timepoints = n_distinct(.data$time_hr),
+      .groups = "drop"
+    ) %>%
+    mutate(analysis_unit_type = unit_type)
+
+  cumulative %>%
+    mutate(analysis_unit_type = unit_type)
+
+  list(cumulative = cumulative, values = values)
+}
+
+sample_auc <- compute_auc_tables(
+  analysis_data %>% filter(!is.na(sample_id_group) & sample_id_group != ""),
+  c("experiment_dir", "sample_id_group"),
+  "sample_id"
+)
+
+well_auc <- compute_auc_tables(
+  analysis_data %>% filter(is.na(sample_id_group) | sample_id_group == ""),
+  c("experiment_dir", "plate_id", "well_id"),
+  "well"
+)
+
+# Join cumulative_auc and auc_value back into analysis_data, preferring sample-level results.
+analysis_data <- analysis_data %>%
+  left_join(
+    sample_auc$cumulative %>% rename(sample_cumulative_auc = cumulative_auc),
+    by = c("experiment_dir", "sample_id_group", "time_hr")
+  ) %>%
+  left_join(
+    sample_auc$values %>% rename(sample_auc_value = auc_value, sample_n_timepoints = n_timepoints),
+    by = c("experiment_dir", "sample_id_group")
+  ) %>%
+  left_join(
+    well_auc$cumulative %>% rename(well_cumulative_auc = cumulative_auc),
+    by = c("experiment_dir", "plate_id", "well_id", "time_hr")
+  ) %>%
+  left_join(
+    well_auc$values %>% rename(well_auc_value = auc_value, well_n_timepoints = n_timepoints),
+    by = c("experiment_dir", "plate_id", "well_id")
   ) %>%
   mutate(
-    cumulative_auc = cumsum(replace_na(inc_area, 0))
-  ) %>%
-  ungroup() %>%
-  select(experiment_dir, plate_id, well_id, time_hr, cumulative_auc)
-
-# Number of valid points per well (needed to determine availability)
-valid_counts <- analysis_data %>%
-  group_by(experiment_dir, plate_id, well_id) %>%
-  summarise(n_valid_for_auc = sum(!is.na(normalized_value) & is.finite(normalized_value) & !is.na(time_hr) & is.finite(time_hr)), .groups = "drop")
-
-# Derive final auc_value per well (NA if fewer than 2 valid points)
-auc_value_per_well <- auc_cumulative %>%
-  left_join(valid_counts, by = c("experiment_dir", "plate_id", "well_id")) %>%
-  group_by(experiment_dir, plate_id, well_id) %>%
-  summarise(
-    auc_value = if_else(n_valid_for_auc >= 2, max(cumulative_auc, na.rm = TRUE), NA_real_),
-    .groups = "drop"
+    cumulative_auc = coalesce(sample_cumulative_auc, well_cumulative_auc),
+    auc_value = coalesce(sample_auc_value, well_auc_value),
+    n_timepoints = coalesce(sample_n_timepoints, well_n_timepoints),
+    analysis_unit_type = case_when(
+      !is.na(sample_auc_value) ~ "sample_id",
+      !is.na(well_auc_value) ~ "well",
+      TRUE ~ NA_character_
+    ),
+    analysis_unit_id = case_when(
+      !is.na(sample_auc_value) ~ paste(experiment_dir, sample_id_group, sep = "|"),
+      !is.na(well_auc_value) ~ paste(experiment_dir, plate_id, well_id, sep = "|"),
+      TRUE ~ NA_character_
+    )
   )
-
-# Ensure unique one-row-per-well to avoid many-to-many joins downstream
-auc_value_per_well <- auc_value_per_well %>%
-  distinct(experiment_dir, plate_id, well_id, .keep_all = TRUE)
-
-# Join cumulative_auc (per timepoint) and auc_value (per well) back into analysis_data
-analysis_data <- analysis_data %>%
-  left_join(auc_cumulative, by = c("experiment_dir", "plate_id", "well_id", "time_hr")) %>%
-  left_join(auc_value_per_well, by = c("experiment_dir", "plate_id", "well_id"))
 
 analysis_cols <- analysis_data %>%
   select(
@@ -344,8 +399,115 @@ plate_data_out <- plate_data %>%
     normalized_value
   )
 
-write_csv(plate_data_out, file.path(out_dir, "dashboard-data.csv"))
-write_csv(qc, file.path(out_dir, "dashboard-qc.csv"))
+  # Write main outputs
+  write_csv(plate_data_out, file.path(out_dir, "dashboard-data.csv"))
+  write_csv(qc, file.path(out_dir, "dashboard-qc.csv"))
 
-message("Wrote: ", file.path(out_dir, "dashboard-data.csv"))
-message("Wrote: ", file.path(out_dir, "dashboard-qc.csv"))
+  # --- Compute AUC statistics for dashboard ----------------------------------
+  # Identify group columns present in plate metadata
+  grouping_cols <- names(plate_data)[str_detect(names(plate_data), "_group$")]
+
+  auc_stats <- tibble()
+
+  if (length(grouping_cols) > 0) {
+    # Use the same sample-first AUC unit table as the plot data.
+    auc_for_stats <- analysis_data %>%
+      filter(!is.na(auc_value), !is_blank) %>%
+      mutate(
+        analysis_unit_type = if_else(!is.na(sample_id_group) & sample_id_group != "", "sample_id", "well"),
+        analysis_unit_id = if_else(
+          analysis_unit_type == "sample_id",
+          paste(experiment_dir, sample_id_group, sep = "|"),
+          paste(experiment_dir, plate_id, well_id, sep = "|")
+        )
+      ) %>%
+      group_by(experiment_dir, analysis_unit_type, analysis_unit_id, across(all_of(grouping_cols))) %>%
+      summarise(
+        auc_value = mean(auc_value, na.rm = TRUE),
+        n_wells = n_distinct(well_id),
+        n_timepoints = n_distinct(time_hr),
+        .groups = "drop"
+      )
+
+    for (gcol in grouping_cols) {
+      per_group <- auc_for_stats %>%
+        filter(!is.na(!!sym(gcol))) %>%
+        mutate(group_val = as.character(!!sym(gcol)))
+
+      if (nrow(per_group) == 0) next
+
+      for (exp in unique(per_group$experiment_dir)) {
+        per_exp <- per_group %>% filter(experiment_dir == exp)
+        if (nrow(per_exp) < 2) next
+
+        groups_present <- unique(per_exp$group_val)
+        if (length(groups_present) < 2) next
+
+        # Kruskal-Wallis across all groups
+        kw <- tryCatch(kruskal.test(auc_value ~ group_val, data = per_exp), error = function(e) NULL)
+        if (!is.null(kw)) {
+          auc_stats <- bind_rows(auc_stats, tibble(
+            experiment_dir = exp,
+            plate_id = NA_character_,
+            group_col = gcol,
+            analysis_unit_type = unique(per_exp$analysis_unit_type)[1],
+            comparison = "Kruskal-Wallis",
+            group1 = NA_character_,
+            group2 = NA_character_,
+            statistic = as.numeric(kw$statistic),
+            p_value = as.numeric(kw$p.value),
+            p_adj = as.numeric(kw$p.value),
+            n1 = NA_integer_,
+            n2 = NA_integer_,
+            median1 = NA_real_,
+            median2 = NA_real_,
+            n_wells1 = NA_integer_,
+            n_wells2 = NA_integer_,
+            n_timepoints1 = NA_integer_,
+            n_timepoints2 = NA_integer_
+          ))
+        }
+
+        # Pairwise Wilcoxon tests
+        pairs <- combn(groups_present, 2, simplify = FALSE)
+        pair_res <- map_dfr(pairs, function(pr) {
+          a <- pr[1]
+          b <- pr[2]
+          da <- per_exp %>% filter(group_val == a) %>% pull(auc_value)
+          db <- per_exp %>% filter(group_val == b) %>% pull(auc_value)
+          if (length(da) < 1 || length(db) < 1) return(tibble())
+          wt <- tryCatch(wilcox.test(da, db, exact = FALSE), error = function(e) NULL)
+          tibble(
+            experiment_dir = exp,
+            plate_id = NA_character_,
+            group_col = gcol,
+            analysis_unit_type = unique(per_exp$analysis_unit_type)[1],
+            comparison = "Wilcoxon",
+            group1 = a,
+            group2 = b,
+            statistic = if (!is.null(wt)) as.numeric(wt$statistic) else NA_real_,
+            p_value = if (!is.null(wt)) as.numeric(wt$p.value) else NA_real_,
+            n1 = length(da),
+            n2 = length(db),
+            median1 = median(da, na.rm = TRUE),
+            median2 = median(db, na.rm = TRUE),
+            n_wells1 = sum(per_exp$group_val == a, na.rm = TRUE),
+            n_wells2 = sum(per_exp$group_val == b, na.rm = TRUE),
+            n_timepoints1 = sum(per_exp$group_val == a, na.rm = TRUE),
+            n_timepoints2 = sum(per_exp$group_val == b, na.rm = TRUE)
+          )
+        })
+
+        if (nrow(pair_res) > 0) {
+          pair_res <- pair_res %>% mutate(p_adj = p.adjust(p_value, method = "BH"))
+          auc_stats <- bind_rows(auc_stats, pair_res)
+        }
+      }
+    }
+  }
+
+  write_csv(auc_stats, file.path(out_dir, "dashboard-stats.csv"))
+
+  message("Wrote: ", file.path(out_dir, "dashboard-data.csv"))
+  message("Wrote: ", file.path(out_dir, "dashboard-qc.csv"))
+  message("Wrote: ", file.path(out_dir, "dashboard-stats.csv"))
