@@ -1,0 +1,42 @@
+
+
+Software Version	3.16.10
+
+
+
+Experiment File Path:	C:\Users\Public\Documents\20260505-mgig-freshwater-RT\Experiment1.xpt
+Protocol File Path:	C:\Users\Public\Documents\Protocols\resazurin_12well.prt
+
+
+
+Plate Number	Plate 35
+Date	5/5/2026
+Time	11:11:11 AM
+Reader Type:	Synergy HTX
+Reader Serial Number:	25030704
+Reading Type	Reader
+
+Procedure Details
+
+Plate Type	12 WELL PLATE
+Eject plate on completion	
+Plate Out/In	
+Read	Fluorescence Endpoint
+	Full Plate
+	Filter Set 1
+	    Excitation: 528/20,  Emission: 590/20
+	    Optics: Top,  Gain: 35
+	Light Source: Tungsten,  Standard Dynamic Range
+	Read Speed: Normal,  Delay: 100 msec,  Measurements/Data Point: 10
+	Read Height: 4.5 mm
+
+
+
+Actual Temperature:	26.0
+
+Results
+	1	2	3	4
+A	281	253	248	136	528/20,590/20
+B	344	269	328	196	528/20,590/20
+C	283	274	281	217	528/20,590/20
+
