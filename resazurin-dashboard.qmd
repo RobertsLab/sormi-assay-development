@@ -430,17 +430,31 @@ initialValueByWell = (() => {
       a.well_id.localeCompare(b.well_id) ||
       a.time_hr - b.time_hr
     )
-
   for (const d of sorted) {
-    const key = `${d.experiment_dir}|${d.plate_id}|${d.well_id}`
-    if (!out.has(key)) out.set(key, d.value)
+    // Prefer a sample-level initial value when available (samples are often
+    // spread across plates at different timepoints). Fall back to a
+    // plate|well key when sample identifier is missing.
+    const sampleKey = d.sample_id_group == null || d.sample_id_group === ''
+      ? null
+      : `${d.experiment_dir}|sample|${d.sample_id_group}`
+    const plateKey = `${d.experiment_dir}|${d.plate_id}|${d.well_id}`
+
+    if (sampleKey !== null && !out.has(sampleKey)) out.set(sampleKey, d.value)
+    if (!out.has(plateKey)) out.set(plateKey, d.value)
   }
   return out
 })()
 
 paperMetabolismValue = d => {
-  const initKey = `${d.experiment_dir}|${d.plate_id}|${d.well_id}`
-  const initVal = initialValueByWell.get(initKey)
+  const sampleKey = d.sample_id_group == null || d.sample_id_group === ''
+    ? null
+    : `${d.experiment_dir}|sample|${d.sample_id_group}`
+
+  const plateKey = `${d.experiment_dir}|${d.plate_id}|${d.well_id}`
+  const initVal = (sampleKey !== null && initialValueByWell.has(sampleKey))
+    ? initialValueByWell.get(sampleKey)
+    : initialValueByWell.get(plateKey)
+
   const measurementVal = activeMeasurementCol === null ? NaN : Number(d[activeMeasurementCol])
   if (!Number.isFinite(d.value) || !Number.isFinite(initVal) || initVal === 0 || !Number.isFinite(measurementVal) || measurementVal <= 0) {
     return NaN
