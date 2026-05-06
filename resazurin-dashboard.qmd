@@ -575,18 +575,27 @@ aucData = (() => {
     const byTrace = new Map()
     for (const d of plottedSorted) {
       if (d.auc_value === null || d.auc_value === undefined || !Number.isFinite(d.auc_value)) continue
+      const timeVal = Number(d.time_hr)
       if (!byTrace.has(d.trace_id)) {
         byTrace.set(d.trace_id, {
           ...d,
           trace_id: d.trace_id,
           auc_value: d.auc_value,
-          n_timepoints: 1
+          _timepoints: new Set([timeVal])
         })
       } else {
-        byTrace.get(d.trace_id).n_timepoints += 1
+        const entry = byTrace.get(d.trace_id)
+        if (!entry._timepoints) entry._timepoints = new Set()
+        entry._timepoints.add(timeVal)
       }
     }
-    return [...byTrace.values()]
+    return [...byTrace.values()].map(e => {
+      const n_timepoints = e._timepoints ? [...e._timepoints].filter(t => Number.isFinite(t)).length : 1
+      const out = {...e}
+      out.n_timepoints = n_timepoints
+      delete out._timepoints
+      return out
+    })
   }
 
   // Fallback: compute on-the-fly (original behavior)
