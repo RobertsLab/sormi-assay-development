@@ -1696,81 +1696,8 @@ groupUnavailable
           return n.toFixed(3)
         }
 
-        const aucSignificanceLabels = (() => {
-          if (!aucPlotMode) return []
-          if (!activeGroupCol || activeWithinGroupCol !== null || activeAggregationMode === "Individual replicates") return []
-          if (significantPairs.length === 0 || aucData.length === 0) return []
-
-          const aucSeriesIds = [...new Set(aucData.map(d => String(d.series_id)).filter(v => v !== "" && v !== "Blank"))]
-          if (aucSeriesIds.length < 2) return []
-
-          const pairKey = (a, b) => [a, b].sort(naturalCompare).join("||")
-          const aucBySeries = new Map()
-          const significantPairSet = new Set(significantPairs.map(r => pairKey(String(r.group1), String(r.group2))))
-
-          for (const row of aucData) {
-            const seriesId = String(row.series_id)
-            if (!aucBySeries.has(seriesId)) aucBySeries.set(seriesId, [])
-            aucBySeries.get(seriesId).push(Number(row.auc_value))
-          }
-
-          const significantDegree = new Map(aucSeriesIds.map(seriesId => [seriesId, 0]))
-          for (const row of significantPairs) {
-            const group1 = String(row.group1)
-            const group2 = String(row.group2)
-            if (significantDegree.has(group1)) significantDegree.set(group1, significantDegree.get(group1) + 1)
-            if (significantDegree.has(group2)) significantDegree.set(group2, significantDegree.get(group2) + 1)
-          }
-
-          const orderedSeries = aucSeriesIds
-            .slice()
-            .sort((a, b) => {
-              const degreeA = significantDegree.get(a) || 0
-              const degreeB = significantDegree.get(b) || 0
-              if (degreeA !== degreeB) return degreeB - degreeA
-              const medianA = d3.median(aucBySeries.get(a) || []) ?? Number.POSITIVE_INFINITY
-              const medianB = d3.median(aucBySeries.get(b) || []) ?? Number.POSITIVE_INFINITY
-              if (medianA !== medianB) return medianA - medianB
-              return naturalCompare(a, b)
-            })
-
-          const letterGroups = []
-          const lettersBySeries = new Map(aucSeriesIds.map(seriesId => [seriesId, []]))
-
-          for (const seriesId of orderedSeries) {
-            const compatibleLetters = letterGroups.filter(letterGroup =>
-              [...letterGroup.members].every(member => !significantPairSet.has(pairKey(seriesId, member)))
-            )
-
-            if (compatibleLetters.length === 0) {
-              const label = significanceLabelForIndex(letterGroups.length)
-              const newLetterGroup = {label, members: new Set([seriesId])}
-              letterGroups.push(newLetterGroup)
-              lettersBySeries.get(seriesId)?.push(label)
-            } else {
-              compatibleLetters.forEach(letterGroup => {
-                letterGroup.members.add(seriesId)
-                lettersBySeries.get(seriesId)?.push(letterGroup.label)
-              })
-            }
-          }
-
-          const aucMax = d3.max(aucData, d => Number(d.auc_value))
-          const aucMin = d3.min(aucData, d => Number(d.auc_value))
-          const aucSpan = Number.isFinite(aucMax) && Number.isFinite(aucMin) ? Math.max(aucMax - aucMin, Math.abs(aucMax) || 1) : 1
-          const labelY = Number.isFinite(aucMax) ? aucMax + aucSpan * 0.08 : 1
-          const labelStep = aucSpan * 0.018
-
-          return aucSeriesIds.map((seriesId, index) => ({
-            series_id: seriesId,
-            sig_label: (lettersBySeries.get(seriesId) || []).join(""),
-            label_y: labelY + index * labelStep
-          }))
-        })()
-
-        const aucSignificanceNote = aucSignificanceLabels.length > 0
-          ? `Significance notation: groups sharing a letter are not significantly different after BH-adjusted pairwise Wilcoxon tests (p_adj > 0.05). Different letters indicate at least one significant pairwise difference (p_adj <= 0.05).`
-          : null
+        // Reuse the precomputed significance labels and note from `aucStatsContext`.
+        // The heavy stats computation is performed once in `aucStatsContext` above.
 
       if (relevantStats.length === 0) {
         const none = document.createElement("div")
