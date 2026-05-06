@@ -88,19 +88,19 @@ plate-A	H02	FALSE	5	88
 plate-A	H03	FALSE	5	48						
 plate-A	H04	FALSE	5	27						
 plate-A	H05	FALSE	5	59						
-plate-A	H06	FALSE	10	153						
-plate-A	H07	FALSE	10	149						
-plate-A	H08	FALSE	10	151						
-plate-A	H09	FALSE	10	147						
-plate-A	H10	FALSE	10	144						
-plate-A	H11	FALSE	10	148						
+plate-A	H06	FALSE	10	153					1010.162	5
+plate-A	H07	FALSE	10	149					725	2
+plate-A	H08	FALSE	10	151					587.061	4
+plate-A	H09	FALSE	10	147					663.776	9
+plate-A	H10	FALSE	10	144					1171.457	7
+plate-A	H11	FALSE	10	148					256.916	10
 plate-A	H12	TRUE		blank						
 plate-B	A01	FALSE	6	143						
 plate-B	A02	FALSE		139						
 plate-B	A03	FALSE		136						
 plate-B	A04	FALSE		134						
-plate-B	A05	FALSE	10	150						
-plate-B	A06	FALSE	10	152						
+plate-B	A05	FALSE	10	150					1143.849	1
+plate-B	A06	FALSE	10	152					829.535	3
 plate-B	A07	FALSE		137						
 plate-B	A08	FALSE		138						
 plate-B	A09	FALSE		135						
@@ -113,8 +113,8 @@ plate-B	B03	FALSE	2	166
 plate-B	B04	FALSE	2	168						
 plate-B	B05	FALSE	2	169						
 plate-B	B06	FALSE	2	171						
-plate-B	B07	FALSE	10	146						
-plate-B	B08	FALSE	10	145						
+plate-B	B07	FALSE	10	146					1038.62	6
+plate-B	B08	FALSE	10	145					856.647	8
 plate-B	B09	FALSE	2	164						
 plate-B	B10	FALSE	2	165						
 plate-B	B11	FALSE	2	162						
@@ -280,23 +280,23 @@ plate-C	H02	FALSE	9	118
 plate-C	H03	FALSE	5	109						
 plate-C	H04	FALSE	3	60						
 plate-C	H05	FALSE	5	89						
-plate-C	H06	FALSE	10	144						
-plate-C	H07	FALSE	10	148						
-plate-C	H08	FALSE	10	151						
-plate-C	H09	FALSE	10	147						
+plate-C	H06	FALSE	10	144					1171.457	7
+plate-C	H07	FALSE	10	148					256.916	10
+plate-C	H08	FALSE	10	151					587.061	4
+plate-C	H09	FALSE	10	147					663.776	9
 plate-C	H10	FALSE		139						
-plate-C	H11	FALSE	10	149						
+plate-C	H11	FALSE	10	149					725	2
 plate-C	H12	TRUE		blank						
 plate-D	A01	FALSE	6	143						
-plate-D	A02	FALSE	10	153						
+plate-D	A02	FALSE	10	153					1010.162	5
 plate-D	A03	FALSE		137						
 plate-D	A04	FALSE		138						
 plate-D	A05	FALSE		136						
 plate-D	A06	FALSE		134						
 plate-D	A07	FALSE		140						
 plate-D	A08	FALSE	6	142						
-plate-D	A09	FALSE	10	150						
-plate-D	A10	FALSE	10	152						
+plate-D	A09	FALSE	10	150					1143.849	1
+plate-D	A10	FALSE	10	152					829.535	3
 plate-D	A11	FALSE		135						
 plate-D	A12	FALSE	6	141						
 plate-D	B01	FALSE	1	53						
@@ -304,7 +304,7 @@ plate-D	B02	FALSE	1	28
 plate-D	B03	FALSE	1	76						
 plate-D	B04	FALSE	1	77						
 plate-D	B05	FALSE	1	119						
-plate-D	B06	FALSE	10	145						
+plate-D	B06	FALSE	10	145					856.647	8
 plate-D	B07	FALSE	8	130						
 plate-D	B08	FALSE	2	162						
 plate-D	B09	FALSE	2	163						
@@ -315,7 +315,7 @@ plate-D	C01	FALSE	2	169
 plate-D	C02	FALSE	8	161						
 plate-D	C03	FALSE	2	166						
 plate-D	C04	FALSE	2	168						
-plate-D	C05	FALSE	10	146						
+plate-D	C05	FALSE	10	146					1038.62	6
 plate-D	C06	FALSE	2	167						
 plate-D	C07	FALSE	2	170						
 plate-D	C08	FALSE	8	131						
@@ -472,22 +472,22 @@ plate-E	H02	FALSE	5	27
 plate-E	H03	FALSE	5	79						
 plate-E	H04	FALSE	3	23						
 plate-E	H05	FALSE	5	59						
-plate-E	H06	FALSE	10	151						
-plate-E	H07	FALSE	10	144						
-plate-E	H08	FALSE	10	147						
+plate-E	H06	FALSE	10	151					587.061	4
+plate-E	H07	FALSE	10	144					1171.457	7
+plate-E	H08	FALSE	10	147					663.776	9
 plate-E	H09	FALSE		138						
 plate-E	H10	FALSE		139						
-plate-E	H11	FALSE	10	149						
+plate-E	H11	FALSE	10	149					725	2
 plate-E	H12	TRUE		blank						
 plate-F	A01	FALSE	6	142						
-plate-F	A02	FALSE	10	148						
+plate-F	A02	FALSE	10	148					256.916	10
 plate-F	A03	FALSE	6	143						
 plate-F	A04	FALSE	6	141						
-plate-F	A05	FALSE	10	153						
+plate-F	A05	FALSE	10	153					1010.162	5
 plate-F	A06	FALSE		137						
-plate-F	A07	FALSE	10	152						
+plate-F	A07	FALSE	10	152					829.535	3
 plate-F	A08	FALSE		140						
-plate-F	A09	FALSE	10	150						
+plate-F	A09	FALSE	10	150					1143.849	1
 plate-F	A10	FALSE		136						
 plate-F	A11	FALSE		134						
 plate-F	A12	FALSE		135						
@@ -506,11 +506,11 @@ plate-F	B12	FALSE	1	77
 plate-F	C01	FALSE	3	43						
 plate-F	C02	FALSE	8	132						
 plate-F	C03	FALSE	8	160						
-plate-F	C04	FALSE	10	146						
+plate-F	C04	FALSE	10	146					1038.62	6
 plate-F	C05	FALSE	2	164						
 plate-F	C06	FALSE	8	174						
 plate-F	C07	FALSE	8	172						
-plate-F	C08	FALSE	10	145						
+plate-F	C08	FALSE	10	145					856.647	8
 plate-F	C09	FALSE	2	169						
 plate-F	C10	FALSE	8	161						
 plate-F	C11	FALSE	8	130						
@@ -667,22 +667,22 @@ plate-G	H05	FALSE	3	111
 plate-G	H06	TRUE		blank						
 plate-G	H07	FALSE		138						
 plate-G	H08	FALSE		139						
-plate-G	H09	FALSE	10	151						
-plate-G	H10	FALSE	10	144						
-plate-G	H11	FALSE	10	147						
+plate-G	H09	FALSE	10	151					587.061	4
+plate-G	H10	FALSE	10	144					1171.457	7
+plate-G	H11	FALSE	10	147					663.776	9
 plate-G	H12	FALSE	6	142						
-plate-H	A01	FALSE	10	148						
+plate-H	A01	FALSE	10	148					256.916	10
 plate-H	A02	FALSE	6	143						
 plate-H	A03	FALSE	6	141						
-plate-H	A04	FALSE	10	149						
-plate-H	A05	FALSE	10	152						
+plate-H	A04	FALSE	10	149					725	2
+plate-H	A05	FALSE	10	152					829.535	3
 plate-H	A06	FALSE		140						
 plate-H	A07	FALSE		134						
 plate-H	A08	FALSE		136						
 plate-H	A09	FALSE		135						
-plate-H	A10	FALSE	10	153						
+plate-H	A10	FALSE	10	153					1010.162	5
 plate-H	A11	FALSE		137						
-plate-H	A12	FALSE	10	150						
+plate-H	A12	FALSE	10	150					1143.849	1
 plate-H	B01	FALSE	3	101						
 plate-H	B02	FALSE	2	164						
 plate-H	B03	FALSE	2	166						
@@ -695,7 +695,7 @@ plate-H	B09	FALSE	8	172
 plate-H	B10	FALSE	1	119						
 plate-H	B11	FALSE	3	115						
 plate-H	B12	FALSE	8	174						
-plate-H	C01	FALSE	10	145						
+plate-H	C01	FALSE	10	145					856.647	8
 plate-H	C02	FALSE	1	77						
 plate-H	C03	FALSE	1	28						
 plate-H	C04	FALSE	3	86						
@@ -712,7 +712,7 @@ plate-H	D02	FALSE	2	165
 plate-H	D03	FALSE	8	161						
 plate-H	D04	FALSE	8	133						
 plate-H	D05	FALSE	8	160						
-plate-H	D06	FALSE	10	146						
+plate-H	D06	FALSE	10	146					1038.62	6
 plate-H	D07	FALSE	8	175						
 plate-H	D08	FALSE	8	130						
 plate-H	D09	FALSE	8	173						
@@ -858,23 +858,23 @@ plate-I	H04	FALSE	5	14
 plate-I	H05	FALSE	5	90						
 plate-I	H06	FALSE		136						
 plate-I	H07	FALSE		139						
-plate-I	H08	FALSE	10	148						
+plate-I	H08	FALSE	10	148					256.916	10
 plate-I	H09	FALSE		138						
-plate-I	H10	FALSE	10	147						
+plate-I	H10	FALSE	10	147					663.776	9
 plate-I	H11	FALSE	6	141						
 plate-I	H12	TRUE		blank						
-plate-J	A01	FALSE	10	144						
-plate-J	A02	FALSE	10	151						
+plate-J	A01	FALSE	10	144					1171.457	7
+plate-J	A02	FALSE	10	151					587.061	4
 plate-J	A03	FALSE		135						
-plate-J	A04	FALSE	10	149						
+plate-J	A04	FALSE	10	149					725	2
 plate-J	A05	FALSE	6	143						
 plate-J	A06	FALSE		137						
-plate-J	A07	FALSE	10	150						
+plate-J	A07	FALSE	10	150					1143.849	1
 plate-J	A08	FALSE		140						
 plate-J	A09	FALSE		134						
 plate-J	A10	FALSE	6	142						
-plate-J	A11	FALSE	10	153						
-plate-J	A12	FALSE	10	152						
+plate-J	A11	FALSE	10	153					1010.162	5
+plate-J	A12	FALSE	10	152					829.535	3
 plate-J	B01	FALSE	8	130						
 plate-J	B02	FALSE	8	173						
 plate-J	B03	FALSE	8	132						
@@ -882,14 +882,14 @@ plate-J	B04	FALSE	3	25
 plate-J	B05	FALSE	8	175						
 plate-J	B06	FALSE	1	76						
 plate-J	B07	FALSE	8	160						
-plate-J	B08	FALSE	10	146						
+plate-J	B08	FALSE	10	146					1038.62	6
 plate-J	B09	FALSE	3	86						
 plate-J	B10	FALSE	3	17						
 plate-J	B11	FALSE	1	28						
 plate-J	B12	FALSE	2	170						
 plate-J	C01	FALSE	2	169						
 plate-J	C02	FALSE	3	43						
-plate-J	C03	FALSE	10	145						
+plate-J	C03	FALSE	10	145					856.647	8
 plate-J	C04	FALSE	1	77						
 plate-J	C05	FALSE	2	163						
 plate-J	C06	FALSE	2	171						
