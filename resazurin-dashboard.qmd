@@ -209,7 +209,7 @@ viewof groupValSel = Inputs.select(
 
 measurementColumns = selectionRows.length > 0
   ? Object.keys(selectionRows[0]).filter(
-      k => /_measur(?:e)?ment$/.test(k) && selectionRows.some(d => Number.isFinite(d[k]))
+      k => /_measur(?:e)?ment$/.test(k) && selectionRows.some(d => Number.isFinite(Number(d[k])))
     )
   : []
 
@@ -441,7 +441,7 @@ initialValueByWell = (() => {
 paperMetabolismValue = d => {
   const initKey = `${d.experiment_dir}|${d.plate_id}|${d.well_id}`
   const initVal = initialValueByWell.get(initKey)
-  const measurementVal = activeMeasurementCol === null ? NaN : d[activeMeasurementCol]
+  const measurementVal = activeMeasurementCol === null ? NaN : Number(d[activeMeasurementCol])
   if (!Number.isFinite(d.value) || !Number.isFinite(initVal) || initVal === 0 || !Number.isFinite(measurementVal) || measurementVal <= 0) {
     return NaN
   }
@@ -452,7 +452,7 @@ paperMetabolismValue = d => {
 
 plottedBase = dataViewSel === "Measurement-normalized fluorescence"
   ? filtered.map(d => {
-      const denom = activeMeasurementCol === null ? NaN : d[activeMeasurementCol]
+      const denom = activeMeasurementCol === null ? NaN : Number(d[activeMeasurementCol])
       const valid = Number.isFinite(d.value) && d.value > 0 && Number.isFinite(denom) && denom > 0
       return {
         ...d,
