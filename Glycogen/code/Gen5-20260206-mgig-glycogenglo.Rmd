@@ -26,6 +26,16 @@ knitr::opts_chunk$set(
 
 plate_layout <- read.csv("https://raw.githubusercontent.com/RobertsLab/sormi-assay-development/refs/heads/main/Glycogen/data/raw_luminescence/layout-Gen5-20260206-mgig-glycogenglo.csv", header = FALSE)
 raw_luminescence <- read.csv("https://raw.githubusercontent.com/RobertsLab/sormi-assay-development/refs/heads/main/Glycogen/data/raw_luminescence/raw_lum-Gen5-20260206-mgig-glycogenglo.csv", header = FALSE)
+tissue_weights <- read.csv("https://raw.githubusercontent.com/RobertsLab/sormi-assay-development/refs/heads/main/Glycogen/data/20251210-mgig-ctenidia_weights-glycogen_assay.csv")
+
+# Homogenate volume (µL): 750 µL PBS/HCl + 250 µL TRIS buffer = 1000 µL total
+homogenate_volume_uL <- 1000
+
+# Helper function to extract tissue weight from plate layout label
+# Label format: "<sampleID>-<type>-<weight>-df.<dilution>", e.g., "B8-glyc-31-df.20"
+get_weight_from_label <- function(label) {
+  as.numeric(gsub("^[^-]+-[a-z]+-([0-9.]+)-df.*", "\\1", as.character(label)))
+}
 
 cat("Plate layout:\n")
 str(plate_layout)
@@ -584,17 +594,28 @@ for (i in 1:nrow(glycogen_summary_data)) {
 
 
 ```{r, sample glycogen calculations}
-tab <- matrix(c(glyc_B8_dilution, glyc_B8_mean_lum, glyc_B8_mean_conc,  (glyc_B8_dilution*glyc_B8_mean_conc), 
-                glyc_C1_dilution, glyc_C1_mean_lum, glyc_C1_mean_conc,  (glyc_C1_dilution*glyc_C1_mean_conc), 
-                glyc_C2_dilution, glyc_C2_mean_lum, glyc_C2_mean_conc,  (glyc_C2_dilution*glyc_C2_mean_conc), 
-                glyc_C3_dilution, glyc_C3_mean_lum, glyc_C3_mean_conc,  (glyc_C3_dilution*glyc_C3_mean_conc), 
-                glyc_C4_dilution, glyc_C4_mean_lum, glyc_C4_mean_conc,  (glyc_C4_dilution*glyc_C4_mean_conc), 
-                glyc_C5_dilution, glyc_C5_mean_lum, glyc_C5_mean_conc,  (glyc_C5_dilution*glyc_C5_mean_conc), 
-                glyc_C6_dilution, glyc_C6_mean_lum, glyc_C6_mean_conc,  (glyc_C6_dilution*glyc_C6_mean_conc), 
-                glyc_C7_dilution, glyc_C7_mean_lum, glyc_C7_mean_conc,  (glyc_C7_dilution*glyc_C7_mean_conc), 
-                glyc_C8_dilution, glyc_C8_mean_lum, glyc_C8_mean_conc,  (glyc_C8_dilution*glyc_C8_mean_conc), 
-                glyc_D1_dilution, glyc_D1_mean_lum, glyc_D1_mean_conc,  (glyc_D1_dilution*glyc_D1_mean_conc)), ncol=4, byrow=TRUE)
-colnames(tab) <- c('Dilution factor','Luminescence','Calculated Glycogen (ug/uL)', 'Total glycogen (ug/uL)')
+wt_B8 <- get_weight_from_label(plate_layout[1, 1])
+wt_C1 <- get_weight_from_label(plate_layout[2, 1])
+wt_C2 <- get_weight_from_label(plate_layout[3, 1])
+wt_C3 <- get_weight_from_label(plate_layout[4, 1])
+wt_C4 <- get_weight_from_label(plate_layout[5, 1])
+wt_C5 <- get_weight_from_label(plate_layout[1, 4])
+wt_C6 <- get_weight_from_label(plate_layout[2, 4])
+wt_C7 <- get_weight_from_label(plate_layout[3, 4])
+wt_C8 <- get_weight_from_label(plate_layout[4, 4])
+wt_D1 <- get_weight_from_label(plate_layout[5, 4])
+
+tab <- matrix(c(glyc_B8_dilution, glyc_B8_mean_lum, glyc_B8_mean_conc,  (glyc_B8_dilution*glyc_B8_mean_conc), (glyc_B8_dilution*glyc_B8_mean_conc*homogenate_volume_uL)/wt_B8,
+                glyc_C1_dilution, glyc_C1_mean_lum, glyc_C1_mean_conc,  (glyc_C1_dilution*glyc_C1_mean_conc), (glyc_C1_dilution*glyc_C1_mean_conc*homogenate_volume_uL)/wt_C1,
+                glyc_C2_dilution, glyc_C2_mean_lum, glyc_C2_mean_conc,  (glyc_C2_dilution*glyc_C2_mean_conc), (glyc_C2_dilution*glyc_C2_mean_conc*homogenate_volume_uL)/wt_C2,
+                glyc_C3_dilution, glyc_C3_mean_lum, glyc_C3_mean_conc,  (glyc_C3_dilution*glyc_C3_mean_conc), (glyc_C3_dilution*glyc_C3_mean_conc*homogenate_volume_uL)/wt_C3,
+                glyc_C4_dilution, glyc_C4_mean_lum, glyc_C4_mean_conc,  (glyc_C4_dilution*glyc_C4_mean_conc), (glyc_C4_dilution*glyc_C4_mean_conc*homogenate_volume_uL)/wt_C4,
+                glyc_C5_dilution, glyc_C5_mean_lum, glyc_C5_mean_conc,  (glyc_C5_dilution*glyc_C5_mean_conc), (glyc_C5_dilution*glyc_C5_mean_conc*homogenate_volume_uL)/wt_C5,
+                glyc_C6_dilution, glyc_C6_mean_lum, glyc_C6_mean_conc,  (glyc_C6_dilution*glyc_C6_mean_conc), (glyc_C6_dilution*glyc_C6_mean_conc*homogenate_volume_uL)/wt_C6,
+                glyc_C7_dilution, glyc_C7_mean_lum, glyc_C7_mean_conc,  (glyc_C7_dilution*glyc_C7_mean_conc), (glyc_C7_dilution*glyc_C7_mean_conc*homogenate_volume_uL)/wt_C7,
+                glyc_C8_dilution, glyc_C8_mean_lum, glyc_C8_mean_conc,  (glyc_C8_dilution*glyc_C8_mean_conc), (glyc_C8_dilution*glyc_C8_mean_conc*homogenate_volume_uL)/wt_C8,
+                glyc_D1_dilution, glyc_D1_mean_lum, glyc_D1_mean_conc,  (glyc_D1_dilution*glyc_D1_mean_conc), (glyc_D1_dilution*glyc_D1_mean_conc*homogenate_volume_uL)/wt_D1), ncol=5, byrow=TRUE)
+colnames(tab) <- c('Dilution factor','Luminescence','Calculated Glycogen (ug/uL)', 'Total glycogen (ug/uL)', 'Normalized glycogen (ug/mg tissue)')
 rownames(tab) <- c('B8','C1','C2','C3','C4','C5','C6','C7','C8','D1' )
 tab <- as.table(tab)
 tab
@@ -1140,17 +1161,17 @@ for (i in 1:nrow(glucose_summary_data)) {
 
 
 ```{r, sample glucose calculations}
-tab <- matrix(c(glu_B8_dilution, glu_B8_mean_lum, glu_B8_mean_conc,  (glu_B8_dilution*glu_B8_mean_conc), 
-                glu_C1_dilution, glu_C1_mean_lum, glu_C1_mean_conc,  (glu_C1_dilution*glu_C1_mean_conc), 
-                glu_C2_dilution, glu_C2_mean_lum, glu_C2_mean_conc,  (glu_C2_dilution*glu_C2_mean_conc), 
-                glu_C3_dilution, glu_C3_mean_lum, glu_C3_mean_conc,  (glu_C3_dilution*glu_C3_mean_conc), 
-                glu_C4_dilution, glu_C4_mean_lum, glu_C4_mean_conc,  (glu_C4_dilution*glu_C4_mean_conc), 
-                glu_C5_dilution, glu_C5_mean_lum, glu_C5_mean_conc,  (glu_C5_dilution*glu_C5_mean_conc), 
-                glu_C6_dilution, glu_C6_mean_lum, glu_C6_mean_conc,  (glu_C6_dilution*glu_C6_mean_conc), 
-                glu_C7_dilution, glu_C7_mean_lum, glu_C7_mean_conc,  (glu_C7_dilution*glu_C7_mean_conc), 
-                glu_C8_dilution, glu_C8_mean_lum, glu_C8_mean_conc,  (glu_C8_dilution*glu_C8_mean_conc), 
-                glu_D1_dilution, glu_D1_mean_lum, glu_D1_mean_conc,  (glu_D1_dilution*glu_D1_mean_conc)), ncol=4, byrow=TRUE)
-colnames(tab) <- c('Dilution factor','Luminescence','Calculated glucose (ug/uL)', 'Total glucose (ug/uL)')
+tab <- matrix(c(glu_B8_dilution, glu_B8_mean_lum, glu_B8_mean_conc,  (glu_B8_dilution*glu_B8_mean_conc), (glu_B8_dilution*glu_B8_mean_conc*homogenate_volume_uL)/wt_B8,
+                glu_C1_dilution, glu_C1_mean_lum, glu_C1_mean_conc,  (glu_C1_dilution*glu_C1_mean_conc), (glu_C1_dilution*glu_C1_mean_conc*homogenate_volume_uL)/wt_C1,
+                glu_C2_dilution, glu_C2_mean_lum, glu_C2_mean_conc,  (glu_C2_dilution*glu_C2_mean_conc), (glu_C2_dilution*glu_C2_mean_conc*homogenate_volume_uL)/wt_C2,
+                glu_C3_dilution, glu_C3_mean_lum, glu_C3_mean_conc,  (glu_C3_dilution*glu_C3_mean_conc), (glu_C3_dilution*glu_C3_mean_conc*homogenate_volume_uL)/wt_C3,
+                glu_C4_dilution, glu_C4_mean_lum, glu_C4_mean_conc,  (glu_C4_dilution*glu_C4_mean_conc), (glu_C4_dilution*glu_C4_mean_conc*homogenate_volume_uL)/wt_C4,
+                glu_C5_dilution, glu_C5_mean_lum, glu_C5_mean_conc,  (glu_C5_dilution*glu_C5_mean_conc), (glu_C5_dilution*glu_C5_mean_conc*homogenate_volume_uL)/wt_C5,
+                glu_C6_dilution, glu_C6_mean_lum, glu_C6_mean_conc,  (glu_C6_dilution*glu_C6_mean_conc), (glu_C6_dilution*glu_C6_mean_conc*homogenate_volume_uL)/wt_C6,
+                glu_C7_dilution, glu_C7_mean_lum, glu_C7_mean_conc,  (glu_C7_dilution*glu_C7_mean_conc), (glu_C7_dilution*glu_C7_mean_conc*homogenate_volume_uL)/wt_C7,
+                glu_C8_dilution, glu_C8_mean_lum, glu_C8_mean_conc,  (glu_C8_dilution*glu_C8_mean_conc), (glu_C8_dilution*glu_C8_mean_conc*homogenate_volume_uL)/wt_C8,
+                glu_D1_dilution, glu_D1_mean_lum, glu_D1_mean_conc,  (glu_D1_dilution*glu_D1_mean_conc), (glu_D1_dilution*glu_D1_mean_conc*homogenate_volume_uL)/wt_D1), ncol=5, byrow=TRUE)
+colnames(tab) <- c('Dilution factor','Luminescence','Calculated glucose (ug/uL)', 'Total glucose (ug/uL)', 'Normalized glucose (ug/mg tissue)')
 rownames(tab) <- c('B8','C1','C2','C3','C4','C5','C6','C7','C8','D1' )
 tab <- as.table(tab)
 tab
