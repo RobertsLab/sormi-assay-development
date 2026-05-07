@@ -1,0 +1,225 @@
+---
+title: "00.00-mgig-heat-survivorship.Rmd"
+author: "Sam White"
+date: "2026-05-07"
+output: 
+  github_document:
+    toc: true
+    number_sections: true
+  bookdown::html_document2:
+    theme: cosmo
+    toc: true
+    toc_float: true
+    number_sections: true
+    code_folding: show
+    code_download: true
+  html_document:
+    theme: cosmo
+    toc: true
+    toc_float: true
+    number_sections: true
+    code_folding: show
+    code_download: true
+---
+
+# BACKGROUND
+
+This is a Kaplan-Meier survival analysis of 33<sup>o</sup>C heat stress of _Magallana gigas_ oysters, [conducted on 20260427](https://github.com/RobertsLab/sormi-assay-development/tree/main/heat-survivorship/20260427-33C-USDA-families) (GitHub repo). It compares 9 different families bred/selected by the USDA.
+
+These oysters had been [previously heat stressed @ 36<sup>o</sup>C and assessed by the resazurin assay on 20260415](https://github.com/RobertsLab/sormi-assay-development/blob/main/Resazurin/20260415-36C/README.md) (GitHub README)
+
+## SETUP
+
+### Load packages
+
+```{r setup, message=FALSE, warning=FALSE}
+library(readr)
+library(dplyr)
+library(survival)
+library(ggplot2)
+
+knitr::opts_chunk$set(
+  echo = TRUE,         # Display code chunks
+  eval = FALSE,        # Evaluate code chunks
+  warning = FALSE,     # Hide warnings
+  message = FALSE,     # Hide messages
+  comment = ""         # Prevents appending '##' to beginning of lines in code output
+)
+```
+
+
+### Read in and view raw data
+
+```{r read-raw-data}
+survivorship_raw <- read_csv(
+	"../heat-survivorship/20260427-33C-USDA-families/survivorship.csv",
+	show_col_types = FALSE
+)
+
+# Preview newly created object
+str(survivorship_raw)
+```
+
+
+## ANALYSIS
+
+### Clean and standardize columns used for survival analysis
+
+```{r clean-columns, message=FALSE, warning=FALSE}
+survivorship_clean <- survivorship_raw %>%
+	mutate(
+		individual_id = as.character(individual_id),
+		family_group = as.character(`familly_id.group`),
+		timepoint_hrs = as.numeric(timepoint_hrs),
+		alive_chr = toupper(trimws(as.character(`alive.measurement`))),
+		alive = case_when(
+			alive_chr %in% c("TRUE", "T", "1", "YES", "Y") ~ TRUE,
+			alive_chr %in% c("FALSE", "F", "0", "NO", "N") ~ FALSE,
+			TRUE ~ NA
+		)
+	) %>%
+	select(
+		individual_id,
+		family_group,
+		timepoint_count,
+		timepoint_hrs,
+		alive,
+		date,
+		time,
+		everything()
+	)
+
+# Preview newly created object
+str(survivorship_clean)
+summary(survivorship_clean$alive)
+```
+
+### Reduce repeated observations to one survival row per individual
+
+```{r build-individual-survival, message=FALSE, warning=FALSE}
+individual_survival <- survivorship_clean %>%
+	filter(!is.na(individual_id), !is.na(timepoint_hrs), !is.na(alive)) %>%
+	arrange(individual_id, timepoint_hrs) %>%
+	group_by(individual_id) %>%
+	summarise(
+		family_group = first(family_group[!is.na(family_group)]),
+		event = if_else(any(!alive), 1L, 0L),
+		time_to_event = if_else(
+			any(!alive),
+			min(timepoint_hrs[!alive]),
+			max(timepoint_hrs)
+		),
+		n_observations = n(),
+		.groups = "drop"
+	)
+
+# Preview newly created object
+str(individual_survival)
+summary(individual_survival$time_to_event)
+table(individual_survival$event)
+```
+
+### Create Surv object and fit Kaplan-Meier models
+
+```{r fit-km-models, message=FALSE, warning=FALSE}
+surv_object <- with(individual_survival, Surv(time = time_to_event, event = event))
+
+km_fit_overall <- survfit(surv_object ~ 1, data = individual_survival)
+km_fit_by_family <- survfit(surv_object ~ family_group, data = individual_survival)
+
+# Preview newly created objects
+print(km_fit_overall)
+print(km_fit_by_family)
+str(km_fit_overall)
+str(km_fit_by_family)
+```
+
+### Perform log-rank test to compare survival between families
+
+```{r log-rank-test, message=FALSE, warning=FALSE}
+logrank_test <- survdiff(surv_object ~ family_group, data = individual_survival)
+
+# Display test results
+print(logrank_test)
+
+# Extract and report key statistics
+cat("\n=== Log-Rank Test Summary ===\n")
+cat("Chi-square statistic:", logrank_test$chisq, "\n")
+cat("Degrees of freedom:", length(logrank_test$n) - 1, "\n")
+cat("p-value:", 1 - pchisq(logrank_test$chisq, df = length(logrank_test$n) - 1), "\n")
+cat("\nInterpretation:\n")
+p_val <- 1 - pchisq(logrank_test$chisq, df = length(logrank_test$n) - 1)
+if (p_val < 0.05) {
+  cat("p < 0.05: Family groups show SIGNIFICANTLY DIFFERENT survival (reject null hypothesis)\n")
+} else {
+  cat("p >= 0.05: No significant difference in survival detected between family groups\n")
+}
+```
+
+### Convert Kaplan-Meier fit to plotting data frames
+
+```{r build-plot-data, message=FALSE, warning=FALSE}
+km_overall_df <- summary(km_fit_overall) %>%
+	with(
+		data.frame(
+			time = time,
+			surv = surv,
+			n_risk = n.risk,
+			n_event = n.event,
+			n_censor = n.censor
+		)
+	)
+
+km_family_df <- summary(km_fit_by_family) %>%
+	with(
+		data.frame(
+			time = time,
+			surv = surv,
+			n_risk = n.risk,
+			n_event = n.event,
+			n_censor = n.censor,
+			strata = strata
+		)
+	) %>%
+	mutate(family_group = sub("^family_group=", "", strata))
+
+# Preview newly created objects
+head(km_overall_df)
+str(km_overall_df)
+
+head(km_family_df)
+str(km_family_df)
+```
+
+## PLOTS
+
+### Plot Kaplan-Meier curves
+
+#### Overall
+
+```{r plot-km-overall, fig.width=8, fig.height=5, message=FALSE, warning=FALSE}
+ggplot(km_overall_df, aes(x = time, y = surv)) +
+	geom_step(linewidth = 1.1) +
+	labs(
+		title = "Kaplan-Meier Survival Curve (Overall)",
+		x = "Time (hours)",
+		y = "Survival probability"
+	) +
+	ylim(0, 1) +
+	theme_minimal(base_size = 12)
+```
+
+#### Families
+
+```{r plot-km-by-family, fig.width=9, fig.height=6, message=FALSE, warning=FALSE}
+ggplot(km_family_df, aes(x = time, y = surv, color = family_group)) +
+	geom_step(linewidth = 1.0) +
+	labs(
+		title = "Kaplan-Meier Survival Curves by Family Group",
+		x = "Time (hours)",
+		y = "Survival probability",
+		color = "Family group"
+	) +
+	ylim(0, 1) +
+	theme_minimal(base_size = 12)
+```
