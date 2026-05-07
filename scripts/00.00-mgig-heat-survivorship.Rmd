@@ -108,11 +108,13 @@ individual_survival <- survivorship_clean %>%
 	summarise(
 		family_group = first(family_group[!is.na(family_group)]),
 		event = if_else(any(!alive), 1L, 0L),
-		time_to_event = if_else(
-			any(!alive),
-			min(timepoint_hrs[!alive]),
-			max(timepoint_hrs)
-		),
+		time_to_event = {
+			if (any(!alive)) {
+				min(timepoint_hrs[!alive])
+			} else {
+				max(timepoint_hrs)
+			}
+		},
 		n_observations = n(),
 		.groups = "drop"
 	)
@@ -171,29 +173,50 @@ if (p_val < 0.05) {
 ### Convert Kaplan-Meier fit to plotting data frames
 
 ```{r build-plot-data, message=FALSE, warning=FALSE}
-km_overall_df <- summary(km_fit_overall) %>%
-	with(
-		data.frame(
-			time = time,
-			surv = surv,
-			n_risk = n.risk,
-			n_event = n.event,
-			n_censor = n.censor
+km_overall_df <- bind_rows(
+	data.frame(
+		time = 0,
+		surv = 1,
+		n_risk = km_fit_overall$n,
+		n_event = 0,
+		n_censor = 0
+	),
+	summary(km_fit_overall) %>%
+		with(
+			data.frame(
+				time = time,
+				surv = surv,
+				n_risk = n.risk,
+				n_event = n.event,
+				n_censor = n.censor
+			)
 		)
-	)
+) %>%
+	arrange(time)
 
-km_family_df <- summary(km_fit_by_family) %>%
-	with(
-		data.frame(
-			time = time,
-			surv = surv,
-			n_risk = n.risk,
-			n_event = n.event,
-			n_censor = n.censor,
-			strata = strata
+km_family_df <- bind_rows(
+	data.frame(
+		time = 0,
+		surv = 1,
+		n_risk = as.numeric(km_fit_by_family$n),
+		n_event = 0,
+		n_censor = 0,
+		strata = names(km_fit_by_family$strata)
+	),
+	summary(km_fit_by_family) %>%
+		with(
+			data.frame(
+				time = time,
+				surv = surv,
+				n_risk = n.risk,
+				n_event = n.event,
+				n_censor = n.censor,
+				strata = strata
+			)
 		)
-	) %>%
-	mutate(family_group = sub("^family_group=", "", strata))
+) %>%
+	mutate(family_group = sub("^family_group=", "", strata)) %>%
+	arrange(family_group, time)
 
 # Preview newly created objects
 cat("\n=== km_overall_df: head() ===\n")
