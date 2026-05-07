@@ -40,10 +40,11 @@ library(ggplot2)
 
 knitr::opts_chunk$set(
   echo = TRUE,         # Display code chunks
-  eval = FALSE,        # Evaluate code chunks
+  eval = TRUE,        # Evaluate code chunks
   warning = FALSE,     # Hide warnings
   message = FALSE,     # Hide messages
-  comment = ""         # Prevents appending '##' to beginning of lines in code output
+  comment = "",         # Prevents appending '##' to beginning of lines in code output
+  results = 'hold'     # Holds output so it's all printed together after code chunk
 )
 ```
 
@@ -57,6 +58,7 @@ survivorship_raw <- read_csv(
 )
 
 # Preview newly created object
+cat("\n=== survivorship_raw: str() ===\n")
 str(survivorship_raw)
 ```
 
@@ -90,7 +92,9 @@ survivorship_clean <- survivorship_raw %>%
 	)
 
 # Preview newly created object
+cat("\n=== survivorship_clean: str() ===\n")
 str(survivorship_clean)
+cat("\n=== survivorship_clean: summary(alive) ===\n")
 summary(survivorship_clean$alive)
 ```
 
@@ -114,8 +118,11 @@ individual_survival <- survivorship_clean %>%
 	)
 
 # Preview newly created object
+cat("\n=== individual_survival: str() ===\n")
 str(individual_survival)
+cat("\n=== individual_survival: summary(time_to_event) ===\n")
 summary(individual_survival$time_to_event)
+cat("\n=== individual_survival: table(event) ===\n")
 table(individual_survival$event)
 ```
 
@@ -128,9 +135,13 @@ km_fit_overall <- survfit(surv_object ~ 1, data = individual_survival)
 km_fit_by_family <- survfit(surv_object ~ family_group, data = individual_survival)
 
 # Preview newly created objects
+cat("\n=== km_fit_overall ===\n")
 print(km_fit_overall)
+cat("\n=== km_fit_by_family ===\n")
 print(km_fit_by_family)
+cat("\n=== km_fit_overall: str() ===\n")
 str(km_fit_overall)
+cat("\n=== km_fit_by_family: str() ===\n")
 str(km_fit_by_family)
 ```
 
@@ -140,6 +151,7 @@ str(km_fit_by_family)
 logrank_test <- survdiff(surv_object ~ family_group, data = individual_survival)
 
 # Display test results
+cat("\n=== Log-rank test: survdiff() output ===\n")
 print(logrank_test)
 
 # Extract and report key statistics
@@ -184,10 +196,14 @@ km_family_df <- summary(km_fit_by_family) %>%
 	mutate(family_group = sub("^family_group=", "", strata))
 
 # Preview newly created objects
-head(km_overall_df)
+cat("\n=== km_overall_df: head() ===\n")
+print(head(km_overall_df))
+cat("\n=== km_overall_df: str() ===\n")
 str(km_overall_df)
 
-head(km_family_df)
+cat("\n=== km_family_df: head() ===\n")
+print(head(km_family_df))
+cat("\n=== km_family_df: str() ===\n")
 str(km_family_df)
 ```
 
