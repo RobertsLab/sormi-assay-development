@@ -11,7 +11,7 @@ Subdirectories created here can be automatically parsed and have the data plotte
 
 1. Exported plate reader files with filenames like: `plate-<label>-T<hour>.txt`
 
-2. A `layout.txt` file. See the `example-layout.txt` file in this directory for an example.
+2. A `layout.csv` file. See the `example-layout.csv` file in this directory for an example.
 
 Visit https://sormi.science/resazurin-dashboard.html to view plots.
 
@@ -20,7 +20,7 @@ Visit https://sormi.science/resazurin-dashboard.html to view plots.
 
 ### FILES
 
-- [`example-layout.txt`](https://github.com/RobertsLab/sormi-assay-development/blob/main/Resazurin/example-layout.txt): This is an example/template file for use with the automatic plotting of data found in experiment subdirectories.
+- [`example-layout.csv`](https://github.com/RobertsLab/sormi-assay-development/blob/main/Resazurin/example-layout.csv): This is an example/template file for use with the automatic plotting of data found in experiment subdirectories.
 
     - `plate_ID`: This should match the `plate-<label>` portion of the plate reader filename.
     - `is_blank`: This should be either `TRUE` or `FALSE`.

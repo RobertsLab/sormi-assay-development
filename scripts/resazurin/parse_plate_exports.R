@@ -424,7 +424,7 @@ parse_layout_txt <- function(layout_path) {
 }
 
 parse_layout_for_experiment <- function(experiment_dir_path) {
-  layout_path <- file.path(experiment_dir_path, "layout.txt")
+  layout_path <- file.path(experiment_dir_path, "layout.csv")
   if (!file.exists(layout_path)) {
     return(tibble(
       plate_id = character(),
