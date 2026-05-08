@@ -607,6 +607,8 @@ print("All samples have calculated glycogen > 20 ug/uL, and are therefore out of
 
 ## Glucose Standard Curve
 
+### Extract glucose luminescence data
+
 ```{r glucose standard data, include=TRUE}
 # Extract glycogen standard curve data from plate layout and raw luminescence.
 # Rows F, G, H (rows 6, 7, 8) correspond to glycogen standards
@@ -1169,7 +1171,7 @@ tab
 
 Note: the ‘glycogen’ readout includes background glucose - the ‘Glycogen-Glucose’ number is a more accurate measurement of glycogen levels, as this removes the contribution of background glucose
 
-All samples were out of the standard curve range. Samples A1-A5 were re-run on 20260126 (df.2 and 4) but were still out of the range. Re-running A1-A5 on 20260130 (Gen5-20260130-mgig-glycogenglo.md) with 20 and 100 fold dilutions brought samples within the standard curve range. Samples A6-B2 were re-run with df.20 on 20260204 9Gen5-20260204-mgig-glycogenglo.md), and were within standard curve range.
+All samples were out of the standard curve range. Samples A1-A5 were re-run on 20260126 (df.2 and 4) but were still out of the range. Re-running A1-A5 on 20260130 (Gen5-20260130-mgig-glycogenglo.md) with 20 and 100 fold dilutions brought samples within the standard curve range. Samples A6-B2 were re-run with df.20 on 20260204 (Gen5-20260204-mgig-glycogenglo.md), and were within standard curve range.
 
 ```{r, Overall summary table}
 tab <- matrix(c(as.numeric(weights[1,2]), glyc_A1_dilution, glyc_A1_mean_conc, glu_A1_mean_conc, (glyc_A1_mean_conc-glu_A1_mean_conc), ((glyc_A1_mean_conc-glu_A1_mean_conc)*(glyc_A1_dilution/as.numeric(weights[1,2]))), 

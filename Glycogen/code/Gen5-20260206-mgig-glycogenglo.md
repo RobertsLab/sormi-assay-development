@@ -15,13 +15,15 @@ Hazel Abrahamson-Amerine
       points](#114-plot-glycogen-standard-curve-sample-points)
     - [1.1.5 Glycogen summary table](#115-glycogen-summary-table)
   - [1.2 Glucose Standard Curve](#12-glucose-standard-curve)
-    - [1.2.1 Glucose standard curve summary statistics and linear
-      regression](#121-glucose-standard-curve-summary-statistics-and-linear-regression)
-    - [1.2.2 Calculate sample glucose
-      levels](#122-calculate-sample-glucose-levels)
-    - [1.2.3 Plot glucose standard curve, sample
-      points](#123-plot-glucose-standard-curve-sample-points)
-    - [1.2.4 Glucose summary table](#124-glucose-summary-table)
+    - [1.2.1 Extract glucose luminescence
+      data](#121-extract-glucose-luminescence-data)
+    - [1.2.2 Glucose standard curve summary statistics and linear
+      regression](#122-glucose-standard-curve-summary-statistics-and-linear-regression)
+    - [1.2.3 Calculate sample glucose
+      levels](#123-calculate-sample-glucose-levels)
+    - [1.2.4 Plot glucose standard curve, sample
+      points](#124-plot-glucose-standard-curve-sample-points)
+    - [1.2.5 Glucose summary table](#125-glucose-summary-table)
 - [2 Overall summary table](#2-overall-summary-table)
 
 ``` r
@@ -791,6 +793,8 @@ tab
 
 ## 1.2 Glucose Standard Curve
 
+### 1.2.1 Extract glucose luminescence data
+
 ``` r
 # Extract glycogen standard curve data from plate layout and raw luminescence.
 # Rows F, G, H (rows 6, 7, 8) correspond to glycogen standards
@@ -845,7 +849,7 @@ glu_D1_dilution <- as.numeric(gsub(".*-df\\.", "", plate_layout[5, 10]))
 glu_D1_luminescence <- as.numeric(raw_luminescence[5, glu_sample_cols2])
 ```
 
-### 1.2.1 Glucose standard curve summary statistics and linear regression
+### 1.2.2 Glucose standard curve summary statistics and linear regression
 
 ``` r
 # Calculate mean and standard error for each concentration
@@ -876,7 +880,7 @@ glu_slope <- coef(lm_model)[2]
 glu_intercept <- coef(lm_model)[1]
 ```
 
-### 1.2.2 Calculate sample glucose levels
+### 1.2.3 Calculate sample glucose levels
 
 ``` r
 # Create sample data frame
@@ -1218,7 +1222,7 @@ glu_D1_mean_conc
     [1] 230
     [1] 0.1072012
 
-### 1.2.3 Plot glucose standard curve, sample points
+### 1.2.4 Plot glucose standard curve, sample points
 
 ``` r
 # Create the plot
@@ -1412,7 +1416,7 @@ for (i in 1:nrow(glucose_summary_data)) {
       Standard Error: 8.82
       CV%: 6.83%
 
-### 1.2.4 Glucose summary table
+### 1.2.5 Glucose summary table
 
 ``` r
 tab <- matrix(c(glu_B8_dilution, glu_B8_mean_lum, glu_B8_mean_conc,  (glu_B8_dilution*glu_B8_mean_conc), 

@@ -605,6 +605,8 @@ tab
 
 ## Glucose Standard Curve
 
+### Extract glucose luminescence data
+
 ```{r glucose standard data, include=TRUE}
 # Extract glycogen standard curve data from plate layout and raw luminescence.
 # Rows F, G, H (rows 6, 7, 8) correspond to glycogen standards

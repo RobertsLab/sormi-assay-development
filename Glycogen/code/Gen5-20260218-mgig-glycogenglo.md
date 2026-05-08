@@ -15,13 +15,15 @@ Hazel Abrahamson-Amerine
       points](#114-plot-glycogen-standard-curve-sample-points)
     - [1.1.5 Glycogen summary table](#115-glycogen-summary-table)
   - [1.2 Glucose Standard Curve](#12-glucose-standard-curve)
-    - [1.2.1 Glucose standard curve summary statistics and linear
-      regression](#121-glucose-standard-curve-summary-statistics-and-linear-regression)
-    - [1.2.2 Calculate sample glucose
-      levels](#122-calculate-sample-glucose-levels)
-    - [1.2.3 Plot glucose standard curve, sample
-      points](#123-plot-glucose-standard-curve-sample-points)
-    - [1.2.4 Glucose summary table](#124-glucose-summary-table)
+    - [1.2.1 Extract glucose luminescence
+      data](#121-extract-glucose-luminescence-data)
+    - [1.2.2 Glucose standard curve summary statistics and linear
+      regression](#122-glucose-standard-curve-summary-statistics-and-linear-regression)
+    - [1.2.3 Calculate sample glucose
+      levels](#123-calculate-sample-glucose-levels)
+    - [1.2.4 Plot glucose standard curve, sample
+      points](#124-plot-glucose-standard-curve-sample-points)
+    - [1.2.5 Glucose summary table](#125-glucose-summary-table)
 - [2 Standard curves for 20260330B - sample E5
   re-run](#2-standard-curves-for-20260330b---sample-e5-re-run)
   - [2.1 Glycogen Standard Curve](#21-glycogen-standard-curve)
@@ -86,7 +88,7 @@ cat("\n\n")
 cat("Raw luminescence:\n")
 str(raw_luminescence)
 
-#standard curve for sample E4.df50
+#standard curve for sample E5.df50
 plate_layout2 <- read.csv("https://raw.githubusercontent.com/RobertsLab/sormi-assay-development/refs/heads/main/Glycogen/data/raw_luminescence/layout-Gen5-20260330A-tempprelim-mgig-glycogengglo.csv", header = FALSE)
 raw_luminescence2 <- read.csv("https://raw.githubusercontent.com/RobertsLab/sormi-assay-development/refs/heads/main/Glycogen/data/raw_luminescence/raw_lum-Gen5-20260330A-tempprelim-mgig-glycogengglo.csv", header = FALSE)
 
@@ -98,7 +100,7 @@ cat("\n\n")
 cat("Raw luminescence2:\n")
 str(raw_luminescence2)
 
-#sample E4.df50 - on same plate as temp stress prelim samples
+#sample E5.df50 - on same plate as temp stress prelim samples
 plate_layout3 <- read.csv("https://raw.githubusercontent.com/RobertsLab/sormi-assay-development/refs/heads/main/Glycogen/data/raw_luminescence/layout-Gen5-20260330B-tempprelim-mgig-glycogengglo.csv", header = FALSE)
 raw_luminescence3 <- read.csv("https://raw.githubusercontent.com/RobertsLab/sormi-assay-development/refs/heads/main/Glycogen/data/raw_luminescence/raw_lum-Gen5-20260330B-tempprelim-mgig-glycogengglo.csv", header = FALSE)
 
@@ -737,6 +739,8 @@ tab
 
 ## 1.2 Glucose Standard Curve
 
+### 1.2.1 Extract glucose luminescence data
+
 ``` r
 # Extract glucose standard curve data from plate layout and raw luminescence.
 # Rows F, G, H (rows 6, 7, 8) correspond to glucose standards
@@ -781,7 +785,7 @@ glu_E7_dilution <- as.numeric(gsub(".*-df\\.", "", plate_layout[2, 4]))
 glu_E7_luminescence <- as.numeric(raw_luminescence[2, glu_sample_cols2])
 ```
 
-### 1.2.1 Glucose standard curve summary statistics and linear regression
+### 1.2.2 Glucose standard curve summary statistics and linear regression
 
 ``` r
 # Calculate mean and standard error for each concentration
@@ -812,7 +816,7 @@ glu_slope <- coef(lm_model)[2]
 glu_intercept <- coef(lm_model)[1]
 ```
 
-### 1.2.2 Calculate sample glucose levels
+### 1.2.3 Calculate sample glucose levels
 
 ``` r
 # Create sample data frame
@@ -1052,7 +1056,7 @@ glu_E7_mean_conc
     [1] 298
     [1] -3.488236
 
-### 1.2.3 Plot glucose standard curve, sample points
+### 1.2.4 Plot glucose standard curve, sample points
 
 ``` r
 # Create the plot
@@ -1220,7 +1224,7 @@ for (i in 1:nrow(glucose_summary_data)) {
       Standard Error: 2987.92
       CV%: 53.65%
 
-### 1.2.4 Glucose summary table
+### 1.2.5 Glucose summary table
 
 ``` r
 tab <- matrix(c(glu_C7_dilution50, glu_C7_mean_lum50, glu_C7_mean_conc50,  (glu_C7_dilution50*glu_C7_mean_conc50), 

@@ -15,13 +15,15 @@ Hazel Abrahamson-Amerine
       points](#114-plot-glycogen-standard-curve-sample-points)
     - [1.1.5 Glycogen summary table](#115-glycogen-summary-table)
   - [1.2 Glucose Standard Curve](#12-glucose-standard-curve)
-    - [1.2.1 Glucose standard curve summary statistics and linear
-      regression](#121-glucose-standard-curve-summary-statistics-and-linear-regression)
-    - [1.2.2 Calculate sample glucose
-      levels](#122-calculate-sample-glucose-levels)
-    - [1.2.3 Plot glucose standard curve, sample
-      points](#123-plot-glucose-standard-curve-sample-points)
-    - [1.2.4 Glucose summary table](#124-glucose-summary-table)
+    - [1.2.1 Extract glucose luminescence
+      data](#121-extract-glucose-luminescence-data)
+    - [1.2.2 Glucose standard curve summary statistics and linear
+      regression](#122-glucose-standard-curve-summary-statistics-and-linear-regression)
+    - [1.2.3 Calculate sample glucose
+      levels](#123-calculate-sample-glucose-levels)
+    - [1.2.4 Plot glucose standard curve, sample
+      points](#124-plot-glucose-standard-curve-sample-points)
+    - [1.2.5 Glucose summary table](#125-glucose-summary-table)
 - [2 Overall summary table](#2-overall-summary-table)
 
 ``` r
@@ -795,6 +797,8 @@ print("All samples have calculated glycogen > 20 ug/uL, and are therefore out of
 
 ## 1.2 Glucose Standard Curve
 
+### 1.2.1 Extract glucose luminescence data
+
 ``` r
 # Extract glycogen standard curve data from plate layout and raw luminescence.
 # Rows F, G, H (rows 6, 7, 8) correspond to glycogen standards
@@ -849,7 +853,7 @@ glu_B2_dilution <- as.numeric(gsub(".*-df\\.", "", plate_layout[5, 10]))
 glu_B2_luminescence <- as.numeric(raw_luminescence[5, glu_sample_cols2])
 ```
 
-### 1.2.1 Glucose standard curve summary statistics and linear regression
+### 1.2.2 Glucose standard curve summary statistics and linear regression
 
 ``` r
 # Calculate mean and standard error for each concentration
@@ -880,7 +884,7 @@ glu_slope <- coef(lm_model)[2]
 glu_intercept <- coef(lm_model)[1]
 ```
 
-### 1.2.2 Calculate sample glucose levels
+### 1.2.3 Calculate sample glucose levels
 
 ``` r
 # Create sample data frame
@@ -1222,7 +1226,7 @@ glu_B2_mean_conc
     [1] 402.6667
     [1] 1.848312
 
-### 1.2.3 Plot glucose standard curve, sample points
+### 1.2.4 Plot glucose standard curve, sample points
 
 ``` r
 # Create the plot
@@ -1418,7 +1422,7 @@ for (i in 1:nrow(glucose_summary_data)) {
       Standard Error: 435.17
       CV%: 130.25%
 
-### 1.2.4 Glucose summary table
+### 1.2.5 Glucose summary table
 
 ``` r
 tab <- matrix(c(glu_A1_dilution, glu_A1_mean_lum, glu_A1_mean_conc,  (glu_A1_dilution*glu_A1_mean_conc), 
@@ -1460,7 +1464,7 @@ re-run on 20260126 (df.2 and 4) but were still out of the range.
 Re-running A1-A5 on 20260130 (Gen5-20260130-mgig-glycogenglo.md) with 20
 and 100 fold dilutions brought samples within the standard curve range.
 Samples A6-B2 were re-run with df.20 on 20260204
-9Gen5-20260204-mgig-glycogenglo.md), and were within standard curve
+(Gen5-20260204-mgig-glycogenglo.md), and were within standard curve
 range.
 
 ``` r

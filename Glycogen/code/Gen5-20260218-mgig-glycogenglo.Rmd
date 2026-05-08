@@ -36,7 +36,7 @@ cat("\n\n")
 cat("Raw luminescence:\n")
 str(raw_luminescence)
 
-#standard curve for sample E4.df50
+#standard curve for sample E5.df50
 plate_layout2 <- read.csv("https://raw.githubusercontent.com/RobertsLab/sormi-assay-development/refs/heads/main/Glycogen/data/raw_luminescence/layout-Gen5-20260330A-tempprelim-mgig-glycogengglo.csv", header = FALSE)
 raw_luminescence2 <- read.csv("https://raw.githubusercontent.com/RobertsLab/sormi-assay-development/refs/heads/main/Glycogen/data/raw_luminescence/raw_lum-Gen5-20260330A-tempprelim-mgig-glycogengglo.csv", header = FALSE)
 
@@ -48,7 +48,7 @@ cat("\n\n")
 cat("Raw luminescence2:\n")
 str(raw_luminescence2)
 
-#sample E4.df50 - on same plate as temp stress prelim samples
+#sample E5.df50 - on same plate as temp stress prelim samples
 plate_layout3 <- read.csv("https://raw.githubusercontent.com/RobertsLab/sormi-assay-development/refs/heads/main/Glycogen/data/raw_luminescence/layout-Gen5-20260330B-tempprelim-mgig-glycogengglo.csv", header = FALSE)
 raw_luminescence3 <- read.csv("https://raw.githubusercontent.com/RobertsLab/sormi-assay-development/refs/heads/main/Glycogen/data/raw_luminescence/raw_lum-Gen5-20260330B-tempprelim-mgig-glycogengglo.csv", header = FALSE)
 
@@ -496,6 +496,8 @@ tab
 ```
 
 ## Glucose Standard Curve
+
+### Extract glucose luminescence data
 
 ```{r glucose standard data, include=TRUE}
 # Extract glucose standard curve data from plate layout and raw luminescence.
