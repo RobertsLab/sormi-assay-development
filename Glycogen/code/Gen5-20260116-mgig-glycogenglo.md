@@ -124,7 +124,7 @@ glyc_row_H <- as.numeric(raw_luminescence[8, 1:5])  # Row 8 (H)
     [1] 20.00  2.00  0.20  0.02  0.00
 
 ``` r
-#Extract glycogen sample data - wells B8-E6
+#Extract glycogen sample data
 glyc_sample_cols <- c(1,2,3)
 glyc_A3_luminescence <- as.numeric(raw_luminescence[1, glyc_sample_cols])
 glyc_A3_dilution <- 1
@@ -371,9 +371,9 @@ tab
 ``` r
 # Extract glucose standard curve data from plate layout and raw luminescence.
 # Rows F, G, H (rows 6, 7, 8) correspond to glucose standards
-# Columns 1-5 contain the standard curve concentrations
+# Columns 7-11 contain the standard curve concentrations
 
-# Extract concentration values from plate layout (row 6, columns 1-5)
+# Extract concentration values from plate layout (row 6, columns 7-11)
 # Parse concentration from labels like "STD-gluc-20" -> 20
 glu_concentrations <- as.numeric(gsub("Std-Gluc-", "", plate_layout[6, 7:11]))
 glu_concentrations
@@ -387,7 +387,7 @@ glu_row_H <- as.numeric(raw_luminescence[8, 7:11])  # Row 8 (H)
     [1] 100.0  10.0   1.0   0.1   0.0
 
 ``` r
-#Extract glucose sample data - wells B8-E6
+#Extract glucose sample data
 glu_sample_cols <- c(1,2,3)
 glu_A3_luminescence <- as.numeric(raw_luminescence[3, glu_sample_cols])
 glu_A3_dilution <- 1
@@ -628,6 +628,12 @@ tab
 Note: the ‘glycogen’ readout includes background glucose - the
 ‘Glycogen-Glucose’ number is a more accurate measurement of glycogen
 levels, as this removes the contribution of background glucose
+
+Samples A3 and A4 are both out of the standard curve range. Samples were
+re-run on 20260123 (df.2) and 20260126 (df.2 and 4) but were still out
+of the range. Re-running on 20260130 (Gen5-20260130-mgig-glycogenglo.md)
+with 20 and 100 fold dilutions brought samples within the standard curve
+range.
 
 ``` r
 tab <- matrix(c(as.numeric(weights[3,2]), glyc_A3_dilution, glyc_A3_mean_conc, glu_A3_mean_conc, (glyc_A3_mean_conc-glu_A3_mean_conc), ((glyc_A3_mean_conc-glu_A3_mean_conc)*(glyc_A3_dilution/as.numeric(weights[3,2]))), as.numeric(weights[4,2]), glyc_A4_dilution, glyc_A4_mean_conc, glu_A4_mean_conc, (glyc_A4_mean_conc-glu_A4_mean_conc), ((glyc_A4_mean_conc-glu_A4_mean_conc)*(glyc_A4_dilution/as.numeric(weights[4,2])))), ncol=6, byrow=TRUE)

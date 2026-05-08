@@ -227,7 +227,7 @@ glyc_row_H <- as.numeric(raw_luminescence[8, 1:5])  # Row 8 (H)
     [1] 20.00  2.00  0.20  0.02  0.00
 
 ``` r
-#Extract glycogen sample data - wells D2-E6
+#Extract glycogen sample data
 glyc_sample_cols1 <- c(1,2,3)
 glyc_C7_dilution50 <- as.numeric(gsub(".*-df\\.", "", plate_layout[1, 1]))
 glyc_C7_luminescence50 <- as.numeric(raw_luminescence[1, glyc_sample_cols1])
@@ -1278,7 +1278,7 @@ glyc_row_H2 <- as.numeric(raw_luminescence2[8, 1:5])  # Row 8 (H)
     [1] 20.00  2.00  0.20  0.02  0.00
 
 ``` r
-#Extract glycogen sample data - wells D2-E6
+#Extract glycogen sample data
 glyc_sample_cols1 <- c(1,2,3)
 
 glyc_E5_dilution2 <- as.numeric(gsub(".*-df\\.", "", plate_layout3[6, 1]))

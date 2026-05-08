@@ -123,7 +123,7 @@ glyc_row_H <- as.numeric(raw_luminescence[8, 1:5])  # Row 8 (H)
     [1] 20.00  2.00  0.20  0.02  0.00
 
 ``` r
-#Extract glycogen sample data - wells A6-E6
+#Extract glycogen sample data
 glyc_sample_cols1 <- c(1,2,3)
 glyc_A6_dilution <- as.numeric(gsub(".*-df\\.", "", plate_layout[1, 1]))
 glyc_A6_luminescence <- as.numeric(raw_luminescence[1, glyc_sample_cols1])
@@ -792,9 +792,9 @@ tab
 ``` r
 # Extract glycogen standard curve data from plate layout and raw luminescence.
 # Rows F, G, H (rows 6, 7, 8) correspond to glycogen standards
-# Columns 1-5 contain the standard curve concentrations
+# Columns 7-11 contain the standard curve concentrations
 
-# Extract concentration values from plate layout (row 6, columns 1-5)
+# Extract concentration values from plate layout (row 6, columns 7-11)
 # Parse concentration from labels like "STD-glyc-20" -> 20
 glu_concentrations <- as.numeric(gsub("STD-glu-", "", plate_layout[6, 7:11]))
 glu_concentrations
@@ -808,7 +808,7 @@ glu_row_H <- as.numeric(raw_luminescence[8, 7:11])  # Row 8 (H)
     [1] 100.0  10.0   1.0   0.1   0.0
 
 ``` r
-#Extract glucose sample data - wells A6-E6
+#Extract glucose sample data
 glu_sample_cols1 <- c(7,8,9)
 glu_A6_dilution <- as.numeric(gsub(".*-df\\.", "", plate_layout[1, 1]))
 glu_A6_luminescence <- as.numeric(raw_luminescence[1, glu_sample_cols1])

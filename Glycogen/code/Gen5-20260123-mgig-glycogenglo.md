@@ -122,7 +122,7 @@ glyc_row_H <- as.numeric(raw_luminescence[8, 1:5])  # Row 8 (H)
     [1] 20.00  2.00  0.20  0.02  0.00
 
 ``` r
-#Extract glycogen sample data - wells A1-E6
+#Extract glycogen sample data
 glyc_sample_cols1 <- c(1,2,3)
 glyc_A1_dilution <- as.numeric(gsub(".*-df\\.", "", plate_layout[1, 1]))
 glyc_A1_luminescence <- as.numeric(raw_luminescence[1, glyc_sample_cols1])
@@ -798,9 +798,9 @@ print("All samples have calculated glycogen > 20 ug/uL, and are therefore out of
 ``` r
 # Extract glycogen standard curve data from plate layout and raw luminescence.
 # Rows F, G, H (rows 6, 7, 8) correspond to glycogen standards
-# Columns 1-5 contain the standard curve concentrations
+# Columns 7-11 contain the standard curve concentrations
 
-# Extract concentration values from plate layout (row 6, columns 1-5)
+# Extract concentration values from plate layout (row 6, columns 7-11)
 # Parse concentration from labels like "STD-glyc-20" -> 20
 glu_concentrations <- as.numeric(gsub("STD-glu-", "", plate_layout[6, 7:11]))
 glu_concentrations
@@ -814,7 +814,7 @@ glu_row_H <- as.numeric(raw_luminescence[8, 7:11])  # Row 8 (H)
     [1] 100.0  10.0   1.0   0.1   0.0
 
 ``` r
-#Extract glucose sample data - wells A1-E6
+#Extract glucose sample data
 glu_sample_cols1 <- c(7,8,9)
 glu_A1_dilution <- as.numeric(gsub(".*-df\\.", "", plate_layout[1, 7]))
 glu_A1_luminescence <- as.numeric(raw_luminescence[1, glu_sample_cols1])
@@ -1454,6 +1454,14 @@ tab
 Note: the ‘glycogen’ readout includes background glucose - the
 ‘Glycogen-Glucose’ number is a more accurate measurement of glycogen
 levels, as this removes the contribution of background glucose
+
+All samples were out of the standard curve range. Samples A1-A5 were
+re-run on 20260126 (df.2 and 4) but were still out of the range.
+Re-running A1-A5 on 20260130 (Gen5-20260130-mgig-glycogenglo.md) with 20
+and 100 fold dilutions brought samples within the standard curve range.
+Samples A6-B2 were re-run with df.20 on 20260204
+9Gen5-20260204-mgig-glycogenglo.md), and were within standard curve
+range.
 
 ``` r
 tab <- matrix(c(as.numeric(weights[1,2]), glyc_A1_dilution, glyc_A1_mean_conc, glu_A1_mean_conc, (glyc_A1_mean_conc-glu_A1_mean_conc), ((glyc_A1_mean_conc-glu_A1_mean_conc)*(glyc_A1_dilution/as.numeric(weights[1,2]))), 
