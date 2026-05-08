@@ -13,12 +13,12 @@ library(knitr)
 library(ggplot2)
 library(dplyr)
 knitr::opts_chunk$set(
-  echo = TRUE,         # Display code chunks
-  eval = TRUE,        # Evaluate code chunks
-  warning = FALSE,     # Hide warnings
-  message = FALSE,     # Hide messages
-  comment = "",         # Prevents appending '##' to beginning of lines in code output
-  results = 'hold'     # Holds output so it's all printed together after code chunk
+	eval = TRUE,
+	echo = TRUE,
+	message = FALSE,
+	warning = FALSE,
+	comment = "",
+	results = "hold"
 )
 ```
 
@@ -26,6 +26,7 @@ knitr::opts_chunk$set(
 
 plate_layout <- read.csv("https://raw.githubusercontent.com/RobertsLab/sormi-assay-development/refs/heads/main/Glycogen/data/raw_luminescence/layout-20260116-mgig-gylcogen_glo.csv", header = FALSE)
 raw_luminescence <- read.csv("https://raw.githubusercontent.com/RobertsLab/sormi-assay-development/refs/heads/main/Glycogen/data/raw_luminescence/raw_lum-20260116-mgig-gylcogen_glo.csv", header = FALSE)
+weights <- read.csv("https://raw.githubusercontent.com/RobertsLab/sormi-assay-development/refs/heads/main/Glycogen/data/20251210-mgig-ctenidia_weights-glycogen_assay.csv")
 
 cat("Plate layout:\n")
 str(plate_layout)
@@ -40,7 +41,7 @@ str(raw_luminescence)
 
 ## Glycogen Standard Curve
 
-### Extract luminescence data
+### Extract glycogen luminescence data
 
 ```{r glycogen standard data, include=TRUE}
 # Extract glycogen standard curve data from plate layout and raw luminescence.
@@ -67,6 +68,8 @@ glyc_A3_dilution <- 1
 glyc_A4_luminescence <- as.numeric(raw_luminescence[2, glyc_sample_cols])
 glyc_A4_dilution <- 1
 ```
+
+### Glycogen standard curve summary statistics and linear regression
 
 ```{r glycogen summary statistics and linear regression,include=TRUE}
 # Calculate mean and standard error for each concentration
@@ -96,6 +99,8 @@ glyc_r_squared <- summary(lm_model)$r.squared
 glyc_slope <- coef(lm_model)[2]
 glyc_intercept <- coef(lm_model)[1]
 ```
+
+### Calculate sample glycogen levels
 
 ```{r add A3 glycogen to standard curve, include=TRUE}
 # Create sample data frame
@@ -157,6 +162,8 @@ glyc_A4_data <- data.frame(
 glyc_A4_mean_lum
 glyc_A4_mean_conc
 ```
+### Plot glycogen standard curve, sample points
+
 ```{r plot glycogen standard curve with samples, include=TRUE}
 # Create the plot
 glyc_plot <- ggplot(glycogen_summary_data, aes(x = glyc_concentration, y = glyc_mean_luminescence)) +
@@ -226,6 +233,7 @@ for (i in 1:nrow(glycogen_summary_data)) {
   cat(sprintf("  CV%%: %.2f%%\n\n", glycogen_summary_data$glyc_cv[i]))
 }
 ```
+### Glycogen summary table
 
 ```{r, sample glycogen calculations}
 tab <- matrix(c(glyc_A3_dilution, glyc_A3_mean_lum, glyc_A3_mean_conc,  (glyc_A3_dilution*glyc_A3_mean_conc), 
@@ -235,11 +243,9 @@ rownames(tab) <- c('A3','A4')
 tab <- as.table(tab)
 tab
 ```
-# STANDARD CURVES
-
 ## Glucose Standard Curve
 
-### Extract luminescence data
+### Extract glucose luminescence data
 
 ```{r glucose standard data, include=TRUE}
 # Extract glucose standard curve data from plate layout and raw luminescence.
@@ -266,6 +272,8 @@ glu_A3_dilution <- 1
 glu_A4_luminescence <- as.numeric(raw_luminescence[4, glu_sample_cols])
 glu_A4_dilution <- 1
 ```
+
+### Glucose standard curve summary statistics and linear regression
 
 ```{r glucose summary statistics and linear regression,include=TRUE}
 # Calculate mean and standard error for each concentration
@@ -295,6 +303,8 @@ glu_r_squared <- summary(lm_model)$r.squared
 glu_slope <- coef(lm_model)[2]
 glu_intercept <- coef(lm_model)[1]
 ```
+
+### Calculate sample glucose levels
 
 ```{r add A3 glucose to standard curve, include=TRUE}
 # Create sample data frame
@@ -356,6 +366,8 @@ glu_A4_data <- data.frame(
 glu_A4_mean_lum
 glu_A4_mean_conc
 ```
+### Plot glucose standard curve, sample points
+
 ```{r plot glucose standard curve with samples, include=TRUE}
 # Create the plot
 glu_plot <- ggplot(glucose_summary_data, aes(x = glu_concentration, y = glu_mean_luminescence)) +
@@ -426,6 +438,8 @@ for (i in 1:nrow(glucose_summary_data)) {
 }
 ```
 
+### Glucose summary table
+
 ```{r, sample glucose calculations}
 tab <- matrix(c(glu_A3_dilution, glu_A3_mean_lum, glu_A3_mean_conc,  (glu_A3_dilution*glu_A3_mean_conc), 
                 glu_A4_dilution, glu_A4_mean_lum, glu_A4_mean_conc,  (glu_A4_dilution*glu_A4_mean_conc)), ncol=4, byrow=TRUE)
@@ -433,4 +447,16 @@ colnames(tab) <- c('Dilution factor','Luminescence','Calculated glucose (ug/uL)'
 rownames(tab) <- c('A3','A4')
 tab <- as.table(tab)
 tab
+```
+# Overall summary table
+
+```{r, Overall summary table}
+tab <- matrix(c(as.numeric(weights[3,2]), glyc_A3_dilution, glyc_A3_mean_conc, glu_A3_mean_conc, (glyc_A3_mean_conc-glu_A3_mean_conc), ((glyc_A3_mean_conc-glu_A3_mean_conc)*(glyc_A3_dilution/as.numeric(weights[3,2]))), as.numeric(weights[4,2]), glyc_A4_dilution, glyc_A4_mean_conc, glu_A4_mean_conc, (glyc_A4_mean_conc-glu_A4_mean_conc), ((glyc_A4_mean_conc-glu_A4_mean_conc)*(glyc_A4_dilution/as.numeric(weights[4,2])))), ncol=6, byrow=TRUE)
+
+colnames(tab) <- c('Weight (mg)', 'df', 'Glycogen (ug/uL)', 'Glucose (uM)', 'Glycogen-Glucose (ug/uL)', '(Glycogen-Glucose)*df/weight (ug/uL/mg)')
+rownames(tab) <- c('A3', 'A4')
+tab <- as.table(tab)
+tab
+
+
 ```
