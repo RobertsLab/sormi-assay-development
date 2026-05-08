@@ -26,6 +26,7 @@ knitr::opts_chunk$set(
 
 plate_layout <- read.csv("https://raw.githubusercontent.com/RobertsLab/sormi-assay-development/refs/heads/main/Glycogen/data/raw_luminescence/layout-Gen5-20260126-mgig-glycogenglo.csv", header = FALSE)
 raw_luminescence <- read.csv("https://raw.githubusercontent.com/RobertsLab/sormi-assay-development/refs/heads/main/Glycogen/data/raw_luminescence/raw_lum-Gen5-20260126-mgig-glycogenglo.csv", header = FALSE)
+weights <- read.csv("https://raw.githubusercontent.com/RobertsLab/sormi-assay-development/refs/heads/main/Glycogen/data/20251210-mgig-ctenidia_weights-glycogen_assay.csv")
 
 cat("Plate layout:\n")
 str(plate_layout)
@@ -40,7 +41,7 @@ str(raw_luminescence)
 
 ## Glycogen Standard Curve
 
-### Extract luminescence data
+### Extract glycogen luminescence data
 
 ```{r glycogen standard data, include=TRUE}
 # Extract glycogen standard curve data from plate layout and raw luminescence.
@@ -93,9 +94,8 @@ glyc_A4_luminescence4 <- as.numeric(raw_luminescence[4, glyc_sample_cols4])
 glyc_A5_dilution4 <- as.numeric(gsub(".*-df\\.", "", plate_layout[5, 4]))
 glyc_A5_luminescence4 <- as.numeric(raw_luminescence[5, glyc_sample_cols4])
 ```
-
                 
-
+### Glycogen standard curve summary statistics and linear regression
 
 ```{r glycogen summary statistics and linear regression,include=TRUE}
 # Calculate mean and standard error for each concentration
@@ -126,6 +126,7 @@ glyc_slope <- coef(lm_model)[2]
 glyc_intercept <- coef(lm_model)[1]
 ```
 
+### Calculate sample glycogen levels
 
 ```{r add A1 df 2 glycogen to standard curve, include=TRUE}
 # Create sample data frame
@@ -440,6 +441,7 @@ glyc_A5_mean_lum4
 glyc_A5_mean_conc4
 ```
 
+### Plot glycogen standard curve, sample points
 
 ```{r plot glycogen standard curve with samples, include=TRUE}
 # Create the plot
@@ -585,6 +587,7 @@ for (i in 1:nrow(glycogen_summary_data)) {
 }
 ```
 
+### Glycogen summary table
 
 ```{r, sample glycogen calculations}
 tab <- matrix(c(glyc_A1_dilution2, glyc_A1_mean_lum2, glyc_A1_mean_conc2,  (glyc_A1_dilution2*glyc_A1_mean_conc2), 
@@ -602,8 +605,6 @@ rownames(tab) <- c('A1.df2','A2.df2','A3.df2','A4.df2','A5.df2','A1.df4','A2.df4
 tab <- as.table(tab)
 tab
 ```
-
-# STANDARD CURVES
 
 ## Glucose Standard Curve
 
@@ -659,6 +660,8 @@ glu_A5_dilution4 <- as.numeric(gsub(".*-df\\.", "", plate_layout[5, 10]))
 glu_A5_luminescence4 <- as.numeric(raw_luminescence[5, glu_sample_cols4])
 ```
 
+### Glucose standard curve summary statistics and linear regression
+
 ```{r glucose summary statistics and linear regression, include=TRUE}
 # Calculate mean and standard error for each concentration
 glu_means <- numeric(length(glu_concentrations))
@@ -687,6 +690,8 @@ glu_r_squared <- summary(lm_model)$r.squared
 glu_slope <- coef(lm_model)[2]
 glu_intercept <- coef(lm_model)[1]
 ```
+
+### Calculate sample glucose levels
 
 ```{r add A1 df 2 glucose to standard curve, include=TRUE}
 # Create sample data frame
@@ -1000,7 +1005,7 @@ glu_A5_data4 <- data.frame(
 glu_A5_mean_lum4
 glu_A5_mean_conc4
 ```
-
+### Plot glucose standard curve, sample points
 
 ```{r plot glucose standard curve with samples, include=TRUE}
 # Create the plot
@@ -1147,6 +1152,7 @@ for (i in 1:nrow(glucose_summary_data)) {
 }
 ```
 
+### Glucose summary table
 
 ```{r, sample glucose calculations}
 tab <- matrix(c(glu_A1_dilution2, glu_A1_mean_lum2, glu_A1_mean_conc2,  (glu_A1_dilution2*glu_A1_mean_conc2), 
@@ -1161,6 +1167,29 @@ tab <- matrix(c(glu_A1_dilution2, glu_A1_mean_lum2, glu_A1_mean_conc2,  (glu_A1_
                 glu_A5_dilution4, glu_A5_mean_lum4, glu_A5_mean_conc4,  (glu_A5_dilution4*glu_A5_mean_conc4)), ncol=4, byrow=TRUE)
 colnames(tab) <- c('Dilution factor','Luminescence','Calculated Glycogen (ug/uL)', 'Total glucose (ug/uL)')
 rownames(tab) <- c('A1.df2','A2.df2','A3.df2','A4.df2','A5.df2','A1.df4','A2.df4','A3.df4','A4.df4','Af.df4' )
+tab <- as.table(tab)
+tab
+```
+
+# Overall summary table
+
+Note: the ‘glycogen’ readout includes background glucose - the ‘Glycogen-Glucose’ number is a more accurate measurement of glycogen levels, as this removes the contribution of background glucose
+
+```{r, Overall summary table}
+tab <- matrix(c(as.numeric(weights[1,2]), glyc_A1_dilution2, glyc_A1_mean_conc2, glu_A1_mean_conc2, (glyc_A1_mean_conc2-glu_A1_mean_conc2), ((glyc_A1_mean_conc2-glu_A1_mean_conc2)*(glyc_A1_dilution2/as.numeric(weights[1,2]))), 
+                as.numeric(weights[2,2]), glyc_A2_dilution2, glyc_A2_mean_conc2, glu_A2_mean_conc2, (glyc_A2_mean_conc2-glu_A2_mean_conc2), ((glyc_A2_mean_conc2-glu_A2_mean_conc2)*(glyc_A2_dilution2/as.numeric(weights[2,2]))),
+                as.numeric(weights[3,2]), glyc_A3_dilution2, glyc_A3_mean_conc2, glu_A3_mean_conc2, (glyc_A3_mean_conc2-glu_A3_mean_conc2), ((glyc_A3_mean_conc2-glu_A3_mean_conc2)*(glyc_A3_dilution2/as.numeric(weights[3,2]))), 
+                as.numeric(weights[4,2]), glyc_A4_dilution2, glyc_A4_mean_conc2, glu_A4_mean_conc2, (glyc_A4_mean_conc2-glu_A4_mean_conc2), ((glyc_A4_mean_conc2-glu_A4_mean_conc2)*(glyc_A4_dilution2/as.numeric(weights[4,2]))),
+                as.numeric(weights[5,2]), glyc_A5_dilution2, glyc_A5_mean_conc2, glu_A5_mean_conc2, (glyc_A5_mean_conc2-glu_A5_mean_conc2), ((glyc_A5_mean_conc2-glu_A5_mean_conc2)*(glyc_A5_dilution2/as.numeric(weights[5,2]))),
+                as.numeric(weights[1,2]), glyc_A1_dilution4, glyc_A1_mean_conc4, glu_A1_mean_conc4, (glyc_A1_mean_conc4-glu_A1_mean_conc4), ((glyc_A1_mean_conc4-glu_A1_mean_conc4)*(glyc_A1_dilution4/as.numeric(weights[1,2]))), 
+                as.numeric(weights[2,2]), glyc_A2_dilution4, glyc_A2_mean_conc4, glu_A2_mean_conc4, (glyc_A2_mean_conc4-glu_A2_mean_conc4), ((glyc_A2_mean_conc4-glu_A2_mean_conc4)*(glyc_A2_dilution4/as.numeric(weights[2,2]))),
+                as.numeric(weights[3,2]), glyc_A3_dilution4, glyc_A3_mean_conc4, glu_A3_mean_conc4, (glyc_A3_mean_conc4-glu_A3_mean_conc4), ((glyc_A3_mean_conc4-glu_A3_mean_conc4)*(glyc_A3_dilution4/as.numeric(weights[3,2]))), 
+                as.numeric(weights[4,2]), glyc_A4_dilution4, glyc_A4_mean_conc4, glu_A4_mean_conc4, (glyc_A4_mean_conc4-glu_A4_mean_conc4), ((glyc_A4_mean_conc4-glu_A4_mean_conc4)*(glyc_A4_dilution4/as.numeric(weights[4,2]))),
+                as.numeric(weights[5,2]), glyc_A5_dilution4, glyc_A5_mean_conc4, glu_A5_mean_conc4, (glyc_A5_mean_conc4-glu_A5_mean_conc4), ((glyc_A5_mean_conc4-glu_A5_mean_conc4)*(glyc_A5_dilution4/as.numeric(weights[5,2])))
+                ), ncol=6, byrow=TRUE)
+
+colnames(tab) <- c('Weight (mg)', 'df', 'Glycogen (ug/uL)', 'Glucose (uM)', 'Glycogen-Glucose (ug/uL)', '(Glycogen-Glucose)*df/weight (ug/uL/mg)')
+rownames(tab) <- c('A1.df2','A2.df2','A3.df2','A4.df2','A5.df2','A1.df4','A2.df4','A3.df4','A4.df4','A5.df4')
 tab <- as.table(tab)
 tab
 ```
