@@ -29,7 +29,13 @@ jobs:
       - name: Install Quarto setup dependencies
         run: |
           apt-get update
-          apt-get install -y --no-install-recommends curl jq
+          apt-get install -y --no-install-recommends \
+            curl \
+            jq \
+            r-cran-car \
+            r-cran-emmeans \
+            r-cran-lme4 \
+            r-cran-lmertest
           rm -rf /var/lib/apt/lists/*
 
       - name: Setup Quarto

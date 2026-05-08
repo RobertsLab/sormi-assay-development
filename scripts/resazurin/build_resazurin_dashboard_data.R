@@ -21,6 +21,11 @@ resazurin_root <- file.path(repo_root, "Resazurin")
 out_dir <- file.path(repo_root, "output", "resazurin")
 dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
 
+has_lmer_stats <- requireNamespace("lmerTest", quietly = TRUE) &&
+  requireNamespace("lme4", quietly = TRUE) &&
+  requireNamespace("emmeans", quietly = TRUE)
+has_emmeans <- requireNamespace("emmeans", quietly = TRUE)
+
 plate_files <- list.files(
   path = resazurin_root,
   pattern = "(?i)^plate-.*-T[0-9]+(?:\\.[0-9]+)?\\.txt$",
@@ -403,104 +408,262 @@ plate_data_out <- plate_data %>%
   write_csv(plate_data_out, file.path(out_dir, "dashboard-data.csv"))
   write_csv(qc, file.path(out_dir, "dashboard-qc.csv"))
 
-  # --- Compute AUC statistics for dashboard ----------------------------------
-  # Identify group columns present in plate metadata
-  grouping_cols <- names(plate_data)[str_detect(names(plate_data), "_group$")]
+  # --- Compute paper-style AUC statistics for dashboard -----------------------
+  valid_group_value <- function(x) {
+    x <- str_trim(as.character(x))
+    !is.na(x) & x != "" & !str_to_upper(x) %in% c("NA", "N/A", "NULL", "NAN", "<NA>")
+  }
 
-  auc_stats <- tibble()
+  first_non_missing <- function(x) {
+    x <- x[!is.na(x)]
+    if (length(x) == 0) NA else x[1]
+  }
 
-  if (length(grouping_cols) > 0) {
-    # Use the same sample-first AUC unit table as the plot data.
-    auc_for_stats <- analysis_data %>%
-      filter(!is.na(auc_value), !is_blank) %>%
-      mutate(
-        analysis_unit_type = if_else(!is.na(sample_id_group) & sample_id_group != "", "sample_id", "well"),
-        analysis_unit_id = if_else(
-          analysis_unit_type == "sample_id",
-          paste(experiment_dir, sample_id_group, sep = "|"),
-          paste(experiment_dir, plate_id, well_id, sep = "|")
-        )
-      ) %>%
-      group_by(experiment_dir, analysis_unit_type, analysis_unit_id, across(all_of(grouping_cols))) %>%
+  auc_from_points <- function(time, value) {
+    keep <- is.finite(time) & is.finite(value)
+    time <- time[keep]
+    value <- value[keep]
+    if (length(time) < 2) return(NA_real_)
+
+    ord <- order(time)
+    time <- time[ord]
+    value <- value[ord]
+
+    dt <- diff(time)
+    if (!any(is.finite(dt) & dt > 0)) return(NA_real_)
+    sum(dt * ((head(value, -1) + tail(value, -1)) / 2), na.rm = TRUE)
+  }
+
+  parse_tukey_pair <- function(x) {
+    parts <- str_split_fixed(x, "-", 2)
+    tibble(group1 = parts[, 2], group2 = parts[, 1])
+  }
+
+  add_pair_summaries <- function(pair_tbl, data) {
+    group_summary <- data %>%
+      group_by(group_val) %>%
       summarise(
-        auc_value = mean(auc_value, na.rm = TRUE),
-        n_wells = n_distinct(well_id),
-        n_timepoints = n_distinct(time_hr),
+        n = dplyr::n(),
+        median = median(auc_value, na.rm = TRUE),
+        n_wells = sum(n_wells, na.rm = TRUE),
+        n_timepoints = sum(n_timepoints, na.rm = TRUE),
         .groups = "drop"
       )
 
-    for (gcol in grouping_cols) {
-      per_group <- auc_for_stats %>%
-        filter(!is.na(!!sym(gcol))) %>%
-        mutate(group_val = as.character(!!sym(gcol)))
+    pair_tbl %>%
+      left_join(group_summary, by = c("group1" = "group_val")) %>%
+      rename(n1 = n, median1 = median, n_wells1 = n_wells, n_timepoints1 = n_timepoints) %>%
+      left_join(group_summary, by = c("group2" = "group_val")) %>%
+      rename(n2 = n, median2 = median, n_wells2 = n_wells, n_timepoints2 = n_timepoints)
+  }
 
-      if (nrow(per_group) == 0) next
+  fit_auc_stats <- function(per_exp, exp, gcol, size_col) {
+    per_exp <- per_exp %>%
+      filter(is.finite(.data$auc_value), valid_group_value(.data$group_val)) %>%
+      mutate(group_val = factor(.data$group_val))
 
-      for (exp in unique(per_group$experiment_dir)) {
-        per_exp <- per_group %>% filter(experiment_dir == exp)
-        if (nrow(per_exp) < 2) next
+    if (nrow(per_exp) < 3 || n_distinct(per_exp$group_val) < 2) return(tibble())
 
-        groups_present <- unique(per_exp$group_val)
-        if (length(groups_present) < 2) next
+    use_lmm <- has_lmer_stats && n_distinct(per_exp$plate_id) > 1
+    model_class <- if (use_lmm) "LMM" else "ANOVA"
+    model_formula <- if (use_lmm) "auc_value ~ group_val + (1 | plate_id)" else "auc_value ~ group_val"
+    p_adjust_method <- if (has_emmeans) "tukey" else "TukeyHSD"
 
-        # Kruskal-Wallis across all groups
-        kw <- tryCatch(kruskal.test(auc_value ~ group_val, data = per_exp), error = function(e) NULL)
-        if (!is.null(kw)) {
-          auc_stats <- bind_rows(auc_stats, tibble(
-            experiment_dir = exp,
-            plate_id = NA_character_,
-            group_col = gcol,
-            analysis_unit_type = unique(per_exp$analysis_unit_type)[1],
-            comparison = "Kruskal-Wallis",
-            group1 = NA_character_,
-            group2 = NA_character_,
-            statistic = as.numeric(kw$statistic),
-            p_value = as.numeric(kw$p.value),
-            p_adj = as.numeric(kw$p.value),
-            n1 = NA_integer_,
-            n2 = NA_integer_,
-            median1 = NA_real_,
-            median2 = NA_real_,
-            n_wells1 = NA_integer_,
-            n_wells2 = NA_integer_,
-            n_timepoints1 = NA_integer_,
-            n_timepoints2 = NA_integer_
-          ))
+    model <- tryCatch(
+      {
+        if (use_lmm) {
+          lmerTest::lmer(auc_value ~ group_val + (1 | plate_id), data = per_exp)
+        } else {
+          stats::lm(auc_value ~ group_val, data = per_exp)
         }
+      },
+      error = function(e) NULL
+    )
+    if (is.null(model) && use_lmm) {
+      model <- tryCatch(stats::lm(auc_value ~ group_val, data = per_exp), error = function(e) NULL)
+      model_class <- "ANOVA"
+      model_formula <- "auc_value ~ group_val"
+    }
+    if (is.null(model)) return(tibble())
 
-        # Pairwise Wilcoxon tests
-        pairs <- combn(groups_present, 2, simplify = FALSE)
-        pair_res <- map_dfr(pairs, function(pr) {
-          a <- pr[1]
-          b <- pr[2]
-          da <- per_exp %>% filter(group_val == a) %>% pull(auc_value)
-          db <- per_exp %>% filter(group_val == b) %>% pull(auc_value)
-          if (length(da) < 1 || length(db) < 1) return(tibble())
-          wt <- tryCatch(wilcox.test(da, db, exact = FALSE), error = function(e) NULL)
-          tibble(
-            experiment_dir = exp,
-            plate_id = NA_character_,
-            group_col = gcol,
-            analysis_unit_type = unique(per_exp$analysis_unit_type)[1],
-            comparison = "Wilcoxon",
-            group1 = a,
-            group2 = b,
-            statistic = if (!is.null(wt)) as.numeric(wt$statistic) else NA_real_,
-            p_value = if (!is.null(wt)) as.numeric(wt$p.value) else NA_real_,
-            n1 = length(da),
-            n2 = length(db),
-            median1 = median(da, na.rm = TRUE),
-            median2 = median(db, na.rm = TRUE),
-            n_wells1 = sum(per_exp$group_val == a, na.rm = TRUE),
-            n_wells2 = sum(per_exp$group_val == b, na.rm = TRUE),
-            n_timepoints1 = sum(per_exp$group_val == a, na.rm = TRUE),
-            n_timepoints2 = sum(per_exp$group_val == b, na.rm = TRUE)
+    omnibus_tbl <- tryCatch(
+      {
+        a <- stats::anova(model)
+        p_col <- intersect(c("Pr(>F)", "Pr(>Chisq)"), names(a))[1]
+        stat_col <- intersect(c("F value", "Chisq"), names(a))[1]
+        tibble(
+          comparison_type = "omnibus",
+          comparison = model_class,
+          term = "group_val",
+          statistic = if (!is.na(stat_col)) as.numeric(a["group_val", stat_col]) else NA_real_,
+          p_value = if (!is.na(p_col)) as.numeric(a["group_val", p_col]) else NA_real_,
+          p_adj = if (!is.na(p_col)) as.numeric(a["group_val", p_col]) else NA_real_,
+          group1 = NA_character_,
+          group2 = NA_character_,
+          n1 = NA_integer_,
+          n2 = NA_integer_,
+          median1 = NA_real_,
+          median2 = NA_real_,
+          n_wells1 = NA_integer_,
+          n_wells2 = NA_integer_,
+          n_timepoints1 = NA_integer_,
+          n_timepoints2 = NA_integer_
+        )
+      },
+      error = function(e) tibble()
+    )
+
+    pair_tbl <- if (has_emmeans) {
+      tryCatch(
+        {
+          pairs <- as.data.frame(
+            emmeans::contrast(
+              emmeans::emmeans(model, specs = "group_val"),
+              method = "pairwise",
+              adjust = "tukey"
+            )
           )
-        })
+          pair_names <- str_split_fixed(as.character(pairs$contrast), " - ", 2)
+          pair_names <- apply(pair_names, 2, function(x) str_remove(x, "^group_val"))
+          tibble(
+            comparison_type = "pairwise",
+            comparison = "emmeans",
+            term = "group_val",
+            group1 = pair_names[, 1],
+            group2 = pair_names[, 2],
+            statistic = if ("t.ratio" %in% names(pairs)) as.numeric(pairs$t.ratio) else NA_real_,
+            p_value = as.numeric(pairs$p.value),
+            p_adj = as.numeric(pairs$p.value)
+          )
+        },
+        error = function(e) tibble()
+      )
+    } else {
+      tryCatch(
+        {
+          tk <- stats::TukeyHSD(stats::aov(auc_value ~ group_val, data = per_exp), "group_val")$group_val
+          pair_names <- parse_tukey_pair(rownames(tk))
+          tibble(
+            comparison_type = "pairwise",
+            comparison = "TukeyHSD",
+            term = "group_val",
+            group1 = pair_names$group1,
+            group2 = pair_names$group2,
+            statistic = as.numeric(tk[, "diff"]),
+            p_value = as.numeric(tk[, "p adj"]),
+            p_adj = as.numeric(tk[, "p adj"])
+          )
+        },
+        error = function(e) tibble()
+      )
+    }
 
-        if (nrow(pair_res) > 0) {
-          pair_res <- pair_res %>% mutate(p_adj = p.adjust(p_value, method = "BH"))
-          auc_stats <- bind_rows(auc_stats, pair_res)
+    if (nrow(pair_tbl) > 0) {
+      pair_tbl <- add_pair_summaries(pair_tbl, per_exp)
+    }
+
+    bind_rows(omnibus_tbl, pair_tbl) %>%
+      mutate(
+        experiment_dir = exp,
+        plate_id = NA_character_,
+        group_col = gcol,
+        size_col = size_col,
+        metric = "paper_metabolism_auc",
+        model_class = model_class,
+        model_formula = model_formula,
+        response_transform = "none",
+        p_adjust_method = p_adjust_method,
+        analysis_unit_type = paste(sort(unique(per_exp$analysis_unit_type)), collapse = ";"),
+        .before = 1
+      )
+  }
+
+  compute_paper_auc_units <- function(data, size_col, grouping_cols) {
+    data_size <- data %>%
+      mutate(
+        size_value = suppressWarnings(as.numeric(.data[[size_col]])),
+        analysis_unit_type = if_else(!is.na(.data$sample_id_group) & .data$sample_id_group != "", "sample_id", "well"),
+        analysis_unit_id = if_else(
+          .data$analysis_unit_type == "sample_id",
+          paste(.data$experiment_dir, .data$sample_id_group, sep = "|"),
+          paste(.data$experiment_dir, .data$plate_id, .data$well_id, sep = "|")
+        )
+      )
+
+    initial_ref <- data_size %>%
+      filter(is.finite(.data$value), is.finite(.data$time_hr)) %>%
+      group_by(.data$analysis_unit_id) %>%
+      filter(.data$time_hr == min(.data$time_hr, na.rm = TRUE)) %>%
+      summarise(initial_value = mean(.data$value, na.rm = TRUE), .groups = "drop")
+
+    fold_data <- data_size %>%
+      left_join(initial_ref, by = "analysis_unit_id") %>%
+      mutate(
+        fold_change = if_else(is.finite(.data$initial_value) & .data$initial_value != 0, .data$value / .data$initial_value, NA_real_)
+      )
+
+    blank_fold_ref <- fold_data %>%
+      filter(.data$is_blank, is.finite(.data$fold_change)) %>%
+      group_by(.data$experiment_dir, .data$plate_id, .data$time_hr) %>%
+      summarise(mean_blank_fold_change = mean(.data$fold_change, na.rm = TRUE), .groups = "drop")
+
+    point_data <- fold_data %>%
+      left_join(blank_fold_ref, by = c("experiment_dir", "plate_id", "time_hr")) %>%
+      filter(!.data$is_blank, is.finite(.data$size_value), .data$size_value > 0) %>%
+      mutate(
+        mean_blank_fold_change = coalesce(.data$mean_blank_fold_change, 0),
+        paper_metabolism_value = (.data$fold_change - .data$mean_blank_fold_change) / .data$size_value
+      ) %>%
+      filter(is.finite(.data$paper_metabolism_value), is.finite(.data$time_hr)) %>%
+      group_by(.data$experiment_dir, .data$analysis_unit_type, .data$analysis_unit_id, .data$time_hr) %>%
+      summarise(
+        plate_id = first_non_missing(.data$plate_id),
+        n_wells = n_distinct(.data$well_id),
+        paper_metabolism_value = mean(.data$paper_metabolism_value, na.rm = TRUE),
+        across(all_of(grouping_cols), first_non_missing),
+        .groups = "drop"
+      )
+
+    point_data %>%
+      group_by(.data$experiment_dir, .data$analysis_unit_type, .data$analysis_unit_id) %>%
+      summarise(
+        plate_id = first_non_missing(.data$plate_id),
+        auc_value = auc_from_points(.data$time_hr, .data$paper_metabolism_value),
+        n_timepoints = n_distinct(.data$time_hr[is.finite(.data$paper_metabolism_value)]),
+        n_wells = max(.data$n_wells, na.rm = TRUE),
+        across(all_of(grouping_cols), first_non_missing),
+        .groups = "drop"
+      ) %>%
+      filter(is.finite(.data$auc_value), .data$n_timepoints >= 2)
+  }
+
+  grouping_cols <- names(plate_data)[str_detect(names(plate_data), "_group$")]
+  grouping_cols <- setdiff(grouping_cols, "sample_id_group")
+  size_cols <- measurement_cols[
+    map_lgl(measurement_cols, ~ any(is.finite(suppressWarnings(as.numeric(analysis_data[[.x]]))) &
+      suppressWarnings(as.numeric(analysis_data[[.x]])) > 0, na.rm = TRUE))
+  ]
+
+  auc_stats <- tibble()
+
+  if (length(grouping_cols) > 0 && length(size_cols) > 0) {
+    for (size_col in size_cols) {
+      auc_for_stats <- compute_paper_auc_units(analysis_data, size_col, grouping_cols)
+      if (nrow(auc_for_stats) == 0) next
+
+      for (gcol in grouping_cols) {
+        per_group <- auc_for_stats %>%
+          filter(valid_group_value(.data[[gcol]])) %>%
+          mutate(group_val = as.character(.data[[gcol]]))
+
+        if (nrow(per_group) == 0 || n_distinct(per_group$group_val) < 2) next
+
+        for (exp in unique(per_group$experiment_dir)) {
+          per_exp <- per_group %>% filter(.data$experiment_dir == exp)
+          auc_stats <- bind_rows(
+            auc_stats,
+            fit_auc_stats(per_exp, exp, gcol, size_col)
+          )
         }
       }
     }

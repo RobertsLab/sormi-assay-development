@@ -223,6 +223,20 @@ viewof measurementColSel = Inputs.select(
 
 activeMeasurementCol = measurementColumns.includes(measurementColSel) ? measurementColSel : null
 
+viewof aucSizeColSel = Inputs.select(
+  measurementColumns.length > 0 ? measurementColumns : ["(none available)"],
+  {
+    label: "AUC size column",
+    value: measurementColumns.includes("length_mm_measurement")
+      ? "length_mm_measurement"
+      : (measurementColumns.includes("area_mm2_measurement")
+          ? "area_mm2_measurement"
+          : (measurementColumns.length > 0 ? measurementColumns[0] : "(none available)"))
+  }
+)
+
+activeAucSizeCol = measurementColumns.includes(aucSizeColSel) ? aucSizeColSel : null
+
 viewModes = [
   "Raw fluorescence",
   "Delta fluorescence",
@@ -386,7 +400,7 @@ yLabel = dataViewSel === "Delta fluorescence"
       : (dataViewSel === "Measurement-normalized fluorescence"
           ? `Fluorescence normalized by ${activeMeasurementCol || "selected measurement"}`
       : (dataViewSel === "Paper metabolism (fold-change / selected measurement)"
-        ? `Paper metabolism (script-style): fold-change / ${activeMeasurementCol || "selected measurement"}`
+        ? `Paper metabolism: blank-corrected fold-change / ${activeAucSizeCol || "selected size measurement"}`
         : "Fluorescence")))
 
 isBlank = d => d.is_blank === true || d.is_blank === "TRUE" || d.is_blank === 1 || d.is_blank === "1"
@@ -417,18 +431,20 @@ traceKey = d => groupMode
   : `${d.experiment_dir}|${d.plate_id}|${d.well_id}`
 
 measurementReady = dataViewSel !== "Measurement-normalized fluorescence" || activeMeasurementCol !== null
-paperMeasurementReady = dataViewSel !== "Paper metabolism (fold-change / selected measurement)" || activeMeasurementCol !== null
+paperMeasurementReady = dataViewSel !== "Paper metabolism (fold-change / selected measurement)" || activeAucSizeCol !== null
+aucSizeReady = dataViewSel !== "Paper metabolism (fold-change / selected measurement)" || activeAucSizeCol !== null
 
 initialValueByWell = (() => {
   const out = new Map()
-  const sorted = filtered
+  const sorted = selectionRows
+    .filter(d => !isExcluded(d))
     .filter(d => Number.isFinite(d.time_hr) && Number.isFinite(d.value))
     .slice()
     .sort((a, b) =>
       a.experiment_dir.localeCompare(b.experiment_dir) ||
+      (a.time_hr - b.time_hr) ||
       a.plate_id.localeCompare(b.plate_id) ||
-      a.well_id.localeCompare(b.well_id) ||
-      a.time_hr - b.time_hr
+      a.well_id.localeCompare(b.well_id)
     )
   for (const d of sorted) {
     // Prefer a sample-level initial value when available (samples are often
@@ -445,6 +461,25 @@ initialValueByWell = (() => {
   return out
 })()
 
+blankFoldChangeByPlateTime = (() => {
+  const blankRows = selectionRows
+    .filter(d => isBlank(d) && Number.isFinite(d.time_hr) && Number.isFinite(d.value))
+    .filter(d => !isExcluded(d))
+    .map(d => {
+      const plateKey = `${d.experiment_dir}|${d.plate_id}|${d.well_id}`
+      const initVal = initialValueByWell.get(plateKey)
+      const foldChange = Number.isFinite(initVal) && initVal !== 0 ? d.value / initVal : NaN
+      return {
+        key: `${d.experiment_dir}|${d.plate_id}|${d.time_hr}`,
+        foldChange
+      }
+    })
+    .filter(d => Number.isFinite(d.foldChange))
+
+  const grouped = d3.group(blankRows, d => d.key)
+  return new Map([...grouped.entries()].map(([key, rows]) => [key, d3.mean(rows, d => d.foldChange)]))
+})()
+
 paperMetabolismValue = d => {
   const sampleKey = d.sample_id_group == null || d.sample_id_group === ''
     ? null
@@ -455,13 +490,18 @@ paperMetabolismValue = d => {
     ? initialValueByWell.get(sampleKey)
     : initialValueByWell.get(plateKey)
 
-  const measurementVal = activeMeasurementCol === null ? NaN : Number(d[activeMeasurementCol])
-  if (!Number.isFinite(d.value) || !Number.isFinite(initVal) || initVal === 0 || !Number.isFinite(measurementVal) || measurementVal <= 0) {
+  const sizeVal = activeAucSizeCol === null ? NaN : Number(d[activeAucSizeCol])
+  if (!Number.isFinite(d.value) || !Number.isFinite(initVal) || initVal === 0 || !Number.isFinite(sizeVal) || sizeVal <= 0) {
     return NaN
   }
 
   const foldChange = d.value / initVal
-  return foldChange / measurementVal
+  const blankKey = `${d.experiment_dir}|${d.plate_id}|${d.time_hr}`
+  const blankFoldChange = blankFoldChangeByPlateTime.has(blankKey)
+    ? blankFoldChangeByPlateTime.get(blankKey)
+    : 0
+
+  return (foldChange - blankFoldChange) / sizeVal
 }
 
 plottedBase = dataViewSel === "Measurement-normalized fluorescence"
@@ -569,36 +609,8 @@ plottedSorted = dataViewSel === "Delta fluorescence"
     }))
 
 aucData = (() => {
-  // Prefer precomputed `auc_value` if present in the CSV rows.
-  const hasPrecomputedAuc = plottedSorted.some(d => d.auc_value !== undefined && d.auc_value !== null && Number.isFinite(d.auc_value))
-  if (hasPrecomputedAuc) {
-    const byTrace = new Map()
-    for (const d of plottedSorted) {
-      if (d.auc_value === null || d.auc_value === undefined || !Number.isFinite(d.auc_value)) continue
-      const timeVal = Number(d.time_hr)
-      if (!byTrace.has(d.trace_id)) {
-        byTrace.set(d.trace_id, {
-          ...d,
-          trace_id: d.trace_id,
-          auc_value: d.auc_value,
-          _timepoints: new Set([timeVal])
-        })
-      } else {
-        const entry = byTrace.get(d.trace_id)
-        if (!entry._timepoints) entry._timepoints = new Set()
-        entry._timepoints.add(timeVal)
-      }
-    }
-    return [...byTrace.values()].map(e => {
-      const n_timepoints = e._timepoints ? [...e._timepoints].filter(t => Number.isFinite(t)).length : 1
-      const out = {...e}
-      out.n_timepoints = n_timepoints
-      delete out._timepoints
-      return out
-    })
-  }
-
-  // Fallback: compute on-the-fly (original behavior)
+  // Compute from the currently plotted metric so AUC follows the selected
+  // data view and, for paper metabolism, the selected size column.
   const byTrace = new Map()
 
   for (const d of plottedSorted) {
@@ -639,17 +651,6 @@ aucData = (() => {
 })()
 
 cumulativeAucData = (() => {
-  // Prefer precomputed `cumulative_auc` if present in the CSV rows.
-  const hasPrecomputedCum = plottedSorted.some(d => d.cumulative_auc !== undefined && d.cumulative_auc !== null && Number.isFinite(d.cumulative_auc))
-  if (hasPrecomputedCum) {
-    // Use precomputed cumulative values directly (ensure sorted ordering)
-    return plottedSorted
-      .filter(d => Number.isFinite(d.cumulative_auc) && Number.isFinite(d.time_hr))
-      .slice()
-      .sort((a, b) => a.trace_id.localeCompare(b.trace_id) || a.time_hr - b.time_hr)
-      .map(d => ({ ...d, trace_id: d.trace_id, cumulative_auc: d.cumulative_auc }))
-  }
-
   const byTrace = new Map()
 
   for (const d of plottedSorted) {
@@ -851,19 +852,25 @@ significanceLabelForIndex = index => {
 aucStatsContext = (() => {
   const statsArr = Array.isArray(stats) ? stats : Array.from(stats || [])
   const statsGroupCol = activeGroupCol || (groupColumns.length > 0 ? groupColumns[0] : null)
+  const statsMatchCurrentAuc = dataViewSel === "Paper metabolism (fold-change / selected measurement)" && activeAucSizeCol !== null
   const relevantStats = statsArr.filter(s => {
+    if (!statsMatchCurrentAuc) return false
     if (!statsGroupCol) return false
+    if (String(s.metric || "") !== "paper_metabolism_auc") return false
+    if (String(s.size_col || "") !== String(activeAucSizeCol)) return false
     if (String(s.group_col) !== String(statsGroupCol)) return false
     if (activeExperimentSel !== "All" && String(s.experiment_dir) !== String(activeExperimentSel)) return false
     if (activePlateSel !== "All" && s.plate_id && String(s.plate_id) !== String(activePlateSel)) return false
     return true
   })
 
-  const kwStats = relevantStats.filter(r => r.comparison === "Kruskal-Wallis")
-  const pairwiseStats = relevantStats.filter(r => r.comparison === "Wilcoxon")
+  const kwStats = relevantStats.filter(r => r.comparison_type === "omnibus")
+  const pairwiseStats = relevantStats.filter(r => r.comparison_type === "pairwise")
   const significantPairs = pairwiseStats.filter(r => Number.isFinite(Number(r.p_adj)) && Number(r.p_adj) <= 0.05)
   const kwBest = kwStats[0] || null
   const analysisUnitType = relevantStats.find(r => r.analysis_unit_type)?.analysis_unit_type || (statsGroupCol ? "sample_id / well" : "unknown")
+  const modelClass = relevantStats.find(r => r.model_class)?.model_class || "model"
+  const pAdjustMethod = relevantStats.find(r => r.p_adjust_method)?.p_adjust_method || "adjusted"
 
   const formatP = v => {
     if (v == null || v === "" || Number.isNaN(Number(v))) return "NA"
@@ -950,38 +957,39 @@ aucStatsContext = (() => {
   })()
 
   const aucSignificanceNote = aucSignificanceLabels.length > 0
-    ? `Significance notation: groups sharing a letter are not significantly different after BH-adjusted pairwise Wilcoxon tests (p_adj > 0.05). Different letters indicate at least one significant pairwise difference (p_adj <= 0.05).`
+    ? `Significance notation: groups sharing a letter are not significantly different by ${pAdjustMethod}-adjusted pairwise model comparisons (p_adj > 0.05). Different letters indicate at least one significant pairwise difference (p_adj <= 0.05).`
     : null
 
   return {
     statsArr,
     statsGroupCol,
+    statsMatchCurrentAuc,
     relevantStats,
     kwStats,
     pairwiseStats,
     significantPairs,
     kwBest,
     analysisUnitType,
+    modelClass,
+    pAdjustMethod,
     formatP,
     aucSignificanceLabels,
     aucSignificanceNote
   }
 })()
 
-aucUsesPrecomputed = plottedSorted.some(d => Number.isFinite(d.auc_value))
-cumAucUsesPrecomputed = plottedSorted.some(d => Number.isFinite(d.cumulative_auc))
+aucUsesPrecomputed = false
+cumAucUsesPrecomputed = false
 
-aucMetricDescription = aucUsesPrecomputed
-  ? "blank-normalized fluorescence"
-  : (dataViewSel === "Delta fluorescence"
+aucMetricDescription = dataViewSel === "Delta fluorescence"
     ? "delta fluorescence"
     : (dataViewSel === "Measurement-normalized fluorescence"
       ? "measurement-normalized fluorescence"
       : (dataViewSel === "Paper metabolism (fold-change / selected measurement)"
-        ? "paper metabolism"
+        ? `paper metabolism using ${activeAucSizeCol || "selected size measurement"}`
         : (dataViewSel === "Normalized fluorescence"
           ? "normalized fluorescence"
-          : "fluorescence"))))
+          : "fluorescence")))
 
 cumAucMetricDescription = cumAucUsesPrecomputed ? "blank-normalized fluorescence" : aucMetricDescription
 
@@ -1063,7 +1071,7 @@ cumAucTooltipTitle = d => {
 
 normalizedUnavailable = dataViewSel === "Normalized fluorescence" && plottedSorted.length === 0
 measurementUnavailable = dataViewSel === "Measurement-normalized fluorescence" && (!measurementReady || plottedSorted.length === 0)
-paperUnavailable = dataViewSel === "Paper metabolism (fold-change / selected measurement)" && (!paperMeasurementReady || plottedSorted.length === 0)
+paperUnavailable = dataViewSel === "Paper metabolism (fold-change / selected measurement)" && (!paperMeasurementReady || !aucSizeReady || plottedSorted.length === 0)
 aucUnavailable = aucPlotMode && aucData.length === 0
 cumAucUnavailable = cumAucPlotMode && cumulativeAucData.length === 0
 groupUnavailable = activeGroupCol !== null && filtered.length === 0
@@ -1078,7 +1086,7 @@ groupUnavailable
   : measurementUnavailable
     ? "Measurement-normalized fluorescence unavailable for this selection. Ensure a non-zero numeric value exists in the selected *.measurement (or *.measurment) column for these wells."
   : paperUnavailable
-    ? "Paper metabolism unavailable for this selection. Choose a numeric non-zero Measurement column and ensure selected wells have valid initial values."
+    ? "Paper metabolism unavailable for this selection. Choose a numeric non-zero AUC size column and ensure selected wells have valid initial values."
   : aucUnavailable
     ? "AUC summary unavailable. This view plots total area under each trajectory from first to last available timepoint; at least two finite timepoints per trajectory are required."
   : cumAucUnavailable
@@ -1679,38 +1687,28 @@ groupUnavailable
       statDesc.style.color = "#374151"
       statDesc.style.fontSize = "0.92rem"
       statDesc.style.lineHeight = "1.4"
-      statDesc.innerHTML = `<strong>Tests computed:</strong> Kruskal-Wallis (omnibus test across all groups), and pairwise Wilcoxon rank-sum tests with Benjamini–Hochberg p-value adjustment (blanks excluded). The replicate unit is <code>sample_id</code> when available; otherwise the analysis falls back to wells. The summary below answers whether the groups differ overall, and which group pairs differ after adjustment.`
+      statDesc.innerHTML = aucStatsContext.statsMatchCurrentAuc
+        ? `<strong>Tests computed:</strong> paper-style AUC model (${aucStatsContext.modelClass}) with pairwise post hoc comparisons (${aucStatsContext.pAdjustMethod} adjustment). The response is fold-change from initial fluorescence, blank-corrected by plate/time, divided by <code>${activeAucSizeCol}</code>, then integrated by trapezoidal AUC.`
+        : `<strong>Tests hidden:</strong> model-based AUC statistics are only displayed for Paper metabolism with a selected AUC size column.`
       statsWrap.appendChild(statDesc)
 
-        const statsArr = Array.isArray(stats) ? stats : Array.from(stats || [])
-        const statsGroupCol = activeGroupCol || (groupColumns.length > 0 ? groupColumns[0] : null)
-        const relevantStats = statsArr.filter(s => {
-          if (!statsGroupCol) return false
-          if (String(s.group_col) !== String(statsGroupCol)) return false
-          if (activeExperimentSel !== "All" && String(s.experiment_dir) !== String(activeExperimentSel)) return false
-          if (activePlateSel !== "All" && s.plate_id && String(s.plate_id) !== String(activePlateSel)) return false
-          return true
-        })
-
-        const kwStats = relevantStats.filter(r => r.comparison === "Kruskal-Wallis")
-        const pairwiseStats = relevantStats.filter(r => r.comparison === "Wilcoxon")
-        const significantPairs = pairwiseStats.filter(r => Number.isFinite(Number(r.p_adj)) && Number(r.p_adj) <= 0.05)
-        const kwBest = kwStats[0] || null
-        const analysisUnitType = relevantStats.find(r => r.analysis_unit_type)?.analysis_unit_type || (statsGroupCol ? "sample_id / well" : "unknown")
-        const formatP = v => {
-          if (v == null || v === "" || Number.isNaN(Number(v))) return "NA"
-          const n = Number(v)
-          if (!Number.isFinite(n)) return "NA"
-          if (n < 0.001) return n.toExponential(2)
-          return n.toFixed(3)
-        }
+        const statsGroupCol = aucStatsContext.statsGroupCol
+        const relevantStats = aucStatsContext.relevantStats
+        const kwStats = aucStatsContext.kwStats
+        const pairwiseStats = aucStatsContext.pairwiseStats
+        const significantPairs = aucStatsContext.significantPairs
+        const kwBest = aucStatsContext.kwBest
+        const analysisUnitType = aucStatsContext.analysisUnitType
+        const formatP = aucStatsContext.formatP
 
         // Reuse the precomputed significance labels and note from `aucStatsContext`.
         // The heavy stats computation is performed once in `aucStatsContext` above.
 
       if (relevantStats.length === 0) {
         const none = document.createElement("div")
-        none.textContent = "No statistical results available for the current selection."
+        none.textContent = aucStatsContext.statsMatchCurrentAuc
+          ? "No statistical results available for the current selection."
+          : "Statistical results are hidden because the current view is not the paper-metabolism AUC metric used for model-based tests."
         none.style.color = "#6b7280"
         statsWrap.appendChild(none)
       } else {
@@ -1725,14 +1723,14 @@ groupUnavailable
         summary.style.lineHeight = "1.45"
 
         const kwText = kwBest
-          ? `Omnibus result: ${Number(kwBest.p_adj) < 0.05 ? "groups differ" : "no evidence that groups differ"} (Kruskal-Wallis p = ${formatP(kwBest.p_value)}, BH-adjusted p = ${formatP(kwBest.p_adj)}).`
+          ? `Omnibus result: ${Number(kwBest.p_adj) < 0.05 ? "groups differ" : "no evidence that groups differ"} (${kwBest.comparison} p = ${formatP(kwBest.p_value)}).`
           : "Omnibus result: unavailable for this selection."
 
         const sigPairText = significantPairs.length > 0
-          ? `Pairwise differences after BH correction: ${significantPairs.map(r => `${r.group1} vs ${r.group2} (p_adj = ${formatP(r.p_adj)})`).join(", ")}.`
-          : "Pairwise differences after BH correction: none detected at the 0.05 threshold."
+          ? `Pairwise differences after ${aucStatsContext.pAdjustMethod} correction: ${significantPairs.map(r => `${r.group1} vs ${r.group2} (p_adj = ${formatP(r.p_adj)})`).join(", ")}.`
+          : `Pairwise differences after ${aucStatsContext.pAdjustMethod} correction: none detected at the 0.05 threshold.`
 
-        summary.innerHTML = `<strong>${kwText}</strong><br>${sigPairText}<br><span style="color:#6b7280">Analysis unit: ${analysisUnitType}.</span>`
+        summary.innerHTML = `<strong>${kwText}</strong><br>${sigPairText}<br><span style="color:#6b7280">Analysis unit: ${analysisUnitType}; size column: ${activeAucSizeCol}.</span>`
         statsWrap.appendChild(summary)
 
         if (!activeGroupCol && statsGroupCol) {
