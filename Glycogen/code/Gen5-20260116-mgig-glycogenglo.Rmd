@@ -450,6 +450,8 @@ tab
 ```
 # Overall summary table
 
+Note: the ‘glycogen’ readout includes background glucose - the ‘Glycogen-Glucose’ number is a more accurate measurement of glycogen levels, as this removes the contribution of background glucose
+
 ```{r, Overall summary table}
 tab <- matrix(c(as.numeric(weights[3,2]), glyc_A3_dilution, glyc_A3_mean_conc, glu_A3_mean_conc, (glyc_A3_mean_conc-glu_A3_mean_conc), ((glyc_A3_mean_conc-glu_A3_mean_conc)*(glyc_A3_dilution/as.numeric(weights[3,2]))), as.numeric(weights[4,2]), glyc_A4_dilution, glyc_A4_mean_conc, glu_A4_mean_conc, (glyc_A4_mean_conc-glu_A4_mean_conc), ((glyc_A4_mean_conc-glu_A4_mean_conc)*(glyc_A4_dilution/as.numeric(weights[4,2])))), ncol=6, byrow=TRUE)
 
