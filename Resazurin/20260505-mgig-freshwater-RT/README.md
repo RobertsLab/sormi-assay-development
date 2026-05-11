@@ -18,6 +18,17 @@ Resazurin working solution:
 
 Resazurin stock was from 7/20/2025 made by Valentina. Stored at 4<sup>o</sup>C.
 
+---
+
+See the data dashboard for plots of data:
+
+https://sormi.science/resazurin-dashboard.html
+
+
+### IMPORTANT
+
+This directory is automatically parsed by GitHub Actions to produce the data dashboard. Please do not alter the plate filenames.
+
 
 ---
 
