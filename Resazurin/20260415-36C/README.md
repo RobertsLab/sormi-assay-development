@@ -18,6 +18,6 @@ This directory is automatically parsed by GitHub Actions to produce the data das
 
 ### FILES
 
-- [`layout.csv`](https://github.com/RobertsLab/sormi-assay-development/blob/main/Resazurin/20260415-36C/layout.csv): This is a tab-delimited plate layout file containing various metadata which is automatically parsed/processed to create the data dashboard.
+- [`layout.csv`](https://github.com/RobertsLab/sormi-assay-development/blob/main/Resazurin/20260415-36C/layout.csv): This is a comma-delimited plate layout file containing various metadata which is automatically parsed/processed to create the data dashboard.
 
 - `plate-<label>-T<N.N>.txt`: Plate reader files. The filename formatting is important, as they are utilized to help generate the data dashboard. The `*-T<N.N>` portion is the time, in hours, the measurement was taken after time = 0 (e.g. `T0.0`).

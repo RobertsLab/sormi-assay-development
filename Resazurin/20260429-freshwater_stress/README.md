@@ -16,3 +16,18 @@ https://sormi.science/resazurin-dashboard.html
 ### IMPORTANT
 
 This directory is automatically parsed by GitHub Actions to produce the data dashboard. Please do not alter the plate filenames.
+
+---
+
+
+### FILES
+
+- `layout.csv`: Metadata file containing all pertinent info on plate layouts, sample IDs, family/group IDs, etc., along with any oyster physical measurements.
+
+- `*-ImageJ.csv`: Comma-separate area measurments of oysters. The file name corresponds to an image file of the same name in the `images` directory.
+
+- `plate-<A-Z>-T<N.N>.txt`: Raw fluorescence data from the plate reader. 
+
+  - `<A-Z>`: Corresponds to plate letter.
+
+  - `T<N.N>`: Corresponds to the measurment timepoint in `N` hours, `N` minutes.
