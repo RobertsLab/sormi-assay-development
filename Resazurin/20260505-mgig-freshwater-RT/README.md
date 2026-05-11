@@ -7,6 +7,18 @@ _M.gigas_ oysters from nine USDA families were placed in clear, 12-well plates a
 Fluorescence was measured periodically using a Synergy HTX (Agilent) plate reader with the Gen5 software (Agilent).
 
 
+Resazurin working solution:
+
+| REAGENT             | VOLUME (mL) |
+|---------------------|-------------|
+| TAP WATER           | 937.72      |
+| RESAZURIN STOCK     | 2.1         |
+| DMSO                | 0.95        |
+| PEN/STREP/FUNGIZONE | 9.5         |
+
+Resazurin stock was from 7/20/2025 made by Valentina. Stored at 4<sup>o</sup>C.
+
+
 ---
 
 ### FILES
