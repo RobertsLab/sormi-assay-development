@@ -1,0 +1,278 @@
+---
+title: "00.00-mgig-heat-survivorship-20260511"
+author: "Sam White"
+date: "2026-05-11"
+output: 
+  github_document:
+    toc: true
+    number_sections: true
+  bookdown::html_document2:
+    theme: cosmo
+    toc: true
+    toc_float: true
+    number_sections: true
+    code_folding: show
+    code_download: true
+  html_document:
+    theme: cosmo
+    toc: true
+    toc_float: true
+    number_sections: true
+    code_folding: show
+    code_download: true
+---
+
+# BACKGROUND
+
+<!-- This is a Kaplan-Meier survival analysis of 33<sup>o</sup>C heat stress of _Magallana gigas_ oysters, [conducted on 20260511](https://github.com/RobertsLab/sormi-assay-development/tree/main/heat-survivorship/20260511-33C-USDA-families) (GitHub repo). It compares 9 different families bred/selected by the USDA. -->
+
+## SETUP
+
+### Load packages
+
+```{r setup, message=FALSE, warning=FALSE}
+library(readr)
+library(dplyr)
+library(survival)
+library(survminer)
+library(ggplot2)
+
+knitr::opts_chunk$set(
+  echo = TRUE,         # Display code chunks
+  eval = TRUE,        # Evaluate code chunks
+  warning = FALSE,     # Hide warnings
+  message = FALSE,     # Hide messages
+  comment = "",         # Prevents appending '##' to beginning of lines in code output
+  results = 'hold'     # Holds output so it's all printed together after code chunk
+)
+```
+
+
+### Read in and view raw data
+
+```{r read-raw-data}
+survivorship_raw <- read_csv(
+	"../heat-survivorship/20260511-33C-USDA-families/survivorship.csv",
+	show_col_types = FALSE
+)
+
+# Preview newly created object
+cat("\n=== survivorship_raw: str() ===\n")
+str(survivorship_raw)
+```
+
+
+## ANALYSIS
+
+### Clean and standardize columns used for survival analysis
+
+```{r clean-columns, message=FALSE, warning=FALSE}
+survivorship_clean <- survivorship_raw %>%
+	mutate(
+		individual_id = as.character(individual_id),
+		family_group = as.character(`familly_id.group`),
+		timepoint_hrs = as.numeric(timepoint_hrs),
+		alive_chr = toupper(trimws(as.character(`alive.measurement`))),
+		alive = case_when(
+			alive_chr %in% c("TRUE", "T", "1", "YES", "Y") ~ TRUE,
+			alive_chr %in% c("FALSE", "F", "0", "NO", "N") ~ FALSE,
+			TRUE ~ NA
+		)
+	) %>%
+	select(
+		individual_id,
+		family_group,
+		timepoint_count,
+		timepoint_hrs,
+		alive,
+		date,
+		time,
+		everything()
+	)
+
+# Preview newly created object
+cat("\n=== survivorship_clean: str() ===\n")
+str(survivorship_clean)
+cat("\n=== survivorship_clean: summary(alive) ===\n")
+summary(survivorship_clean$alive)
+```
+
+### Reduce repeated observations to one survival row per individual
+
+```{r build-individual-survival, message=FALSE, warning=FALSE}
+individual_survival <- survivorship_clean %>%
+	filter(!is.na(individual_id), !is.na(timepoint_hrs), !is.na(alive)) %>%
+	arrange(individual_id, timepoint_hrs) %>%
+	group_by(individual_id) %>%
+	summarise(
+		family_group = first(family_group[!is.na(family_group)]),
+		event = if_else(any(!alive), 1L, 0L),
+		time_to_event = {
+			if (any(!alive)) {
+				min(timepoint_hrs[!alive])
+			} else {
+				max(timepoint_hrs)
+			}
+		},
+		n_observations = n(),
+		.groups = "drop"
+	)
+
+# Preview newly created object
+cat("\n=== individual_survival: str() ===\n")
+str(individual_survival)
+cat("\n=== individual_survival: summary(time_to_event) ===\n")
+summary(individual_survival$time_to_event)
+cat("\n=== individual_survival: table(event) ===\n")
+table(individual_survival$event)
+```
+
+### Create Surv object and fit Kaplan-Meier models
+
+```{r fit-km-models, message=FALSE, warning=FALSE}
+surv_object <- with(individual_survival, Surv(time = time_to_event, event = event))
+
+km_fit_overall <- survfit(surv_object ~ 1, data = individual_survival)
+km_fit_by_family <- survfit(surv_object ~ family_group, data = individual_survival)
+
+# Preview newly created objects
+cat("\n=== km_fit_overall ===\n")
+print(km_fit_overall)
+cat("\n=== km_fit_by_family ===\n")
+print(km_fit_by_family)
+cat("\n=== km_fit_overall: str() ===\n")
+str(km_fit_overall)
+cat("\n=== km_fit_by_family: str() ===\n")
+str(km_fit_by_family)
+```
+
+### Perform log-rank test to compare survival between families
+
+```{r log-rank-test, message=FALSE, warning=FALSE}
+logrank_test <- survdiff(surv_object ~ family_group, data = individual_survival)
+
+# Display test results
+cat("\n=== Log-rank test: survdiff() output ===\n")
+print(logrank_test)
+
+# Extract and report key statistics
+cat("\n=== Log-Rank Test Summary ===\n")
+cat("Chi-square statistic:", logrank_test$chisq, "\n")
+cat("Degrees of freedom:", length(logrank_test$n) - 1, "\n")
+cat("p-value:", 1 - pchisq(logrank_test$chisq, df = length(logrank_test$n) - 1), "\n")
+cat("\nInterpretation:\n")
+p_val <- 1 - pchisq(logrank_test$chisq, df = length(logrank_test$n) - 1)
+if (p_val < 0.05) {
+  cat("p < 0.05: Family groups show SIGNIFICANTLY DIFFERENT survival (reject null hypothesis)\n")
+} else {
+  cat("p >= 0.05: No significant difference in survival detected between family groups\n")
+}
+```
+
+### Pairwise log-rank tests with BH correction
+
+```{r pairwise-log-rank, message=FALSE, warning=FALSE}
+pairwise_results <- pairwise_survdiff(
+	Surv(time_to_event, event) ~ family_group,
+	data = individual_survival,
+	p.adjust.method = "BH"
+)
+
+cat("\n=== Pairwise log-rank test (BH-adjusted p-values) ===\n")
+print(pairwise_results)
+
+# Extract and display only significant pairs
+p_mat <- pairwise_results$p.value
+sig_pairs <- which(p_mat <= 0.05, arr.ind = TRUE)
+
+cat("\n=== Significant pairwise comparisons (BH-adjusted p <= 0.05) ===\n")
+if (nrow(sig_pairs) == 0) {
+	cat("No significant pairwise differences found.\n")
+} else {
+	sig_df <- data.frame(
+		group1      = rownames(p_mat)[sig_pairs[, 1]],
+		group2      = colnames(p_mat)[sig_pairs[, 2]],
+		p_adjusted  = p_mat[sig_pairs]
+	)
+	print(sig_df)
+}
+```
+
+### Convert Kaplan-Meier fit to plotting data frames
+
+```{r build-plot-data, message=FALSE, warning=FALSE}
+km_overall_df <- bind_rows(
+	data.frame(
+		time = 0,
+		surv = 1,
+		n_risk = km_fit_overall$n,
+		n_event = 0,
+		n_censor = 0
+	),
+	summary(km_fit_overall) %>%
+		with(
+			data.frame(
+				time = time,
+				surv = surv,
+				n_risk = n.risk,
+				n_event = n.event,
+				n_censor = n.censor
+			)
+		)
+) %>%
+	arrange(time)
+
+km_family_df <- bind_rows(
+	data.frame(
+		time = 0,
+		surv = 1,
+		n_risk = as.numeric(km_fit_by_family$n),
+		n_event = 0,
+		n_censor = 0,
+		strata = names(km_fit_by_family$strata)
+	),
+	summary(km_fit_by_family) %>%
+		with(
+			data.frame(
+				time = time,
+				surv = surv,
+				n_risk = n.risk,
+				n_event = n.event,
+				n_censor = n.censor,
+				strata = strata
+			)
+		)
+) %>%
+	mutate(family_group = sub("^family_group=", "", strata)) %>%
+	arrange(family_group, time)
+
+# Preview newly created objects
+cat("\n=== km_overall_df: head() ===\n")
+print(head(km_overall_df))
+cat("\n=== km_overall_df: str() ===\n")
+str(km_overall_df)
+
+cat("\n=== km_family_df: head() ===\n")
+print(head(km_family_df))
+cat("\n=== km_family_df: str() ===\n")
+str(km_family_df)
+```
+
+## PLOTS
+
+### Plot Kaplan-Meier curves
+
+#### Families
+
+```{r plot-km-by-family, fig.width=9, fig.height=6, message=FALSE, warning=FALSE}
+ggplot(km_family_df, aes(x = time, y = surv, color = family_group)) +
+	geom_step(linewidth = 1.0) +
+	labs(
+		title = "Kaplan-Meier Survival Curves by Family Group",
+		x = "Time (hours)",
+		y = "Survival probability",
+		color = "Family group"
+	) +
+	ylim(0, 1) +
+	theme_minimal(base_size = 12)
+```
