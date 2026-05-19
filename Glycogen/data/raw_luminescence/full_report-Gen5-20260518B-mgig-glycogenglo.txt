@@ -1,0 +1,66 @@
+
+
+Software Version	3.16.10
+
+
+
+Experiment File Path:	C:\Users\robertslab\Documents\HAA_GlycGlo\Gen5-20260518B-mgig-glycogenglo.xpt
+Protocol File Path:	C:\Users\Public\Documents\Protocols\luminesence-96wells-1.0s-glycogen_glo.prt
+
+
+
+Plate Number	Plate 1
+Date	5/18/2026
+Time	6:44:30 PM
+Reader Type:	Synergy HTX
+Reader Serial Number:	25030704
+Reading Type	Reader
+
+Procedure Details
+
+Plate Type	Costar 96 flat bottom
+Eject plate on completion	
+Read	Luminescence Endpoint
+	Full Plate
+	Integration Time: 0:01.00 (MM:SS.ss)
+	Filter Set 1
+	    Emission: Hole
+	    Optics: Top,  Gain: 135
+	Read Speed: Normal,  Delay: 100 msec
+	Extended Dynamic Range
+	Read Height: 1 mm
+
+Layout
+	1	2	3	4	5	6	7	8	9	10	11	12
+A	SPL1	SPL1	SPL1				SPL3	SPL3	SPL3				Well ID
+	0.0A*-glyc-17.5-df.20	0.0A*-glyc-17.5-df.20	0.0A*-glyc-17.5-df.20				0.0A*-glu-17.5-df.20	0.0A*-glu-17.5-df.20	0.0A*-glu-17.5-df.20				Name
+B	SPL2	SPL2	SPL2				SPL4	SPL4	SPL4				Well ID
+	0.0B**-glyc-10.4-df.20	0.0B**-glyc-10.4-df.20	0.0B**-glyc-10.4-df.20				0.0B**-glu-10.4-df.20	0.0B**-glu-10.4-df.20	0.0B**-glu-10.4-df.20				Name
+C													Well ID
+													Name
+D													Well ID
+													Name
+E													Well ID
+													Name
+F	SPL5	SPL6	SPL7	SPL8	SPL9		SPL10	SPL11	SPL12	SPL13	SPL14		Well ID
+	STD-glyc-20	STD-glyc-2	STD-glyc-0.2	STD-glyc-0.02	STD-glyc-0		STD-glu-100	STD-glu-10	STD-glu-1	STD-glu-0.1	STD-glu-0		Name
+G	SPL5	SPL6	SPL7	SPL8	SPL9		SPL10	SPL11	SPL12	SPL13	SPL14		Well ID
+	STD-glyc-20	STD-glyc-2	STD-glyc-0.2	STD-glyc-0.02	STD-glyc-0		STD-glu-100	STD-glu-10	STD-glu-1	STD-glu-0.1	STD-glu-0		Name
+H	SPL5	SPL6	SPL7	SPL8	SPL9		SPL10	SPL11	SPL12	SPL13	SPL14		Well ID
+	STD-glyc-20	STD-glyc-2	STD-glyc-0.2	STD-glyc-0.02	STD-glyc-0		STD-glu-100	STD-glu-10	STD-glu-1	STD-glu-0.1	STD-glu-0		Name
+
+
+
+Actual Temperature:	24.8
+
+Results
+	1	2	3	4	5	6	7	8	9	10	11	12
+A	4382	4301	6536				744	403	455				Lum
+B	3316	3440	3615				362	334	368				Lum
+C													Lum
+D													Lum
+E													Lum
+F	58787	5290	1078	1033	1201		79200	7888	1036	444	363		Lum
+G	60571	5436	1071	840	1176		78530	7559	1014	446	337		Lum
+H	56346	5032	1159	3291	878		83928	7730	1085	411	427		Lum
+
