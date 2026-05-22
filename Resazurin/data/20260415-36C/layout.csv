@@ -238,27 +238,27 @@ plate-C,D08,FALSE,9,68,FALSE,,,,,,330.852,18
 plate-C,D09,FALSE,5,103,FALSE,,,,,,843.686,1
 plate-C,D10,FALSE,9,65,FALSE,,,,,,1059.026,12
 plate-C,D11,FALSE,5,56,FALSE,,,,,,756.533,17
-plate-C,D12,FALSE,,138,TRUE,,,,,,,
+plate-C,D12,FALSE,,138,TRUE,Duplicate sample ID,,,,,,
 plate-C,E01,FALSE,7,69,FALSE,,,,,,431.788,8
 plate-C,E02,FALSE,7,100,FALSE,,,,,,1015.471,4
 plate-C,E03,FALSE,9,35,FALSE,,,,,,457.892,17
 plate-C,E04,FALSE,7,63,FALSE,,,,,,836.567,20
-plate-C,E05,FALSE,,139,TRUE,,,,,,,
-plate-C,E06,FALSE,,122,TRUE,,,,,,,
+plate-C,E05,FALSE,,139,TRUE,Duplicate sample ID,,,,,,
+plate-C,E06,FALSE,,122,TRUE,Duplicate sample ID,,,,,,
 plate-C,E07,FALSE,9,74,FALSE,,,,,,725.224,4
 plate-C,E08,FALSE,7,61,FALSE,,,,,,558.79,5
 plate-C,E09,FALSE,7,32,FALSE,,,,,,395.887,7
 plate-C,E10,FALSE,3,18,FALSE,,,,,,621.472,2
-plate-C,E11,FALSE,7,40,FALSE,Duplicate sample ID,,,,,996.234,3
+plate-C,E11,FALSE,7,40,FALSE,,,,,,996.234,3
 plate-C,E12,FALSE,7,62,FALSE,,,,,,644.174,16
-plate-C,F01,FALSE,7,31,FALSE,Duplicate sample ID,,,,,1013.626,12
+plate-C,F01,FALSE,7,31,FALSE,,,,,,1013.626,12
 plate-C,F02,FALSE,,137,TRUE,Duplicate sample ID,,,,,,
-plate-C,F03,FALSE,,135,TRUE,,,,,,,
-plate-C,F04,FALSE,,134,TRUE,,,,,,,
+plate-C,F03,FALSE,,135,TRUE,Duplicate sample ID,,,,,,
+plate-C,F04,FALSE,,134,TRUE,Duplicate sample ID,,,,,,
 plate-C,F05,FALSE,,136,TRUE,Duplicate sample ID,,,,,,
 plate-C,F06,FALSE,,140,TRUE,Duplicate sample ID,,,,,,
-plate-C,F07,FALSE,7,33,FALSE,Duplicate sample ID,,,,,1569.815,1
-plate-C,F08,FALSE,7,36,FALSE,Duplicate sample ID,,,,,778.919,6
+plate-C,F07,FALSE,7,33,FALSE,,,,,,1569.815,1
+plate-C,F08,FALSE,7,36,FALSE,,,,,,778.919,6
 plate-C,F09,FALSE,3,49,FALSE,,,,,,1428.222,4
 plate-C,F10,FALSE,3,24,FALSE,,,,,,954.444,6
 plate-C,F11,FALSE,5,90,FALSE,,,,,,610.833,9
@@ -284,18 +284,18 @@ plate-C,H06,FALSE,10,144,FALSE,,,,,,1171.457,7
 plate-C,H07,FALSE,10,148,FALSE,,,,,,256.916,10
 plate-C,H08,FALSE,10,151,FALSE,,,,,,587.061,4
 plate-C,H09,FALSE,10,147,FALSE,,,,,,663.776,9
-plate-C,H10,FALSE,,139,TRUE,,,,,,,
+plate-C,H10,FALSE,,139,TRUE,Duplicate sample ID,,,,,,
 plate-C,H11,FALSE,10,149,FALSE,,,,,,725,2
 plate-C,H12,TRUE,,,,,,,,,,
 plate-D,A01,FALSE,6,143,FALSE,,,,,,696.555,5
-plate-D,A02,FALSE,10,153,FALSE,Duplicate sample ID,,,,,1010.162,5
+plate-D,A02,FALSE,10,153,FALSE,,,,,,1010.162,5
 plate-D,A03,FALSE,,137,TRUE,Duplicate sample ID,,,,,,
 plate-D,A04,FALSE,,138,TRUE,Duplicate sample ID,,,,,,
-plate-D,A05,FALSE,,136,TRUE,,,,,,,
-plate-D,A06,FALSE,,134,TRUE,,,,,,,
+plate-D,A05,FALSE,,136,TRUE,Duplicate sample ID,,,,,,
+plate-D,A06,FALSE,,134,TRUE,Duplicate sample ID,,,,,,
 plate-D,A07,FALSE,,140,TRUE,Duplicate sample ID,,,,,,
-plate-D,A08,FALSE,6,142,FALSE,Duplicate sample ID,,,,,623.906,2
-plate-D,A09,FALSE,10,150,FALSE,Duplicate sample ID,,,,,1143.849,1
+plate-D,A08,FALSE,6,142,FALSE,,,,,,623.906,2
+plate-D,A09,FALSE,10,150,FALSE,,,,,,1143.849,1
 plate-D,A10,FALSE,10,152,FALSE,,,,,,829.535,3
 plate-D,A11,FALSE,,135,TRUE,Duplicate sample ID,,,,,,
 plate-D,A12,FALSE,6,141,FALSE,,,,,,895.674,4
@@ -430,27 +430,27 @@ plate-E,D08,FALSE,9,37,FALSE,,,,,,628.372,14
 plate-E,D09,FALSE,5,106,FALSE,,,,,,1211.475,12
 plate-E,D10,FALSE,5,56,FALSE,,,,,,756.533,17
 plate-E,D11,FALSE,5,20,FALSE,,,,,,903.736,3
-plate-E,D12,FALSE,,140,TRUE,,,,,,,
-plate-E,E01,FALSE,,136,TRUE,,,,,,,
+plate-E,D12,FALSE,,140,TRUE,Duplicate sample ID,,,,,,
+plate-E,E01,FALSE,,136,TRUE,Duplicate sample ID,,,,,,
 plate-E,E02,FALSE,7,69,FALSE,,,,,,431.788,8
 plate-E,E03,FALSE,7,100,FALSE,,,,,,1015.471,4
 plate-E,E04,FALSE,7,61,FALSE,,,,,,558.79,5
-plate-E,E05,FALSE,,138,TRUE,,,,,,,
+plate-E,E05,FALSE,,138,TRUE,Duplicate sample ID,,,,,,
 plate-E,E06,FALSE,9,68,FALSE,,,,,,330.852,18
 plate-E,E07,FALSE,7,33,FALSE,,,,,,1569.815,1
 plate-E,E08,FALSE,3,18,FALSE,,,,,,621.472,2
 plate-E,E09,FALSE,7,32,FALSE,,,,,,395.887,7
-plate-E,E10,FALSE,,139,TRUE,,,,,,,
-plate-E,E11,FALSE,9,22,FALSE,Duplicate sample ID,,,,,733.666,5
+plate-E,E10,FALSE,,139,TRUE,Duplicate sample ID,,,,,,
+plate-E,E11,FALSE,9,22,FALSE,,,,,,733.666,5
 plate-E,E12,FALSE,9,35,FALSE,,,,,,457.892,17
-plate-E,F01,FALSE,7,63,FALSE,Duplicate sample ID,,,,,836.567,20
+plate-E,F01,FALSE,7,63,FALSE,,,,,,836.567,20
 plate-E,F02,FALSE,,135,TRUE,Duplicate sample ID,,,,,,
-plate-E,F03,FALSE,,134,TRUE,,,,,,,
+plate-E,F03,FALSE,,134,TRUE,Duplicate sample ID,,,,,,
 plate-E,F04,FALSE,7,36,FALSE,,,,,,778.919,6
 plate-E,F05,FALSE,,137,TRUE,Duplicate sample ID,,,,,,
-plate-E,F06,FALSE,7,31,FALSE,Duplicate sample ID,,,,,1013.626,12
-plate-E,F07,FALSE,7,40,FALSE,Duplicate sample ID,,,,,996.234,3
-plate-E,F08,FALSE,7,62,FALSE,Duplicate sample ID,,,,,644.174,16
+plate-E,F06,FALSE,7,31,FALSE,,,,,,1013.626,12
+plate-E,F07,FALSE,7,40,FALSE,,,,,,996.234,3
+plate-E,F08,FALSE,7,62,FALSE,,,,,,644.174,16
 plate-E,F09,FALSE,3,60,FALSE,,,,,,470.083,15
 plate-E,F10,FALSE,5,72,FALSE,,,,,,873.793,2
 plate-E,F11,FALSE,5,88,FALSE,,,,,,492.453,20
@@ -475,22 +475,22 @@ plate-E,H05,FALSE,5,59,FALSE,,,,,,793.962,16
 plate-E,H06,FALSE,10,151,FALSE,,,,,,587.061,4
 plate-E,H07,FALSE,10,144,FALSE,,,,,,1171.457,7
 plate-E,H08,FALSE,10,147,FALSE,,,,,,663.776,9
-plate-E,H09,FALSE,,138,TRUE,,,,,,,
-plate-E,H10,FALSE,,139,TRUE,,,,,,,
+plate-E,H09,FALSE,,138,TRUE,Duplicate sample ID,,,,,,
+plate-E,H10,FALSE,,139,TRUE,Duplicate sample ID,,,,,,
 plate-E,H11,FALSE,10,149,FALSE,,,,,,725,2
 plate-E,H12,TRUE,,,,,,,,,,
 plate-F,A01,FALSE,6,142,FALSE,,,,,,623.906,2
-plate-F,A02,FALSE,10,148,FALSE,Duplicate sample ID,,,,,256.916,10
-plate-F,A03,FALSE,6,143,FALSE,Duplicate sample ID,,,,,696.555,5
-plate-F,A04,FALSE,6,141,FALSE,Duplicate sample ID,,,,,895.674,4
+plate-F,A02,FALSE,10,148,FALSE,,,,,,256.916,10
+plate-F,A03,FALSE,6,143,FALSE,,,,,,696.555,5
+plate-F,A04,FALSE,6,141,FALSE,,,,,,895.674,4
 plate-F,A05,FALSE,10,153,FALSE,,,,,,1010.162,5
-plate-F,A06,FALSE,,137,TRUE,,,,,,,
-plate-F,A07,FALSE,10,152,FALSE,Duplicate sample ID,,,,,829.535,3
+plate-F,A06,FALSE,,137,TRUE,Duplicate sample ID,,,,,,
+plate-F,A07,FALSE,10,152,FALSE,,,,,,829.535,3
 plate-F,A08,FALSE,,140,TRUE,Duplicate sample ID,,,,,,
-plate-F,A09,FALSE,10,150,FALSE,Duplicate sample ID,,,,,1143.849,1
-plate-F,A10,FALSE,,136,TRUE,,,,,,,
+plate-F,A09,FALSE,10,150,FALSE,,,,,,1143.849,1
+plate-F,A10,FALSE,,136,TRUE,Duplicate sample ID,,,,,,
 plate-F,A11,FALSE,,134,TRUE,Duplicate sample ID,,,,,,
-plate-F,A12,FALSE,,135,TRUE,,,,,,,
+plate-F,A12,FALSE,,135,TRUE,Duplicate sample ID,,,,,,
 plate-F,B01,FALSE,2,162,FALSE,,,,,,1181.082,6
 plate-F,B02,FALSE,2,163,FALSE,,,,,,702.441,9
 plate-F,B03,FALSE,2,165,FALSE,,,,,,807.993,8
@@ -620,29 +620,29 @@ plate-G,D06,FALSE,7,40,FALSE,,,,,,996.234,3
 plate-G,D07,FALSE,7,31,FALSE,,,,,,1013.626,12
 plate-G,D08,FALSE,7,33,FALSE,,,,,,1569.815,1
 plate-G,D09,FALSE,3,18,FALSE,,,,,,621.472,2
-plate-G,D10,FALSE,,140,TRUE,,,,,,,
+plate-G,D10,FALSE,,140,TRUE,Duplicate sample ID,,,,,,
 plate-G,D11,FALSE,9,65,FALSE,,,,,,1059.026,12
 plate-G,D12,FALSE,7,64,FALSE,,,,,,358.11,10
-plate-G,E01,FALSE,,139,TRUE,,,,,,,
+plate-G,E01,FALSE,,139,TRUE,Duplicate sample ID,,,,,,
 plate-G,E02,FALSE,9,70,FALSE,,,,,,1520.497,15
 plate-G,E03,FALSE,7,32,FALSE,,,,,,395.887,7
 plate-G,E04,FALSE,7,69,FALSE,,,,,,431.788,8
 plate-G,E05,FALSE,7,34,FALSE,,,,,,991.183,2
-plate-G,E06,FALSE,,136,TRUE,,,,,,,
+plate-G,E06,FALSE,,136,TRUE,Duplicate sample ID,,,,,,
 plate-G,E07,FALSE,7,62,FALSE,,,,,,644.174,16
-plate-G,E08,FALSE,,138,TRUE,,,,,,,
+plate-G,E08,FALSE,,138,TRUE,Duplicate sample ID,,,,,,
 plate-G,E09,FALSE,9,84,FALSE,,,,,,678.724,2
 plate-G,E10,FALSE,7,100,FALSE,,,,,,1015.471,4
 plate-G,E11,FALSE,,135,TRUE,Duplicate sample ID,,,,,,
 plate-G,E12,FALSE,9,35,FALSE,,,,,,457.892,17
-plate-G,F01,FALSE,7,61,FALSE,Duplicate sample ID,,,,,558.79,5
-plate-G,F02,FALSE,7,36,FALSE,Duplicate sample ID,,,,,778.919,6
-plate-G,F03,FALSE,,137,TRUE,,,,,,,
-plate-G,F04,FALSE,,134,TRUE,,,,,,,
-plate-G,F05,FALSE,7,63,FALSE,Duplicate sample ID,,,,,836.567,20
-plate-G,F06,FALSE,9,22,FALSE,Duplicate sample ID,,,,,733.666,5
-plate-G,F07,FALSE,9,68,FALSE,Duplicate sample ID,,,,,330.852,18
-plate-G,F08,FALSE,9,37,FALSE,Duplicate sample ID,,,,,628.372,14
+plate-G,F01,FALSE,7,61,FALSE,,,,,,558.79,5
+plate-G,F02,FALSE,7,36,FALSE,,,,,,778.919,6
+plate-G,F03,FALSE,,137,TRUE,Duplicate sample ID,,,,,,
+plate-G,F04,FALSE,,134,TRUE,Duplicate sample ID,,,,,,
+plate-G,F05,FALSE,7,63,FALSE,,,,,,836.567,20
+plate-G,F06,FALSE,9,22,FALSE,,,,,,733.666,5
+plate-G,F07,FALSE,9,68,FALSE,,,,,,330.852,18
+plate-G,F08,FALSE,9,37,FALSE,,,,,,628.372,14
 plate-G,F09,FALSE,3,23,FALSE,,,,,,556.889,18
 plate-G,F10,FALSE,5,29,FALSE,,,,,,680.828,6
 plate-G,F11,FALSE,5,88,FALSE,,,,,,492.453,20
@@ -665,18 +665,18 @@ plate-G,H03,FALSE,5,89,FALSE,,,,,,653.808,14
 plate-G,H04,FALSE,5,41,FALSE,,,,,,902.643,11
 plate-G,H05,FALSE,3,111,FALSE,,,,,,783.5,8
 plate-G,H06,TRUE,,,,,,,,,,
-plate-G,H07,FALSE,,138,TRUE,,,,,,,
-plate-G,H08,FALSE,,139,TRUE,,,,,,,
+plate-G,H07,FALSE,,138,TRUE,Duplicate sample ID,,,,,,
+plate-G,H08,FALSE,,139,TRUE,Duplicate sample ID,,,,,,
 plate-G,H09,FALSE,10,151,FALSE,,,,,,587.061,4
 plate-G,H10,FALSE,10,144,FALSE,,,,,,1171.457,7
 plate-G,H11,FALSE,10,147,FALSE,,,,,,663.776,9
 plate-G,H12,FALSE,6,142,FALSE,,,,,,623.906,2
 plate-H,A01,FALSE,10,148,FALSE,,,,,,256.916,10
-plate-H,A02,FALSE,6,143,FALSE,Duplicate sample ID,,,,,696.555,5
-plate-H,A03,FALSE,6,141,FALSE,Duplicate sample ID,,,,,895.674,4
-plate-H,A04,FALSE,10,149,FALSE,Duplicate sample ID,,,,,725,2
+plate-H,A02,FALSE,6,143,FALSE,,,,,,696.555,5
+plate-H,A03,FALSE,6,141,FALSE,,,,,,895.674,4
+plate-H,A04,FALSE,10,149,FALSE,,,,,,725,2
 plate-H,A05,FALSE,10,152,FALSE,,,,,,829.535,3
-plate-H,A06,FALSE,,140,TRUE,,,,,,,
+plate-H,A06,FALSE,,140,TRUE,Duplicate sample ID,,,,,,
 plate-H,A07,FALSE,,134,TRUE,Duplicate sample ID,,,,,,
 plate-H,A08,FALSE,,136,TRUE,Duplicate sample ID,,,,,,
 plate-H,A09,FALSE,,135,TRUE,Duplicate sample ID,,,,,,
@@ -805,8 +805,8 @@ plate-I,C11,FALSE,7,62,FALSE,,,,,,644.174,16
 plate-I,C12,FALSE,9,39,FALSE,,,,,,412.513,13
 plate-I,D01,FALSE,3,18,FALSE,,,,,,621.472,2
 plate-I,D02,FALSE,9,74,FALSE,,,,,,725.224,4
-plate-I,D03,FALSE,,138,TRUE,,,,,,,
-plate-I,D04,FALSE,,140,TRUE,,,,,,,
+plate-I,D03,FALSE,,138,TRUE,Duplicate sample ID,,,,,,
+plate-I,D04,FALSE,,140,TRUE,Duplicate sample ID,,,,,,
 plate-I,D05,FALSE,9,65,FALSE,,,,,,1059.026,12
 plate-I,D06,FALSE,5,20,FALSE,,,,,,903.736,3
 plate-I,D07,FALSE,9,22,FALSE,,,,,,733.666,5
@@ -814,9 +814,9 @@ plate-I,D08,FALSE,9,68,FALSE,,,,,,330.852,18
 plate-I,D09,FALSE,7,63,FALSE,,,,,,836.567,20
 plate-I,D10,FALSE,9,84,FALSE,,,,,,678.724,2
 plate-I,D11,FALSE,7,100,FALSE,,,,,,1015.471,4
-plate-I,D12,FALSE,,139,TRUE,,,,,,,
+plate-I,D12,FALSE,,139,TRUE,Duplicate sample ID,,,,,,
 plate-I,E01,FALSE,9,37,FALSE,,,,,,628.372,14
-plate-I,E02,FALSE,,135,TRUE,,,,,,,
+plate-I,E02,FALSE,,135,TRUE,Duplicate sample ID,,,,,,
 plate-I,E03,FALSE,5,56,FALSE,,,,,,756.533,17
 plate-I,E04,FALSE,7,64,FALSE,,,,,,358.11,10
 plate-I,E05,FALSE,5,103,FALSE,,,,,,843.686,1
@@ -825,16 +825,16 @@ plate-I,E07,FALSE,9,70,FALSE,,,,,,1520.497,15
 plate-I,E08,FALSE,7,67,FALSE,,,,,,473.104,9
 plate-I,E09,FALSE,7,61,FALSE,,,,,,558.79,5
 plate-I,E10,FALSE,7,32,FALSE,,,,,,395.887,7
-plate-I,E11,FALSE,9,35,FALSE,Duplicate sample ID,,,,,457.892,17
+plate-I,E11,FALSE,9,35,FALSE,,,,,,457.892,17
 plate-I,E12,FALSE,7,40,FALSE,,,,,,996.234,3
-plate-I,F01,FALSE,7,36,FALSE,Duplicate sample ID,,,,,778.919,6
+plate-I,F01,FALSE,7,36,FALSE,,,,,,778.919,6
 plate-I,F02,FALSE,,137,TRUE,Duplicate sample ID,,,,,,
-plate-I,F03,FALSE,,134,TRUE,,,,,,,
-plate-I,F04,FALSE,,136,TRUE,,,,,,,
-plate-I,F05,FALSE,7,33,FALSE,Duplicate sample ID,,,,,1569.815,1
-plate-I,F06,FALSE,7,34,FALSE,Duplicate sample ID,,,,,991.183,2
-plate-I,F07,FALSE,7,31,FALSE,Duplicate sample ID,,,,,1013.626,12
-plate-I,F08,FALSE,7,69,FALSE,Duplicate sample ID,,,,,431.788,8
+plate-I,F03,FALSE,,134,TRUE,Duplicate sample ID,,,,,,
+plate-I,F04,FALSE,,136,TRUE,Duplicate sample ID,,,,,,
+plate-I,F05,FALSE,7,33,FALSE,,,,,,1569.815,1
+plate-I,F06,FALSE,7,34,FALSE,,,,,,991.183,2
+plate-I,F07,FALSE,7,31,FALSE,,,,,,1013.626,12
+plate-I,F08,FALSE,7,69,FALSE,,,,,,431.788,8
 plate-I,F09,FALSE,5,72,FALSE,,,,,,873.793,2
 plate-I,F10,FALSE,5,29,FALSE,,,,,,680.828,6
 plate-I,F11,FALSE,5,88,FALSE,,,,,,492.453,20
@@ -856,24 +856,24 @@ plate-I,H02,FALSE,5,89,FALSE,,,,,,653.808,14
 plate-I,H03,FALSE,5,27,FALSE,,,,,,646.568,18
 plate-I,H04,FALSE,5,14,FALSE,,,,,,562.694,7
 plate-I,H05,FALSE,5,90,FALSE,,,,,,610.833,9
-plate-I,H06,FALSE,,136,TRUE,,,,,,,
-plate-I,H07,FALSE,,139,TRUE,,,,,,,
+plate-I,H06,FALSE,,136,TRUE,Duplicate sample ID,,,,,,
+plate-I,H07,FALSE,,139,TRUE,Duplicate sample ID,,,,,,
 plate-I,H08,FALSE,10,148,FALSE,,,,,,256.916,10
-plate-I,H09,FALSE,,138,TRUE,,,,,,,
+plate-I,H09,FALSE,,138,TRUE,Duplicate sample ID,,,,,,
 plate-I,H10,FALSE,10,147,FALSE,,,,,,663.776,9
 plate-I,H11,FALSE,6,141,FALSE,,,,,,895.674,4
 plate-I,H12,TRUE,,,,,,,,,,
 plate-J,A01,FALSE,10,144,FALSE,,,,,,1171.457,7
-plate-J,A02,FALSE,10,151,FALSE,Duplicate sample ID,,,,,587.061,4
+plate-J,A02,FALSE,10,151,FALSE,,,,,,587.061,4
 plate-J,A03,FALSE,,135,TRUE,Duplicate sample ID,,,,,,
-plate-J,A04,FALSE,10,149,FALSE,Duplicate sample ID,,,,,725,2
+plate-J,A04,FALSE,10,149,FALSE,,,,,,725,2
 plate-J,A05,FALSE,6,143,FALSE,,,,,,696.555,5
-plate-J,A06,FALSE,,137,TRUE,,,,,,,
-plate-J,A07,FALSE,10,150,FALSE,Duplicate sample ID,,,,,1143.849,1
+plate-J,A06,FALSE,,137,TRUE,Duplicate sample ID,,,,,,
+plate-J,A07,FALSE,10,150,FALSE,,,,,,1143.849,1
 plate-J,A08,FALSE,,140,TRUE,Duplicate sample ID,,,,,,
 plate-J,A09,FALSE,,134,TRUE,Duplicate sample ID,,,,,,
 plate-J,A10,FALSE,6,142,FALSE,,,,,,623.906,2
-plate-J,A11,FALSE,10,153,FALSE,Duplicate sample ID,,,,,1010.162,5
+plate-J,A11,FALSE,10,153,FALSE,,,,,,1010.162,5
 plate-J,A12,FALSE,10,152,FALSE,,,,,,829.535,3
 plate-J,B01,FALSE,8,130,FALSE,,,,,,611.468,10
 plate-J,B02,FALSE,8,173,FALSE,,,,,,1365.595,1
