@@ -473,8 +473,10 @@ p_raw_mean <- ggplot(raw_family_summary,
     mapping   = if (has_trt) aes(linetype = treatment_group) else NULL,
     linewidth = 1) +
   geom_point(size = 2) +
-  scale_colour_manual(values = fam_colours, name = "Family") +
-  scale_fill_manual(values = fam_colours, name = "Family") +
+  scale_colour_manual(values = fam_colours, name = "Family",
+                      breaks = families) +
+  scale_fill_manual(values = fam_colours, name = "Family",
+                    breaks = families) +
   labs(x = "Time (h)", y = "Mean raw fluorescence (RFU ± SE)") +
   theme_classic(base_size = 13) +
   if (has_trt) scale_linetype_manual(values = trt_linetypes, name = "Treatment") else NULL
@@ -496,7 +498,8 @@ p_raw_by_family <- raw_df %>%
   facet_wrap(~ family_id_group) +
   scale_colour_manual(
     values = if (has_trt) trt_colours else fam_colours,
-    name   = if (has_trt) "Treatment" else "Family") +
+    name   = if (has_trt) "Treatment" else "Family",
+    breaks = if (has_trt) treatments else families) +
   labs(x = "Time (h)", y = "Raw fluorescence (RFU)") +
   theme_classic(base_size = 12) +
   theme(strip.background = element_blank(),
@@ -517,7 +520,8 @@ if (has_trt) {
     geom_line(alpha = 0.6) +
     geom_point(size = 1.2, alpha = 0.7) +
     facet_wrap(~ treatment_group) +
-    scale_colour_manual(values = fam_colours, name = "Family") +
+    scale_colour_manual(values = fam_colours, name = "Family",
+                        breaks = families) +
     labs(x = "Time (h)", y = "Raw fluorescence (RFU)") +
     theme_classic(base_size = 12) +
     theme(strip.background = element_blank(),
@@ -681,8 +685,10 @@ p_bc_fc_mean <- ggplot(bc_fc_summary,
     mapping   = if (has_trt) aes(linetype = treatment_group) else NULL,
     linewidth = 1) +
   geom_point(size = 2) +
-  scale_colour_manual(values = fam_colours, name = "Family") +
-  scale_fill_manual(values = fam_colours, name = "Family") +
+  scale_colour_manual(values = fam_colours, name = "Family",
+                      breaks = families) +
+  scale_fill_manual(values = fam_colours, name = "Family",
+                    breaks = families) +
   labs(x = "Time (h)",
        y = "Mean blank-corrected fold-change (± SE)") +
   theme_classic(base_size = 13) +
@@ -705,7 +711,8 @@ p_bc_fc_by_family <- samples %>%
   facet_wrap(~ family_id_group) +
   scale_colour_manual(
     values = if (has_trt) trt_colours else fam_colours,
-    name   = if (has_trt) "Treatment" else "Family") +
+    name   = if (has_trt) "Treatment" else "Family",
+    breaks = if (has_trt) treatments else families) +
   labs(x = "Time (h)", y = "Blank-corrected fold-change") +
   theme_classic(base_size = 12) +
   theme(strip.background = element_blank(),
@@ -726,7 +733,8 @@ if (has_trt) {
     geom_line(alpha = 0.6) +
     geom_point(size = 1.2, alpha = 0.7) +
     facet_wrap(~ treatment_group) +
-    scale_colour_manual(values = fam_colours, name = "Family") +
+    scale_colour_manual(values = fam_colours, name = "Family",
+                        breaks = families) +
     labs(x = "Time (h)", y = "Blank-corrected fold-change") +
     theme_classic(base_size = 12) +
     theme(strip.background = element_blank(),
@@ -801,8 +809,10 @@ if (nrow(metabolism_df) > 0) {
         mapping   = if (has_trt) aes(linetype = treatment_group) else NULL,
         linewidth = 1) +
       geom_point(size = 2) +
-      scale_colour_manual(values = fam_colours, name = "Family") +
-      scale_fill_manual(values = fam_colours, name = "Family") +
+      scale_colour_manual(values = fam_colours, name = "Family",
+                          breaks = families) +
+      scale_fill_manual(values = fam_colours, name = "Family",
+                        breaks = families) +
       labs(x = "Time (h)",
            y = paste0(metabolism_y_label(col), " (± SE)")) +
       theme_classic(base_size = 13) +
@@ -835,7 +845,8 @@ if (nrow(metabolism_df) > 0) {
       facet_wrap(~ family_id_group) +
       scale_colour_manual(
         values = if (has_trt) trt_colours else fam_colours,
-        name   = if (has_trt) "Treatment" else "Family") +
+        name   = if (has_trt) "Treatment" else "Family",
+        breaks = if (has_trt) treatments else families) +
       labs(x = "Time (h)", y = metabolism_y_label(col)) +
       theme_classic(base_size = 12) +
       theme(strip.background = element_blank(),
@@ -854,7 +865,8 @@ if (nrow(metabolism_df) > 0) {
         geom_line(alpha = 0.6) +
         geom_point(size = 1.2, alpha = 0.7) +
         facet_wrap(~ treatment_group) +
-        scale_colour_manual(values = fam_colours, name = "Family") +
+        scale_colour_manual(values = fam_colours, name = "Family",
+                            breaks = families) +
         labs(x = "Time (h)", y = metabolism_y_label(col)) +
         theme_classic(base_size = 12) +
         theme(strip.background = element_blank(),
