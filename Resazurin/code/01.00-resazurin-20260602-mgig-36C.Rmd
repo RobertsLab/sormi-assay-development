@@ -375,7 +375,7 @@ raw_df <- dat %>%
     )
   )
 
-families   <- sort(unique(na.omit(raw_df$family_id_group)))
+families   <- str_sort(unique(na.omit(raw_df$family_id_group)), numeric = TRUE)
 treatments <- sort(unique(na.omit(raw_df$treatment_group)))
 
 n_fam <- length(families)
@@ -1224,7 +1224,8 @@ for (met in metrics_to_test) {
   # ── Family main effect (x = family, tick = family name) ───────────────
   if (has_fam) {
     df_p <- df %>%
-      mutate(x = factor(family_id_group, levels = sort(unique(family_id_group))))
+      mutate(x = factor(family_id_group,
+                        levels = str_sort(unique(family_id_group), numeric = TRUE)))
     grps <- levels(df_p$x)
     p <- ggplot(df_p, aes(x = x, y = AUC, fill = x)) +
       geom_boxplot(alpha = 0.6, outlier.shape = NA) +
@@ -1252,7 +1253,8 @@ for (met in metrics_to_test) {
   df_p <- df %>%
     mutate(x = factor(
       paste(family_id_group, treatment_group, sep = ":"),
-      levels = sort(unique(paste(family_id_group, treatment_group, sep = ":")))
+      levels = str_sort(unique(paste(family_id_group, treatment_group, sep = ":")),
+                        numeric = TRUE)
     ))
   grps     <- levels(df_p$x)
   fill_map <- setNames(make_palette(length(grps)), grps)
@@ -1271,12 +1273,13 @@ for (met in metrics_to_test) {
   # ── Within each family: treatment comparison (x = family:treatment) ────
   # Tick labels are family:treatment so these plots are visually distinct
   # from the treatment main-effect plot above.
-  for (fam in sort(unique(df$family_id_group))) {
+  for (fam in str_sort(unique(df$family_id_group), numeric = TRUE)) {
     df_p <- df %>%
       filter(family_id_group == fam) %>%
       mutate(x = factor(
         paste(family_id_group, treatment_group, sep = ":"),
-        levels = sort(unique(paste(family_id_group, treatment_group, sep = ":")))
+        levels = str_sort(unique(paste(family_id_group, treatment_group, sep = ":")),
+                          numeric = TRUE)
       ))
     grps     <- levels(df_p$x)
     pairs_sub <- pairs_fc %>%
@@ -1301,7 +1304,8 @@ for (met in metrics_to_test) {
       filter(treatment_group == trt) %>%
       mutate(x = factor(
         paste(family_id_group, treatment_group, sep = ":"),
-        levels = sort(unique(paste(family_id_group, treatment_group, sep = ":")))
+        levels = str_sort(unique(paste(family_id_group, treatment_group, sep = ":")),
+                          numeric = TRUE)
       ))
     grps      <- levels(df_p$x)
     pairs_sub <- pairs_fc %>%
