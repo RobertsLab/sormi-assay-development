@@ -263,6 +263,19 @@ plot_df <- all_dat %>%
 str(plot_df)
 ```
 
+## Write plot_df to CSV
+
+```{r write-plot-df}
+out_dir <- file.path(proj_root, "Resazurin", "outputs",
+                     "02.00-resazurin-raw-all-freshwater-RT-experiments")
+
+dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
+
+write_csv(plot_df, file.path(out_dir, "plot_df.csv"))
+
+message("plot_df written to: ", out_dir)
+```
+
 # Color Palettes
 
 ```{r color-palette-family}
