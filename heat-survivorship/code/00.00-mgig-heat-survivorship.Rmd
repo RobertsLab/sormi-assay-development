@@ -1,7 +1,7 @@
 ---
-title: "00.00-mgig-heat-survivorship-20260511"
+title: "00.00-mgig-heat-survivorship.Rmd"
 author: "Sam White"
-date: "2026-05-11"
+date: "2026-05-07"
 output: 
   github_document:
     toc: true
@@ -24,7 +24,9 @@ output:
 
 # BACKGROUND
 
-<!-- This is a Kaplan-Meier survival analysis of 33<sup>o</sup>C heat stress of _Magallana gigas_ oysters, [conducted on 20260511](https://github.com/RobertsLab/sormi-assay-development/tree/main/heat-survivorship/20260511-33C-USDA-families) (GitHub repo). It compares 9 different families bred/selected by the USDA. -->
+This is a Kaplan-Meier survival analysis of 33<sup>o</sup>C heat stress of _Magallana gigas_ oysters, [conducted on 20260427](https://github.com/RobertsLab/sormi-assay-development/tree/main/heat-survivorship/20260427-33C-USDA-families) (GitHub repo). It compares 9 different families bred/selected by the USDA.
+
+These oysters had been [previously heat stressed @ 36<sup>o</sup>C and assessed by the resazurin assay on 20260415](https://github.com/RobertsLab/sormi-assay-development/blob/main/Resazurin/20260415-36C/README.md) (GitHub README)
 
 ## SETUP
 
@@ -34,7 +36,6 @@ output:
 library(readr)
 library(dplyr)
 library(survival)
-library(survminer)
 library(ggplot2)
 
 knitr::opts_chunk$set(
@@ -43,7 +44,8 @@ knitr::opts_chunk$set(
   warning = FALSE,     # Hide warnings
   message = FALSE,     # Hide messages
   comment = "",         # Prevents appending '##' to beginning of lines in code output
-  results = 'hold'     # Holds output so it's all printed together after code chunk
+  results = 'hold',    # Holds output so it's all printed together after code chunk
+  fig.path = "../outputs/00.00-mgig-heat-survivorship/"
 )
 ```
 
@@ -52,7 +54,7 @@ knitr::opts_chunk$set(
 
 ```{r read-raw-data}
 survivorship_raw <- read_csv(
-	"../heat-survivorship/20260511-33C-USDA-families/survivorship.csv",
+	"../data/20260427-33C-USDA-families/survivorship.csv",
 	show_col_types = FALSE
 )
 
@@ -169,35 +171,6 @@ if (p_val < 0.05) {
 }
 ```
 
-### Pairwise log-rank tests with BH correction
-
-```{r pairwise-log-rank, message=FALSE, warning=FALSE}
-pairwise_results <- pairwise_survdiff(
-	Surv(time_to_event, event) ~ family_group,
-	data = individual_survival,
-	p.adjust.method = "BH"
-)
-
-cat("\n=== Pairwise log-rank test (BH-adjusted p-values) ===\n")
-print(pairwise_results)
-
-# Extract and display only significant pairs
-p_mat <- pairwise_results$p.value
-sig_pairs <- which(p_mat <= 0.05, arr.ind = TRUE)
-
-cat("\n=== Significant pairwise comparisons (BH-adjusted p <= 0.05) ===\n")
-if (nrow(sig_pairs) == 0) {
-	cat("No significant pairwise differences found.\n")
-} else {
-	sig_df <- data.frame(
-		group1      = rownames(p_mat)[sig_pairs[, 1]],
-		group2      = colnames(p_mat)[sig_pairs[, 2]],
-		p_adjusted  = p_mat[sig_pairs]
-	)
-	print(sig_df)
-}
-```
-
 ### Convert Kaplan-Meier fit to plotting data frames
 
 ```{r build-plot-data, message=FALSE, warning=FALSE}
@@ -261,6 +234,20 @@ str(km_family_df)
 ## PLOTS
 
 ### Plot Kaplan-Meier curves
+
+#### Overall
+
+```{r plot-km-overall, fig.width=8, fig.height=5, message=FALSE, warning=FALSE}
+ggplot(km_overall_df, aes(x = time, y = surv)) +
+	geom_step(linewidth = 1.1) +
+	labs(
+		title = "Kaplan-Meier Survival Curve (Overall)",
+		x = "Time (hours)",
+		y = "Survival probability"
+	) +
+	ylim(0, 1) +
+	theme_minimal(base_size = 12)
+```
 
 #### Families
 
