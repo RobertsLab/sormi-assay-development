@@ -972,17 +972,15 @@ for (col in names(ts_stats)) {
 
   cat("\n\n----\n### Metric:", col, "\n\n")
 
-  cat("**Type III ANOVA (Satterthwaite approximation):**\n\n```\n")
-  cat(capture.output(print(res$anova)), sep = "\n")
-  cat("\n```\n")
+  cat("**Type III ANOVA (Satterthwaite approximation):**\n\n")
+  knitr::kable(as.data.frame(res$anova), digits = 4) |> cat(sep = "\n")
 
-  cat("\n**Marginal means – main effects (collapsed across time):**\n\n```\n")
-  cat(capture.output(print(res$pairs_main)), sep = "\n")
-  cat("\n```\n")
+  cat("\n\n**Marginal means – main effects (collapsed across time):**\n\n")
+  knitr::kable(as.data.frame(res$pairs_main), digits = 4) |> cat(sep = "\n")
 
-  cat("\n**Pairwise comparisons by timepoint (Tukey):**\n\n```\n")
-  cat(capture.output(print(res$pairs_by_time)), sep = "\n")
-  cat("\n```\n")
+  cat("\n\n**Pairwise comparisons by timepoint (Tukey):**\n\n")
+  knitr::kable(as.data.frame(res$pairs_by_time), digits = 4) |> cat(sep = "\n")
+  cat("\n")
 }
 ```
 
@@ -1130,28 +1128,23 @@ stats_results   <- map(
 for (met in metrics_to_test) {
   stats <- stats_results[[met]]
   cat("\n\n----\n### Metric:", met, "\n\n")
-  cat("**ANOVA:**\n\n```\n")
-  cat(capture.output(print(stats$anova)), sep = "\n")
-  cat("\n```\n")
+  cat("**ANOVA:**\n\n")
+  knitr::kable(as.data.frame(stats$anova), digits = 4) |> cat(sep = "\n")
   if (stats$has_family && stats$has_treatment) {
-    cat("\n**Pairwise: family × treatment (Tukey):**\n\n```\n")
-    cat(capture.output(print(stats$pairs_full)), sep = "\n")
-    cat("\n```\n")
-    cat("\n**Pairwise: family main effect:**\n\n```\n")
-    cat(capture.output(print(stats$pairs_family)), sep = "\n")
-    cat("\n```\n")
-    cat("\n**Pairwise: treatment main effect:**\n\n```\n")
-    cat(capture.output(print(stats$pairs_trt)), sep = "\n")
-    cat("\n```\n")
+    cat("\n\n**Pairwise: family × treatment (Tukey):**\n\n")
+    knitr::kable(as.data.frame(stats$pairs_full), digits = 4) |> cat(sep = "\n")
+    cat("\n\n**Pairwise: family main effect:**\n\n")
+    knitr::kable(as.data.frame(stats$pairs_family), digits = 4) |> cat(sep = "\n")
+    cat("\n\n**Pairwise: treatment main effect:**\n\n")
+    knitr::kable(as.data.frame(stats$pairs_trt), digits = 4) |> cat(sep = "\n")
   } else if (stats$has_family) {
-    cat("\n**Pairwise: family (Tukey):**\n\n```\n")
-    cat(capture.output(print(stats$pairs_family)), sep = "\n")
-    cat("\n```\n")
+    cat("\n\n**Pairwise: family (Tukey):**\n\n")
+    knitr::kable(as.data.frame(stats$pairs_family), digits = 4) |> cat(sep = "\n")
   } else if (stats$has_treatment) {
-    cat("\n**Pairwise: treatment (Tukey):**\n\n```\n")
-    cat(capture.output(print(stats$pairs_trt)), sep = "\n")
-    cat("\n```\n")
+    cat("\n\n**Pairwise: treatment (Tukey):**\n\n")
+    knitr::kable(as.data.frame(stats$pairs_trt), digits = 4) |> cat(sep = "\n")
   }
+  cat("\n")
 }
 ```
 
