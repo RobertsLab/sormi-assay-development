@@ -267,7 +267,7 @@ str(km_family_df)
 
 #### Families
 
-# ```{r plot-km-by-family, fig.width=9, fig.height=6, message=FALSE, warning=FALSE}
+```{r plot-km-by-family, fig.width=9, fig.height=6, message=FALSE, warning=FALSE}
 family_levels <- local({
 	lvls <- unique(km_family_df$family_group)
 	lvls[order(readr::parse_number(lvls), lvls)]
