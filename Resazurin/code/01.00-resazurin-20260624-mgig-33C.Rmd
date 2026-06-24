@@ -20,6 +20,8 @@ output:
     number_sections: true
     code_folding: show
     code_download: true
+editor_options: 
+  chunk_output_type: console
 ---
 
 # Background
