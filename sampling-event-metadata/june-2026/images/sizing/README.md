@@ -1,4 +1,4 @@
-`june-2026/images/sizing`
+`sampling-event-metadata/june-2026/images/sizing`
 
 ## DESCRIPTION
 

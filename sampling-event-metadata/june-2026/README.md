@@ -1,4 +1,4 @@
-`june-2026`
+`sampling-event-metadata/june-2026`
 
 ## DESCRIPTION
 
