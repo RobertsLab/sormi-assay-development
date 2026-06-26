@@ -1,0 +1,215 @@
+---
+title: "Kaplan-Meier Survivorship Analysis — 20260427 (33 °C)"
+author: "Steven Roberts"
+date: today
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    code-fold: false
+    embed-resources: true
+editor: visual
+---
+
+BACKGROUND - Re-run of the 20260427 33 °C *Magallana gigas* USDA-family heat-stress
+survivorship experiment through the reusable Kaplan-Meier template
+(`code/01-mgig-heat-survivorship-20260604.qmd`), so all dates are analyzed with
+an identical pipeline (KM curves via `ggsurvfit`, global log-rank test, and a
+Cox Proportional Hazards model with hazard ratios).
+
+Original (un-templated) analysis: `code/00.00-mgig-heat-survivorship.Rmd`.
+
+```{=html}
+<!--
+================================================================================
+REUSABLE KAPLAN-MEIER SURVIVORSHIP TEMPLATE (long-format input variant)
+================================================================================
+Adapted from code/01-mgig-heat-survivorship-20260604.qmd (which itself adapts
+A. Huffmyer's Manchester stress-survival analysis). The downstream KM / log-rank
+/ Cox sections are kept identical to that template so results are directly
+comparable across experiments. ONLY the data read + reshape is changed to accept
+the LONG-format survivorship.csv used by the 20260427/0511/0609 experiments:
+
+  one row per individual x time point, with columns
+    individual_id, familly_id.group, timepoint_hrs, alive.measurement
+  (plus, in later experiments, plate_ID / plate_well / is_blank).
+
+  alive.measurement TRUE  = alive  -> status 0
+  alive.measurement FALSE = dead   -> status 1 (event)
+================================================================================
+-->
+```
+
+## Set up
+
+```{r setup, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(ggplot2)
+library(survival)
+library(ggsurvfit)
+library(gtsummary)
+library(cardx)
+library(cowplot)
+```
+
+```{r config}
+# >>> EDIT: analysis configuration ---------------------------------------------
+
+# Path to the LONG-format mortality csv for this experiment
+data_path  <- "../data/20260427-33C-USDA-families/survivorship.csv"
+
+# Output directory for saved figures (new directory for this re-run)
+out_dir    <- "../outputs/02-mgig-heat-survivorship-20260427/"
+
+# Grouping / factor column(s) to compare survival across.
+group_vars <- c("Family")
+
+# Individual ID column produced in the reshape below.
+id_var     <- "uid"
+# ------------------------------------------------------------------------------
+```
+
+## Read in data
+
+```{r read-data, message=FALSE}
+raw <- readr::read_csv(data_path, show_col_types = FALSE)
+glimpse(raw)
+```
+
+## Reshape to one (time, status) row per individual
+
+```{r reshape}
+# Standardize the long-format columns this experiment family uses.
+raw <- raw %>%
+  rename(Family = `familly_id.group`, alive_raw = `alive.measurement`) %>%
+  mutate(
+    Family        = as.character(Family),
+    timepoint_hrs = as.numeric(timepoint_hrs),
+    alive = case_when(
+      toupper(trimws(as.character(alive_raw))) %in% c("TRUE","T","1","YES","Y") ~ TRUE,
+      toupper(trimws(as.character(alive_raw))) %in% c("FALSE","F","0","NO","N") ~ FALSE,
+      TRUE ~ NA
+    )
+  )
+
+# Drop blank wells when the experiment flags them.
+if ("is_blank" %in% names(raw)) {
+  raw <- raw %>%
+    filter(!(toupper(trimws(as.character(is_blank))) %in% c("TRUE","T","1","YES","Y")))
+}
+
+# Build a TRULY unique individual key. When plate_ID + plate_well exist they are
+# the physical, guaranteed-unique well identity; otherwise individual_id is unique.
+if (all(c("plate_ID","plate_well") %in% names(raw))) {
+  raw <- raw %>% mutate(uid = paste(plate_ID, plate_well, sep = "_"))
+} else {
+  raw <- raw %>% mutate(uid = as.character(individual_id))
+}
+
+# Collapse to ONE (time, status) row per individual:
+#   - if it ever died (alive == FALSE), keep the FIRST death time (event)
+#   - otherwise keep the LAST observed time point (right-censored)
+data <- raw %>%
+  filter(!is.na(uid), !is.na(timepoint_hrs), !is.na(alive)) %>%
+  group_by(uid) %>%
+  summarise(
+    Family = first(Family[!is.na(Family)]),
+    status = as.integer(any(!alive)),
+    time   = if (any(!alive)) min(timepoint_hrs[!alive]) else max(timepoint_hrs),
+    .groups = "drop"
+  ) %>%
+  mutate(
+    Family = factor(Family, levels = unique(Family[order(readr::parse_number(Family), Family)]))
+  )
+
+cat("n individuals:", nrow(data), " | events (deaths):", sum(data$status), "\n")
+head(data)
+```
+
+## Generate Kaplan-Meier survival curves
+
+```{r km-fit}
+km_formula <- as.formula(
+  paste("Surv(time, status) ~", paste(group_vars, collapse = " + "))
+)
+
+s1 <- survival::survfit(km_formula, data = data)
+print(s1)
+summary(s1)
+```
+
+```{r km-plot-combined, warning=FALSE}
+ggsurvfit::survfit2(km_formula, data = data) %>%
+  ggsurvfit::ggsurvfit() +
+  labs(x = "Time (hours)", y = "Survival probability") +
+  ylim(0, 1)
+```
+
+## Global log-rank test (family comparison)
+
+```{r log-rank}
+logrank <- survival::survdiff(km_formula, data = data)
+print(logrank)
+p_val <- 1 - pchisq(logrank$chisq, df = length(logrank$n) - 1)
+cat("Log-rank chi-square:", round(logrank$chisq, 4),
+    "| df:", length(logrank$n) - 1,
+    "| p-value:", signif(p_val, 4), "\n")
+```
+
+## Cox Proportional Hazards model
+
+```{r cox-model}
+cox_formula <- as.formula(
+  paste("Surv(time, status) ~", paste(group_vars, collapse = " * "))
+)
+cox_fit <- survival::coxph(cox_formula, data = data)
+cox_fit
+cox_fit %>% tbl_regression(exp = TRUE)
+```
+
+## Publication plot
+
+```{r theme}
+my_theme <- theme_classic() +
+  theme(
+    axis.title.y = element_text(size = 14, color = "black"),
+    axis.text.y  = element_text(size = 12, color = "black"),
+    axis.text.x  = element_text(size = 12, color = "black"),
+    axis.title.x = element_text(size = 14, color = "black")
+  )
+```
+
+```{r plot-by-family, warning=FALSE}
+g1 <- group_vars[1]
+f1 <- as.formula(paste("Surv(time, status) ~", g1))
+n_groups1     <- nlevels(factor(data[[g1]]))
+group_colors1 <- scales::hue_pal()(n_groups1)
+
+plot1 <- ggsurvfit::survfit2(f1, data = data) %>%
+  ggsurvfit::ggsurvfit() +
+  labs(x = "Time (hours)", y = "Survival probability", title = "") +
+  ylim(0, 1) +
+  my_theme +
+  scale_colour_manual(values = group_colors1) +
+  theme(legend.position = "right")
+
+plot1
+```
+
+```{r save-plots}
+dir.create(out_dir, showWarnings = FALSE, recursive = TRUE)
+ggsave(file.path(out_dir, "survival_by_family.png"), plot1, width = 7, height = 5, dpi = 300)
+```
+
+## Take homes
+
+```{r take-homes}
+med <- summary(survival::survfit(Surv(time, status) ~ 1, data = data))$table["median"]
+cat("Experiment: 20260427, 33 C\n")
+cat("Individuals:", nrow(data), "| Deaths:", sum(data$status),
+    sprintf("(%.0f%%)\n", 100 * mean(data$status)))
+cat("Overall median survival (hrs):", ifelse(is.na(med), "not reached (>50% survived)", med), "\n")
+cat("Family log-rank p-value:", signif(p_val, 4),
+    ifelse(p_val < 0.05, "-> families differ significantly\n",
+                         "-> no significant family difference\n"))
+```
