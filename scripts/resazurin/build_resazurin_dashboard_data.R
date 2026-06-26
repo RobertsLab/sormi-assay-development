@@ -281,7 +281,7 @@ compute_auc_tables <- function(data, unit_cols, unit_type) {
     ) %>%
     mutate(analysis_unit_type = unit_type)
 
-  cumulative %>%
+  cumulative <- cumulative %>%
     mutate(analysis_unit_type = unit_type)
 
   list(cumulative = cumulative, values = values)
@@ -302,7 +302,9 @@ well_auc <- compute_auc_tables(
 # Join cumulative_auc and auc_value back into analysis_data, preferring sample-level results.
 analysis_data <- analysis_data %>%
   left_join(
-    sample_auc$cumulative %>% rename(sample_cumulative_auc = cumulative_auc),
+    sample_auc$cumulative %>%
+      select(-any_of("analysis_unit_type")) %>%
+      rename(sample_cumulative_auc = cumulative_auc),
     by = c("experiment_dir", "sample_id_group", "time_hr")
   ) %>%
   left_join(
@@ -310,7 +312,9 @@ analysis_data <- analysis_data %>%
     by = c("experiment_dir", "sample_id_group")
   ) %>%
   left_join(
-    well_auc$cumulative %>% rename(well_cumulative_auc = cumulative_auc),
+    well_auc$cumulative %>%
+      select(-any_of("analysis_unit_type")) %>%
+      rename(well_cumulative_auc = cumulative_auc),
     by = c("experiment_dir", "plate_id", "well_id", "time_hr")
   ) %>%
   left_join(

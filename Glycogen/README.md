@@ -23,4 +23,4 @@
 
 - [`Glycogen_Assay_Procedure_Kevin.pdf`](https://github.com/RobertsLab/sormi-assay-development/blob/main/Glycogen/Glycogen_Assay_Procedure_Kevin.pdf): *NOT IN USE!* Phenol-sulfuric acid methodology for glycogen analysis.
 
-- [`glyocogen-promega-notes.md`](https://github.com/RobertsLab/sormi-assay-development/blob/main/Glycogen/glyocogen-promega-notes.md): Notes from colleagues regarding their usage of Glycogen-Glo assay (Promega).
+- [`glycogen-promega-notes.md`](https://github.com/RobertsLab/sormi-assay-development/blob/main/Glycogen/glycogen-promega-notes.md): Notes from colleagues regarding their usage of Glycogen-Glo assay (Promega).
