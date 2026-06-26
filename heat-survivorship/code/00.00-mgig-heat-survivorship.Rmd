@@ -45,7 +45,7 @@ knitr::opts_chunk$set(
   message = FALSE,     # Hide messages
   comment = "",         # Prevents appending '##' to beginning of lines in code output
   results = 'hold',    # Holds output so it's all printed together after code chunk
-  fig.path = "../outputs/00.00-mgig-heat-survivorship/"
+  fig.path = "00.00-mgig-heat-survivorship/"
 )
 ```
 
