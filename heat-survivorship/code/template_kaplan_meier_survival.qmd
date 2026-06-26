@@ -1,0 +1,286 @@
+---
+title: "Kaplan-Meier Survivorship Analysis"
+author: "Your Name"
+date: today
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    code-fold: false
+    embed-resources: true
+editor: visual
+---
+
+```{=html}
+<!--
+================================================================================
+REUSABLE KAPLAN-MEIER SURVIVORSHIP TEMPLATE
+================================================================================
+Adapted from A. Huffmyer's Manchester stress-survival analysis:
+https://ahuffmyer.github.io/posts/2026-06-03-analyzing-manchester-stress-survival.html
+
+This template builds Kaplan-Meier survival curves and (optionally) a Cox
+Proportional Hazards model from binary mortality data recorded over time.
+
+--------------------------------------------------------------------------------
+HOW TO FORMAT YOUR INPUT DATA  (read this before running)
+--------------------------------------------------------------------------------
+
+The template expects a WIDE csv: one row per individual, one column per
+time point, plus one or more grouping (treatment/factor) columns.
+
+REQUIRED LAYOUT
+  - Each ROW = one individual (one oyster, fish, plant, animal, etc.).
+  - One or more GROUPING columns (e.g. Treatment, Family, Tank). These are the
+    factors you want to compare survival across.
+  - One column PER TIME POINT. The COLUMN NAME must be the numeric time value
+    (e.g. 0, 6, 12, 24, 54 -> hours; or 0, 1, 2, 3 -> days).
+  - Each time-point CELL holds the status at that time:
+        0 = alive
+        1 = dead
+    Once an individual dies it should stay 1 (dead) for all later time points,
+    OR be left blank after death (see NOTE on censoring below).
+
+EXAMPLE (hours 0 - 54; two grouping columns):
+
+  ID , Hardening_Treatment , Family , 0 , 6 , 12 , 24 , 36 , 48 , 54
+  A1 , Control             , 087    , 0 , 0 , 0  , 1  , 1  , 1  , 1
+  A2 , Control             , 087    , 0 , 0 , 0  , 0  , 0  , 0  , 0
+  A3 , Hardened            , 153    , 0 , 0 , 1  , 1  , 1  , 1  , 1
+  ...
+
+KEY RULES
+  - Column headers for time points must be plain numbers (0, 6, 12 ...). Do not
+    write "0h" or "T0" -- the code converts these headers to numeric time.
+  - Grouping column names must be valid (no spaces is safest, e.g.
+    "Hardening_Treatment" not "Hardening Treatment").
+  - Use consistent, evenly-interpretable time units (all hours OR all days).
+  - The LAST time point is the end of observation. An individual still 0 (alive)
+    at the last time point is treated as surviving (right-censored) at that time.
+
+NOTE on event/censoring coding:
+  The Surv(time, status) call below uses status as the EVENT indicator where
+  1 = event (death) and 0 = censored/alive. The pivot+slice logic below converts
+  your wide 0/1 grid into the single (time, status) row per individual that the
+  survival package needs: time = first time the individual was recorded dead
+  (status=1), or the final time point if it never died (status=0).
+
+--------------------------------------------------------------------------------
+WHAT TO EDIT  (search for "# >>> EDIT")
+--------------------------------------------------------------------------------
+  1. data_path        - path to your csv
+  2. group_vars       - your grouping/factor column(s)
+  3. id_var           - your individual ID column (optional but recommended)
+  4. first_time / last_time column names handled automatically via group_vars
+  5. axis labels / title / colors in the plotting chunks
+================================================================================
+-->
+```
+
+## Set up
+
+```{r setup, message=FALSE, warning=FALSE}
+# Install any missing packages (uncomment to run once):
+# install.packages(c("tidyverse","survival","readxl","ggsurvfit",
+#                    "gtsummary","cardx","cowplot"))
+
+library(tidyverse)
+library(ggplot2)
+library(survival)
+library(readxl)
+library(ggsurvfit)
+library(gtsummary)
+library(cardx)
+library(cowplot)
+```
+
+```{r config}
+# >>> EDIT: analysis configuration ---------------------------------------------
+
+# Path to your wide-format mortality csv (see header for required layout)
+data_path  <- "data/stress_mortality.csv"
+
+# Grouping / factor column(s) to compare survival across.
+# Use one or more; e.g. c("Hardening_Treatment", "Family")
+group_vars <- c("Hardening_Treatment", "Family")
+
+# Individual ID column. Set to NULL if you do not have one.
+id_var     <- "ID"
+
+# ------------------------------------------------------------------------------
+```
+
+## Read in data
+
+```{r read-data, message=FALSE}
+data_wide <- readr::read_csv(data_path)
+
+# Quick look at the raw wide data
+head(data_wide)
+glimpse(data_wide)
+```
+
+## Reshape to one (time, status) row per individual
+
+```{r reshape}
+# Identify the time-point columns: every column whose name is a number.
+time_cols <- names(data_wide)[!is.na(suppressWarnings(as.numeric(names(data_wide))))]
+
+stopifnot("No numeric time-point columns found -- check that your time columns are named 0,6,12,... " = length(time_cols) > 0)
+
+# Long format: one row per individual x time point
+data_long <- data_wide %>%
+  pivot_longer(
+    cols      = all_of(time_cols),
+    names_to  = "time",
+    values_to = "status"
+  ) %>%
+  mutate(time = as.numeric(time)) %>%
+  arrange(across(all_of(c(id_var, group_vars))), time)
+
+# Collapse to ONE row per individual:
+#   - if the individual ever died (status == 1), keep the FIRST death time
+#   - otherwise keep the LAST observed time point with status = 0 (censored)
+grouping_keys <- c(id_var, group_vars)
+grouping_keys <- grouping_keys[!sapply(grouping_keys, is.null)]
+
+data <- data_long %>%
+  group_by(across(all_of(grouping_keys))) %>%
+  summarise(
+    time   = if (any(status == 1, na.rm = TRUE)) min(time[status == 1], na.rm = TRUE)
+             else max(time, na.rm = TRUE),
+    status = as.integer(any(status == 1, na.rm = TRUE)),
+    .groups = "drop"
+  )
+
+# Make grouping columns factors for clean legends
+data <- data %>% mutate(across(all_of(group_vars), as.factor))
+
+head(data)
+```
+
+```{=html}
+<!--
+If your data already has ONE row per individual with explicit `time` and
+`status` columns, you can skip the reshape above and simply do:
+    data <- read_csv(data_path)
+-->
+```
+
+## Generate Kaplan-Meier survival curves
+
+```{r km-fit}
+# Build the survival formula from your grouping variables, e.g.
+#   Surv(time, status) ~ Hardening_Treatment + Family
+km_formula <- as.formula(
+  paste("Surv(time, status) ~", paste(group_vars, collapse = " + "))
+)
+
+s1 <- survival::survfit(km_formula, data = data)
+summary(s1)
+```
+
+```{r km-plot-combined, warning=FALSE}
+ggsurvfit::survfit2(km_formula, data = data) %>%
+  ggsurvfit::ggsurvfit() +
+  labs(
+    x = "Time",                # >>> EDIT: e.g. "Hours" or "Days"
+    y = "Survival probability"
+  ) +
+  ylim(0, 1)
+```
+
+## Cox Proportional Hazards model (optional)
+
+```{r cox-model}
+# Interaction model across grouping variables, e.g.
+#   Surv(time, status) ~ Hardening_Treatment * Family
+cox_formula <- as.formula(
+  paste("Surv(time, status) ~", paste(group_vars, collapse = " * "))
+)
+
+cox_fit <- survival::coxph(cox_formula, data = data)
+cox_fit
+
+# Tidy table with hazard ratios (exp = TRUE)
+cox_fit %>% tbl_regression(exp = TRUE)
+```
+
+```{=html}
+<!--
+Interpretation guide:
+  - Hazard ratio (HR) > 1  -> higher risk of death (lower survival)
+  - Hazard ratio (HR) < 1  -> lower risk of death (higher survival)
+  - A significant interaction term means group effects depend on each other
+    (e.g. treatment effect differs by family).
+-->
+```
+
+## Publication plots
+ 
+```{r theme}
+my_theme <- theme_classic() +
+  theme(
+    axis.title.y = element_text(size = 14, color = "black"),
+    axis.text.y  = element_text(size = 12, color = "black"),
+    axis.text.x  = element_text(size = 12, color = "black"),
+    axis.title.x = element_text(size = 14, color = "black"),
+    legend.position = "none"
+  )
+```
+ 
+```{r plot-by-group1, warning=FALSE}
+# Survival by the FIRST grouping variable
+g1 <- group_vars[1]
+f1 <- as.formula(paste("Surv(time, status) ~", g1))
+ 
+# Build a color palette sized to the number of groups so it never runs short.
+# >>> EDIT: replace `group_colors` with your own vector to set exact colors,
+#     e.g. group_colors <- c("darkgray", "orange")  (must have >= n_groups values)
+n_groups1     <- nlevels(factor(data[[g1]]))
+group_colors1 <- scales::hue_pal()(n_groups1)   # auto palette; swap for your own
+ 
+plot1 <- ggsurvfit::survfit2(f1, data = data) %>%
+  ggsurvfit::ggsurvfit() +
+  labs(x = "Time", y = "Survival probability", title = "") +  # >>> EDIT axis label
+  ylim(0, 1) +
+  my_theme +
+  scale_colour_manual(values = group_colors1) +
+  theme(legend.position = "right")
+ 
+plot1
+```
+ 
+```{r plot-by-group2, warning=FALSE, eval=length(group_vars) >= 2}
+# Survival by the SECOND grouping variable (only runs if you have >= 2)
+g2 <- group_vars[2]
+f2 <- as.formula(paste("Surv(time, status) ~", g2))
+ 
+plot2 <- ggsurvfit::survfit2(f2, data = data) %>%
+  ggsurvfit::ggsurvfit() +
+  labs(x = "Time", y = "Survival probability", title = "") +  # >>> EDIT axis label
+  ylim(0, 1) +
+  my_theme +
+  theme(legend.position = "right")
+ 
+plot2
+```
+ 
+```{r combine-plots, warning=FALSE, eval=length(group_vars) >= 2}
+# Side-by-side panel
+cowplot::plot_grid(plot1, plot2, labels = c("A", "B"), ncol = 2)
+```
+ 
+```{r save-plots, eval=FALSE}
+# >>> EDIT: uncomment / adjust to save figures
+# ggsave("figures/survival_by_treatment.png", plot1, width = 6, height = 4, dpi = 300)
+# ggsave("figures/survival_by_family.png",    plot2, width = 6, height = 4, dpi = 300)
+```
+ 
+## Take homes
+ 
+<!-- >>> EDIT: write your interpretation here. Examples:
+- Was there an effect of treatment on survival?
+- Did groups (e.g. families) differ in susceptibility?
+- Any interaction effects?
+-->
