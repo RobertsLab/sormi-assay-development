@@ -1,0 +1,2290 @@
+03–resazurin-20260624-mgig-33C
+================
+Sam White
+2026-06-24
+
+-   [1 Background](#1-background)
+    -   [1.1 Expected inputs](#11-expected-inputs)
+    -   [1.2 Expected outputs](#12-expected-outputs)
+-   [2 Setup](#2-setup)
+    -   [2.1 Knitr options](#21-knitr-options)
+    -   [2.2 Load libraries](#22-load-libraries)
+-   [3 Helper Functions](#3-helper-functions)
+-   [4 Load Data](#4-load-data)
+    -   [4.1 Plate export files](#41-plate-export-files)
+    -   [4.2 Plate consistency check](#42-plate-consistency-check)
+    -   [4.3 Layout file](#43-layout-file)
+-   [5 Merge Plate Data with Layout](#5-merge-plate-data-with-layout)
+-   [6 Raw Fluorescence](#6-raw-fluorescence)
+    -   [6.1 Data frame](#61-data-frame)
+    -   [6.2 Raw fluorescence by plate (including
+        blanks)](#62-raw-fluorescence-by-plate-including-blanks)
+    -   [6.3 Mean raw fluorescence by
+        family](#63-mean-raw-fluorescence-by-family)
+    -   [6.4 Individual raw fluorescence traces by
+        family](#64-individual-raw-fluorescence-traces-by-family)
+    -   [6.5 Individual raw fluorescence traces by
+        treatment](#65-individual-raw-fluorescence-traces-by-treatment)
+    -   [6.6 Excluded samples](#66-excluded-samples)
+-   [7 Blank Correction via Fold-Change
+    Normalization](#7-blank-correction-via-fold-change-normalization)
+    -   [7.1 Step 1 – Identify T0 and compute per-sample
+        fold-change](#71-step-1--identify-t0-and-compute-per-sample-fold-change)
+    -   [7.2 Step 2 – Blank fold-change reference per plate per
+        timepoint](#72-step-2--blank-fold-change-reference-per-plate-per-timepoint)
+    -   [7.3 Step 3 – Subtract blank fold-change from sample
+        fold-change](#73-step-3--subtract-blank-fold-change-from-sample-fold-change)
+-   [8 Blank-Corrected Fold-Change](#8-blank-corrected-fold-change)
+    -   [8.1 Mean by family](#81-mean-by-family)
+    -   [8.2 Individual traces by
+        family](#82-individual-traces-by-family)
+    -   [8.3 Individual blank-corrected fold-change traces by
+        treatment](#83-individual-blank-corrected-fold-change-traces-by-treatment)
+-   [9 Metabolism (Size-Normalised
+    Fold-Change)](#9-metabolism-size-normalised-fold-change)
+    -   [9.1 Mean metabolism by family](#91-mean-metabolism-by-family)
+    -   [9.2 Individual metabolism traces by
+        family](#92-individual-metabolism-traces-by-family)
+-   [10 Time-Series Statistical
+    Analysis](#10-time-series-statistical-analysis)
+    -   [10.1 Results](#101-results)
+-   [11 Area Under the Curve (AUC)](#11-area-under-the-curve-auc)
+    -   [11.1 AUC summary tables](#111-auc-summary-tables)
+-   [12 Statistical Analysis](#12-statistical-analysis)
+    -   [12.1 Results by metric](#121-results-by-metric)
+        -   [12.1.1 Metric:
+            metabolism\_per\_area\_mm2\_measurement](#1211-metric-metabolism_per_area_mm2_measurement)
+-   [13 AUC Box Plots with Statistical
+    Annotations](#13-auc-box-plots-with-statistical-annotations)
+-   [14 Curve Feature Analysis: Which Aspects Best Distinguish
+    Families?](#14-curve-feature-analysis-which-aspects-best-distinguish-families)
+    -   [14.1 Per-individual Curve
+        Features](#141-per-individual-curve-features)
+    -   [14.2 Family Summaries for Curve
+        Features](#142-family-summaries-for-curve-features)
+    -   [14.3 Rank Features by Family
+        Separation](#143-rank-features-by-family-separation)
+    -   [14.4 Pairwise Family Comparisons for Curve
+        Features](#144-pairwise-family-comparisons-for-curve-features)
+    -   [14.5 Most Distinguishing Curve
+        Aspects](#145-most-distinguishing-curve-aspects)
+        -   [14.5.1 Best overall numeric curve
+            discriminator](#1451-best-overall-numeric-curve-discriminator)
+        -   [14.5.2 Top numeric curve discriminators by
+            metric](#1452-top-numeric-curve-discriminators-by-metric)
+-   [15 Save Output Data](#15-save-output-data)
+
+# 1 Background
+
+Adult oysters from nine USDA families were placed in plastic cups and
+submerged in \~100 mL of freshly prepared resazurin working solution at
+room temperature (\~22°C). Cups were incubated in a water table at 33°C.
+Three rounds of measurements were performed, with different individuals
+from each family used in each round. At designated timepoints, 200 µL of
+resazurin was sampled from each cup and placed in a 96-well plate.
+Fluorescence was measured using a Synergy HTX (Agilent) plate reader.
+
+See `Resazurin/data/20260624-mgig-33C/README.md` for full experimental
+notes.
+
+## 1.1 Expected inputs
+
+| Path                                              | Description                                                                                                                                                                                             |
+|:--------------------------------------------------|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `Resazurin/data/20260624-mgig-33C/plate-*-T*.txt` | Plate reader fluorescence exports (one file per plate per timepoint)                                                                                                                                    |
+| `Resazurin/data/20260624-mgig-33C/layout.csv`     | Well metadata: plate ID, well ID, blank flag, family groups, cup ID (`cup_ID.group`), measurement round (`round.group`), unique individual ID (`sample_ID.group`), area measurements (mm², from ImageJ) |
+
+## 1.2 Expected outputs
+
+All outputs are written to
+`Resazurin/outputs/03--resazurin-20260624-mgig-33C/`.
+
+| File                               | Description                                                                                                 |
+|:-----------------------------------|:------------------------------------------------------------------------------------------------------------|
+| `figures/`                         | All plots generated by this script                                                                          |
+| `auc_all_metrics.csv`              | Per-individual AUC values for every active measurement metric                                               |
+| `auc_summary.csv`                  | Group-level AUC summary statistics (mean, SD, SE, median)                                                   |
+| `metabolism.csv`                   | Full per-well per-timepoint metabolism data frame                                                           |
+| `pairwise_stats.csv`               | Tukey-adjusted pairwise comparisons from AUC linear models                                                  |
+| `curve_features.csv`               | Per-individual curve traits describing metabolic capacity, responsiveness, and stress-like trajectory shape |
+| `curve_feature_family_summary.csv` | Family-level summary statistics for every curve trait                                                       |
+| `curve_feature_family_stats.csv`   | Ranked tests identifying which curve traits best distinguish families                                       |
+| `curve_feature_pairwise_stats.csv` | Tukey-adjusted family pairwise comparisons for each curve trait                                             |
+
+# 2 Setup
+
+## 2.1 Knitr options
+
+``` r
+knitr::opts_chunk$set(
+  echo = TRUE,         # Display code chunks
+  eval = TRUE,        # Evaluate code chunks
+  warning = FALSE,     # Hide warnings
+  message = FALSE,     # Hide messages
+  comment = "",         # Prevents appending '##' to beginning of lines in code output
+  results = 'hold'     # Holds output so it's all printed together after code chunk
+)
+```
+
+## 2.2 Load libraries
+
+``` r
+library(tidyverse)
+library(colorspace)   # qualitative_hcl() for large palettes
+
+has_lme4 <- requireNamespace("lme4", quietly = TRUE)
+has_lmerTest <- requireNamespace("lmerTest", quietly = TRUE)
+has_emmeans <- requireNamespace("emmeans", quietly = TRUE)
+
+if (!has_lme4 || !has_lmerTest || !has_emmeans) {
+  message(
+    "Optional mixed-model/post-hoc packages are not all installed; ",
+    "time-series mixed models and emmeans pairwise tests will be skipped ",
+    "or replaced with base R TukeyHSD fallbacks where possible."
+  )
+}
+```
+
+# 3 Helper Functions
+
+``` r
+normalize_well_id <- function(x) {
+  x <- toupper(trimws(x))
+  valid <- str_detect(x, "^[A-Z]+[0-9]+$")
+  out <- rep(NA_character_, length(x))
+  if (!any(valid)) return(out)
+  m <- str_match(x[valid], "^([A-Z]+)([0-9]+)$")
+  out[valid] <- paste0(m[, 2], as.integer(m[, 3]))
+  out
+}
+
+parse_time_hr <- function(path) {
+  hit <- str_match(basename(path),
+                   "(?i)[_-]T([0-9]+(?:\\.[0-9]+)?)\\.txt$")
+  as.numeric(hit[, 2])
+}
+
+parse_plate_id <- function(path) {
+  hit <- str_match(basename(path),
+    "(?i)^[0-9]{8}_(round[0-9]+)_T[0-9]+(?:\\.[0-9]+)?\\.txt$")
+  id <- hit[, 2]
+  ifelse(is.na(id), "unknown", id)
+}
+
+extract_results_block <- function(lines) {
+  results_idx <- which(trimws(lines) == "Results")
+  if (length(results_idx) == 0) stop("No Results section found")
+  idx <- results_idx[1]
+  header_tokens <- str_split(lines[idx + 1], "\\t")[[1]] |> trimws()
+  col_ids <- header_tokens[
+    header_tokens != "" & str_detect(header_tokens, "^[0-9]+$")]
+  j <- idx + 2
+  data_lines <- character()
+  while (j <= length(lines)) {
+    line <- lines[j]
+    if (trimws(line) == "") break
+    if (!str_detect(line, "^[A-Za-z]\\t")) break
+    data_lines <- c(data_lines, line)
+    j <- j + 1
+  }
+  list(col_ids = col_ids, data_lines = data_lines)
+}
+
+parse_plate_export <- function(path) {
+  lines <- readLines(path, warn = FALSE)
+  res <- extract_results_block(lines)
+
+  map_dfr(res$data_lines, function(line) {
+    tokens <- str_split(line, "\\t")[[1]] |> trimws()
+    tokens <- tokens[tokens != ""]
+    row_letter <- tokens[1]
+    nums <- suppressWarnings(as.numeric(tokens[-1]))
+    valid_idx <- which(!is.na(nums))
+    if (length(valid_idx) == 0) return(tibble())
+    vals <- nums[valid_idx]
+    n <- min(length(vals), length(res$col_ids))
+    tibble(
+      row_id  = toupper(row_letter),
+      col_id  = as.integer(res$col_ids[seq_len(n)]),
+      well_id = normalize_well_id(
+        paste0(toupper(row_letter), res$col_ids[seq_len(n)])),
+      value   = vals[seq_len(n)]
+    )
+  }) %>%
+    mutate(
+      plate_id = str_to_lower(parse_plate_id(path)),
+      time_hr  = parse_time_hr(path)
+    )
+}
+
+trapezoid_auc <- function(time_hr, value) {
+  ok <- is.finite(time_hr) & is.finite(value)
+  t <- time_hr[ok]
+  v <- value[ok]
+  if (length(t) < 2) return(NA_real_)
+  ord <- order(t)
+  t <- t[ord]; v <- v[ord]
+  sum(diff(t) * (head(v, -1) + tail(v, -1)) / 2)
+}
+
+# Shared helper: extract display unit string from a measurement column name.
+# e.g. "area_mm2_measurement" -> "mm²", "weight_mg_measurement" -> "mg"
+parse_meas_unit <- function(col_name) {
+  unit_raw <- col_name |>
+    str_remove("^metabolism_per_") |>
+    str_remove("_measurement$") |>
+    str_extract("[^_]+$")
+  case_when(
+    unit_raw == "mm2" ~ "mm²",
+    unit_raw == "cm2" ~ "cm²",
+    unit_raw == "mm3" ~ "mm³",
+    unit_raw == "cm3" ~ "cm³",
+    TRUE              ~ unit_raw
+  )
+}
+
+# y-axis label for metabolism line plots: "fold change/mm²"
+metabolism_y_label <- function(col_name) {
+  paste0("Metabolism (fold change/", parse_meas_unit(col_name), ")")
+}
+
+# y-axis label for AUC box plots: "Metabolism (AUC; mm²)"
+auc_y_label <- function(metric_name) {
+  paste0("Metabolism (AUC; ", parse_meas_unit(metric_name), ")")
+}
+```
+
+# 4 Load Data
+
+## 4.1 Plate export files
+
+``` r
+proj_root <- rprojroot::find_rstudio_root_file()
+data_dir  <- file.path(proj_root, "Resazurin", "data", "20260624-mgig-33C")
+out_dir   <- file.path(proj_root, "Resazurin", "outputs",
+                        "03--resazurin-20260624-mgig-33C")
+fig_dir   <- file.path(out_dir, "figures")
+
+dir.create(fig_dir, recursive = TRUE, showWarnings = FALSE)
+dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
+
+plate_files <- list.files(
+  data_dir,
+  pattern = "(?i)^[0-9]{8}_round[0-9]+_T[0-9]+(?:\\.[0-9]+)?\\.txt$",
+  full.names = TRUE
+)
+
+plate_raw <- map_dfr(plate_files, function(path) {
+  tryCatch(parse_plate_export(path),
+           error = function(e) {
+             message("Parse error in ", basename(path), ": ", e$message)
+             tibble()
+           })
+})
+
+str(plate_raw)
+```
+
+    tibble [1,152 x 6] (S3: tbl_df/tbl/data.frame)
+     $ row_id  : chr [1:1152] "A" "A" "A" "A" ...
+     $ col_id  : int [1:1152] 1 2 3 4 5 6 7 8 9 10 ...
+     $ well_id : chr [1:1152] "A1" "A2" "A3" "A4" ...
+     $ value   : num [1:1152] 627 598 599 580 563 752 577 559 568 565 ...
+     $ plate_id: chr [1:1152] "round1" "round1" "round1" "round1" ...
+     $ time_hr : num [1:1152] 0 0 0 0 0 0 0 0 0 0 ...
+
+## 4.2 Plate consistency check
+
+Checks that every plate has the same number of wells at every timepoint.
+The expected well count is the mode across all plate × timepoint reads.
+Any plate with at least one deviating read is flagged and dropped
+entirely before any further analysis — removing only the aberrant
+timepoint would break the fold-change baseline calculation.
+
+``` r
+well_counts <- plate_raw %>%
+  group_by(plate_id, time_hr) %>%
+  summarise(n_wells = n_distinct(well_id), .groups = "drop")
+
+expected_n_wells <- as.integer(
+  names(which.max(table(well_counts$n_wells)))
+)
+
+inconsistent_reads <- well_counts %>%
+  filter(n_wells != expected_n_wells) %>%
+  arrange(plate_id, time_hr)
+
+inconsistent_plate_ids <- unique(inconsistent_reads$plate_id)
+
+if (nrow(inconsistent_reads) > 0) {
+  cat("**Plate consistency check FAILED.**",
+      "Expected", expected_n_wells, "wells per plate-timepoint read.",
+      length(inconsistent_plate_ids),
+      "plate(s) have at least one deviating read and are excluded",
+      "from all analyses:\n\n")
+  cat(knitr::kable(
+    inconsistent_reads,
+    col.names = c("Plate", "Time (h)", "Wells read"),
+    caption   = paste("Expected:", expected_n_wells, "wells per read")
+  ), sep = "\n")
+  cat("\n")
+  plate_raw <- plate_raw %>%
+    filter(!plate_id %in% inconsistent_plate_ids)
+  message(length(inconsistent_plate_ids),
+          " plate(s) removed from plate_raw: ",
+          paste(inconsistent_plate_ids, collapse = ", "))
+} else {
+  cat("Plate consistency check passed: all",
+      n_distinct(well_counts$plate_id), "plates have",
+      expected_n_wells, "wells at every timepoint.\n")
+}
+```
+
+Plate consistency check passed: all 3 plates have 96 wells at every
+timepoint.
+
+## 4.3 Layout file
+
+``` r
+layout_path <- file.path(data_dir, "layout.csv")
+
+layout_raw <- read_csv(layout_path,
+                       col_types = cols(.default = "c"),
+                       show_col_types = FALSE)
+
+# Standardise column names to snake_case
+names(layout_raw) <- names(layout_raw) |>
+  str_to_lower() |>
+  str_replace_all("[^a-z0-9]+", "_") |>
+  str_replace_all("_+", "_") |>
+  str_replace("_$", "")
+
+# Normalise plate_id to match plate file ids (strip "plate-" prefix)
+layout_clean <- layout_raw %>%
+  mutate(
+    plate_id = str_remove(str_to_lower(plate_id), "^plate-"),
+    well_id  = normalize_well_id(plate_well),
+    is_blank = if ("is_blank" %in% names(layout_raw))
+      toupper(trimws(is_blank)) %in% c("TRUE", "T", "1", "YES", "Y")
+    else
+      FALSE
+  )
+
+found_exclude_col <- intersect(
+  c("exclude_from_analysis", "exclude", "omit", "not_analyzed"),
+  names(layout_clean)
+)[1]
+layout_clean <- layout_clean %>%
+  mutate(
+    exclude_from_analysis = if (!is.na(found_exclude_col))
+      toupper(trimws(.data[[found_exclude_col]])) %in%
+        c("TRUE", "T", "1", "YES", "Y")
+    else
+      FALSE
+  )
+
+# Identify measurement columns and group columns
+measurement_cols <- names(layout_clean)[
+  str_detect(names(layout_clean), "_measurement$")]
+group_cols <- names(layout_clean)[
+  str_detect(names(layout_clean), "_group$")]
+
+# Cast measurement columns to numeric
+layout_clean <- layout_clean %>%
+  mutate(across(all_of(measurement_cols),
+                ~ suppressWarnings(as.numeric(.x))))
+
+# Determine which measurement columns actually contain finite data
+active_meas_cols <- measurement_cols[
+  sapply(measurement_cols, function(col)
+    any(is.finite(layout_clean[[col]]), na.rm = TRUE))]
+
+# Normalise group values to lowercase so they match colour scale definitions
+layout_clean <- layout_clean %>%
+  mutate(across(all_of(group_cols),
+                ~ str_to_lower(trimws(as.character(.x)))))
+
+message("Group columns: ", paste(group_cols, collapse = ", "))
+message("Active measurement columns: ",
+        paste(active_meas_cols, collapse = ", "))
+
+str(layout_clean)
+```
+
+    tibble [180 x 16] (S3: tbl_df/tbl/data.frame)
+     $ plate_id             : chr [1:180] "round1" "round1" "round1" "round1" ...
+     $ plate_well           : chr [1:180] "A1" "A2" "A3" "A4" ...
+     $ is_blank             : logi [1:180] FALSE FALSE FALSE FALSE FALSE FALSE ...
+     $ family_id_group      : chr [1:180] "1" "2" "3" "5" ...
+     $ cup_id_group         : chr [1:180] "1" "2" "3" "4" ...
+     $ round_group          : chr [1:180] "1" "1" "1" "1" ...
+     $ sample_id_group      : chr [1:180] "1_01" "1_02" "1_03" "1_04" ...
+     $ exclude_from_analysis: logi [1:180] FALSE FALSE FALSE FALSE FALSE FALSE ...
+     $ exclude_reason       : chr [1:180] NA NA NA NA ...
+     $ weight_g_measurement : num [1:180] NA NA NA NA NA NA NA NA NA NA ...
+     $ width_mm_measurement : num [1:180] NA NA NA NA NA NA NA NA NA NA ...
+     $ length_mm_measurement: num [1:180] NA NA NA NA NA NA NA NA NA NA ...
+     $ treatment_group      : chr [1:180] NA NA NA NA ...
+     $ area_mm2_measurement : num [1:180] 1441 1594 1362 1860 1407 ...
+     $ imagej_id            : chr [1:180] "2" "2" "1" "1" ...
+     $ well_id              : chr [1:180] "A1" "A2" "A3" "A4" ...
+
+# 5 Merge Plate Data with Layout
+
+``` r
+dat <- plate_raw %>%
+  left_join(
+    layout_clean %>%
+      select(plate_id, well_id, is_blank, exclude_from_analysis,
+             any_of("exclude_reason"),
+             all_of(group_cols), all_of(measurement_cols)),
+    by = c("plate_id", "well_id")
+  ) %>%
+  mutate(
+    is_blank = replace_na(is_blank, FALSE),
+    exclude_from_analysis = replace_na(exclude_from_analysis, FALSE)
+  )
+
+str(dat)
+```
+
+    tibble [1,152 x 18] (S3: tbl_df/tbl/data.frame)
+     $ row_id               : chr [1:1152] "A" "A" "A" "A" ...
+     $ col_id               : int [1:1152] 1 2 3 4 5 6 7 8 9 10 ...
+     $ well_id              : chr [1:1152] "A1" "A2" "A3" "A4" ...
+     $ value                : num [1:1152] 627 598 599 580 563 752 577 559 568 565 ...
+     $ plate_id             : chr [1:1152] "round1" "round1" "round1" "round1" ...
+     $ time_hr              : num [1:1152] 0 0 0 0 0 0 0 0 0 0 ...
+     $ is_blank             : logi [1:1152] FALSE FALSE FALSE FALSE FALSE FALSE ...
+     $ exclude_from_analysis: logi [1:1152] FALSE FALSE FALSE FALSE FALSE FALSE ...
+     $ exclude_reason       : chr [1:1152] NA NA NA NA ...
+     $ family_id_group      : chr [1:1152] "1" "2" "3" "5" ...
+     $ cup_id_group         : chr [1:1152] "1" "2" "3" "4" ...
+     $ round_group          : chr [1:1152] "1" "1" "1" "1" ...
+     $ sample_id_group      : chr [1:1152] "1_01" "1_02" "1_03" "1_04" ...
+     $ treatment_group      : chr [1:1152] NA NA NA NA ...
+     $ weight_g_measurement : num [1:1152] NA NA NA NA NA NA NA NA NA NA ...
+     $ width_mm_measurement : num [1:1152] NA NA NA NA NA NA NA NA NA NA ...
+     $ length_mm_measurement: num [1:1152] NA NA NA NA NA NA NA NA NA NA ...
+     $ area_mm2_measurement : num [1:1152] 1441 1594 1362 1860 1407 ...
+
+# 6 Raw Fluorescence
+
+## 6.1 Data frame
+
+``` r
+# Wells in the plate reader output that have no layout entry get all-NA group
+# columns after the join. Keep only wells assigned to at least one group.
+active_gc <- intersect(group_cols, names(dat))
+
+raw_df <- dat %>%
+  filter(
+    !is_blank,
+    if (length(active_gc) > 0)
+      if_any(all_of(active_gc), ~ !is.na(.))
+    else
+      TRUE
+  ) %>%
+  mutate(
+    trace_id = if_else(
+      !is.na(sample_id_group) & trimws(as.character(sample_id_group)) != "",
+      as.character(sample_id_group),
+      paste(plate_id, well_id, sep = "_")
+    )
+  )
+
+families   <- str_sort(unique(na.omit(raw_df$family_id_group)), numeric = TRUE)
+treatments <- sort(unique(na.omit(raw_df$treatment_group)))
+
+n_fam <- length(families)
+n_trt <- length(treatments)
+
+# Palette strategy:
+#   <= 7 groups : Okabe-Ito (gold standard for colorblind-safe figures).
+#   >  7 groups : colorspace::qualitative_hcl("Dynamic") scales to any N
+#                 using perceptually uniform HCL space — no colour collisions.
+# Black (#000000) is excluded from both and reserved for blank wells.
+okabe_ito_7 <- c(
+  "#E69F00", "#56B4E9", "#009E73", "#F0E442",
+  "#0072B2", "#D55E00", "#CC79A7"
+)
+make_palette <- function(n) {
+  if (n == 0L) return(character(0))
+  if (n <= length(okabe_ito_7)) return(okabe_ito_7[seq_len(n)])
+  colorspace::qualitative_hcl(n, palette = "Dynamic")
+}
+
+all_colours   <- make_palette(n_fam + n_trt)
+fam_colours   <- setNames(all_colours[seq_len(n_fam)], families)
+trt_colours   <- setNames(all_colours[n_fam + seq_len(n_trt)], treatments)
+
+lty_pool <- c("solid", "dashed", "dotted", "dotdash", "longdash")
+trt_linetypes <- setNames(
+  lty_pool[(seq_len(n_trt) - 1L) %% length(lty_pool) + 1L],
+  treatments
+)
+plate_well_colours <- c(blank = "black", fam_colours)
+
+has_trt <- n_trt > 0
+
+str(raw_df)
+```
+
+    tibble [648 x 19] (S3: tbl_df/tbl/data.frame)
+     $ row_id               : chr [1:648] "A" "A" "A" "A" ...
+     $ col_id               : int [1:648] 1 2 3 4 5 6 7 8 9 11 ...
+     $ well_id              : chr [1:648] "A1" "A2" "A3" "A4" ...
+     $ value                : num [1:648] 627 598 599 580 563 752 577 559 568 596 ...
+     $ plate_id             : chr [1:648] "round1" "round1" "round1" "round1" ...
+     $ time_hr              : num [1:648] 0 0 0 0 0 0 0 0 0 0 ...
+     $ is_blank             : logi [1:648] FALSE FALSE FALSE FALSE FALSE FALSE ...
+     $ exclude_from_analysis: logi [1:648] FALSE FALSE FALSE FALSE FALSE FALSE ...
+     $ exclude_reason       : chr [1:648] NA NA NA NA ...
+     $ family_id_group      : chr [1:648] "1" "2" "3" "5" ...
+     $ cup_id_group         : chr [1:648] "1" "2" "3" "4" ...
+     $ round_group          : chr [1:648] "1" "1" "1" "1" ...
+     $ sample_id_group      : chr [1:648] "1_01" "1_02" "1_03" "1_04" ...
+     $ treatment_group      : chr [1:648] NA NA NA NA ...
+     $ weight_g_measurement : num [1:648] NA NA NA NA NA NA NA NA NA NA ...
+     $ width_mm_measurement : num [1:648] NA NA NA NA NA NA NA NA NA NA ...
+     $ length_mm_measurement: num [1:648] NA NA NA NA NA NA NA NA NA NA ...
+     $ area_mm2_measurement : num [1:648] 1441 1594 1362 1860 1407 ...
+     $ trace_id             : chr [1:648] "1_01" "1_02" "1_03" "1_04" ...
+
+## 6.2 Raw fluorescence by plate (including blanks)
+
+``` r
+p_raw_plates <- dat %>%
+  filter(is.finite(time_hr), is.finite(value)) %>%
+  mutate(
+    colour_group = if_else(is_blank, "blank",
+                           coalesce(family_id_group, "sample")),
+    trace_id     = paste(plate_id, well_id, sep = "_")
+  ) %>%
+  ggplot(aes(x = time_hr, y = value,
+             group = trace_id, colour = colour_group)) +
+  geom_line(alpha = 0.6) +
+  geom_point(size = 1, alpha = 0.7) +
+  facet_wrap(~ plate_id) +
+  scale_colour_manual(
+    values   = plate_well_colours,
+    name     = "Group",
+    breaks   = names(plate_well_colours),
+    na.value = "grey80"
+  ) +
+  labs(x = "Time (h)", y = "Raw fluorescence (RFU)") +
+  theme_classic(base_size = 12) +
+  theme(strip.background = element_blank(),
+        strip.text       = element_text(face = "bold"))
+
+p_raw_plates
+```
+
+![](03--resazurin-20260624-mgig-33C_files/figure-gfm/raw-fluor-by-plate-1.png)<!-- -->
+
+``` r
+ggsave(file.path(fig_dir, "raw_fluor_by_plate.png"),
+       p_raw_plates, width = 10, height = 8)
+```
+
+## 6.3 Mean raw fluorescence by family
+
+``` r
+raw_family_summary <- raw_df %>%
+  filter(!is.na(family_id_group), !exclude_from_analysis) %>%
+  group_by(family_id_group, treatment_group, time_hr) %>%
+  summarise(
+    mean_fluor = mean(value, na.rm = TRUE),
+    se_fluor   = sd(value, na.rm = TRUE) /
+      sqrt(sum(!is.na(value))),
+    n          = sum(!is.na(value)),
+    .groups    = "drop"
+  ) %>%
+  mutate(group_var = if (has_trt)
+    paste(family_id_group, treatment_group, sep = ".")
+  else
+    family_id_group)
+
+p_raw_mean <- ggplot(raw_family_summary,
+    aes(x = time_hr, y = mean_fluor,
+        colour = family_id_group,
+        group = group_var)) +
+  geom_ribbon(aes(ymin = mean_fluor - se_fluor,
+                  ymax = mean_fluor + se_fluor,
+                  fill = family_id_group),
+              alpha = 0.15, colour = NA) +
+  geom_line(
+    mapping   = if (has_trt) aes(linetype = treatment_group) else NULL,
+    linewidth = 1) +
+  geom_point(size = 2) +
+  scale_colour_manual(values = fam_colours, name = "Family",
+                      breaks = families) +
+  scale_fill_manual(values = fam_colours, name = "Family",
+                    breaks = families) +
+  labs(x = "Time (h)", y = "Mean raw fluorescence (RFU ± SE)") +
+  theme_classic(base_size = 13) +
+  if (has_trt) scale_linetype_manual(values = trt_linetypes, name = "Treatment") else NULL
+
+p_raw_mean
+```
+
+![](03--resazurin-20260624-mgig-33C_files/figure-gfm/raw-mean-by-family-1.png)<!-- -->
+
+``` r
+ggsave(file.path(fig_dir, "raw_mean_by_family.png"),
+       p_raw_mean, width = 8, height = 5)
+```
+
+## 6.4 Individual raw fluorescence traces by family
+
+``` r
+p_raw_by_family <- raw_df %>%
+  filter(!is.na(family_id_group)) %>%
+  ggplot(aes(x = time_hr, y = value, group = trace_id,
+             colour = .data[[if (has_trt) "treatment_group" else "family_id_group"]])) +
+  geom_line(alpha = 0.6) +
+  geom_point(size = 1.2, alpha = 0.7) +
+  facet_wrap(~ family_id_group) +
+  scale_colour_manual(
+    values = if (has_trt) trt_colours else fam_colours,
+    name   = if (has_trt) "Treatment" else "Family",
+    breaks = if (has_trt) treatments else families) +
+  labs(x = "Time (h)", y = "Raw fluorescence (RFU)") +
+  theme_classic(base_size = 12) +
+  theme(strip.background = element_blank(),
+        strip.text       = element_text(face = "bold"))
+
+p_raw_by_family
+```
+
+![](03--resazurin-20260624-mgig-33C_files/figure-gfm/raw-individual-by-family-1.png)<!-- -->
+
+``` r
+ggsave(file.path(fig_dir, "raw_individual_by_family.png"),
+       p_raw_by_family, width = 10, height = 5)
+```
+
+## 6.5 Individual raw fluorescence traces by treatment
+
+``` r
+if (has_trt) {
+  p_raw_by_treatment <- raw_df %>%
+    ggplot(aes(x = time_hr, y = value,
+               group = trace_id, colour = family_id_group)) +
+    geom_line(alpha = 0.6) +
+    geom_point(size = 1.2, alpha = 0.7) +
+    facet_wrap(~ treatment_group) +
+    scale_colour_manual(values = fam_colours, name = "Family",
+                        breaks = families) +
+    labs(x = "Time (h)", y = "Raw fluorescence (RFU)") +
+    theme_classic(base_size = 12) +
+    theme(strip.background = element_blank(),
+          strip.text       = element_text(face = "bold"))
+
+  p_raw_by_treatment
+  ggsave(file.path(fig_dir, "raw_individual_by_treatment.png"),
+         p_raw_by_treatment, width = 10, height = 5)
+}
+```
+
+## 6.6 Excluded samples
+
+Wells flagged `exclude_from_analysis = TRUE` appear in the raw
+fluorescence plots above but are omitted from all analyses that follow.
+
+``` r
+excluded_wells <- dat %>%
+  filter(!is_blank, exclude_from_analysis) %>%
+  mutate(
+    sample = if_else(
+      !is.na(sample_id_group) & trimws(as.character(sample_id_group)) != "",
+      as.character(sample_id_group),
+      paste(plate_id, well_id, sep = "_")
+    )
+  ) %>%
+  select(plate_id, well_id, sample, family_id_group, treatment_group,
+         any_of("exclude_reason")) %>%
+  distinct() %>%
+  arrange(plate_id, well_id)
+
+if (nrow(excluded_wells) > 0) {
+  col_names <- c("Plate", "Well", "Sample", "Family", "Treatment")
+  if ("exclude_reason" %in% names(excluded_wells))
+    col_names <- c(col_names, "Reason")
+  cat(knitr::kable(excluded_wells, col.names = col_names), sep = "\n")
+} else {
+  cat("No wells are excluded from analysis.\n")
+}
+```
+
+No wells are excluded from analysis.
+
+# 7 Blank Correction via Fold-Change Normalization
+
+T0 is the earliest timepoint present in the dataset (not necessarily 0
+hr). Sample fold-change is expressed relative to each individual’s T0
+reading, resolved by `sample_id_group` when that column is populated —
+allowing the same animal to be tracked across plates — or by
+`plate_id + well_id` when no sample IDs exist (backward-compatible with
+single-plate, multi-timepoint designs). Blank fold-change is the
+per-plate mean blank RFU at each timepoint divided by the pooled mean
+blank RFU at T0. Subtracting blank fold-change from sample fold-change
+removes background fluorescence drift; all samples start at exactly 0 at
+T0 by construction.
+
+## 7.1 Step 1 – Identify T0 and compute per-sample fold-change
+
+``` r
+# T0 = earliest timepoint present in the dataset
+t0_time <- min(dat$time_hr[is.finite(dat$time_hr)], na.rm = TRUE)
+message("T0 timepoint: ", t0_time, " hr")
+
+# T0 reference value per individual.
+# Resolved by sample_id_group (cross-plate tracking) when available;
+# falls back to plate+well for layouts without explicit sample IDs.
+t0_all <- dat %>%
+  filter(time_hr == t0_time, !is_blank, is.finite(value)) %>%
+  mutate(sample_key = if_else(
+    !is.na(sample_id_group) & trimws(as.character(sample_id_group)) != "",
+    as.character(sample_id_group),
+    paste(plate_id, well_id, sep = "_")
+  )) %>%
+  group_by(sample_key) %>%
+  summarise(value_t0 = mean(value, na.rm = TRUE), .groups = "drop")
+
+dat_fc <- dat %>%
+  mutate(sample_key = if_else(
+    !is_blank &
+      !is.na(sample_id_group) & trimws(as.character(sample_id_group)) != "",
+    as.character(sample_id_group),
+    paste(plate_id, well_id, sep = "_")
+  )) %>%
+  left_join(t0_all, by = "sample_key") %>%
+  mutate(fold_change = if_else(
+    !is_blank & is.finite(value_t0) & value_t0 > 0,
+    value / value_t0,
+    NA_real_
+  ))
+
+str(dat_fc)
+```
+
+    tibble [1,152 x 21] (S3: tbl_df/tbl/data.frame)
+     $ row_id               : chr [1:1152] "A" "A" "A" "A" ...
+     $ col_id               : int [1:1152] 1 2 3 4 5 6 7 8 9 10 ...
+     $ well_id              : chr [1:1152] "A1" "A2" "A3" "A4" ...
+     $ value                : num [1:1152] 627 598 599 580 563 752 577 559 568 565 ...
+     $ plate_id             : chr [1:1152] "round1" "round1" "round1" "round1" ...
+     $ time_hr              : num [1:1152] 0 0 0 0 0 0 0 0 0 0 ...
+     $ is_blank             : logi [1:1152] FALSE FALSE FALSE FALSE FALSE FALSE ...
+     $ exclude_from_analysis: logi [1:1152] FALSE FALSE FALSE FALSE FALSE FALSE ...
+     $ exclude_reason       : chr [1:1152] NA NA NA NA ...
+     $ family_id_group      : chr [1:1152] "1" "2" "3" "5" ...
+     $ cup_id_group         : chr [1:1152] "1" "2" "3" "4" ...
+     $ round_group          : chr [1:1152] "1" "1" "1" "1" ...
+     $ sample_id_group      : chr [1:1152] "1_01" "1_02" "1_03" "1_04" ...
+     $ treatment_group      : chr [1:1152] NA NA NA NA ...
+     $ weight_g_measurement : num [1:1152] NA NA NA NA NA NA NA NA NA NA ...
+     $ width_mm_measurement : num [1:1152] NA NA NA NA NA NA NA NA NA NA ...
+     $ length_mm_measurement: num [1:1152] NA NA NA NA NA NA NA NA NA NA ...
+     $ area_mm2_measurement : num [1:1152] 1441 1594 1362 1860 1407 ...
+     $ sample_key           : chr [1:1152] "1_01" "1_02" "1_03" "1_04" ...
+     $ value_t0             : num [1:1152] 627 598 599 580 563 752 577 559 568 NA ...
+     $ fold_change          : num [1:1152] 1 1 1 1 1 1 1 1 1 NA ...
+
+## 7.2 Step 2 – Blank fold-change reference per plate per timepoint
+
+``` r
+# Pooled mean blank RFU at T0 across all T0 plates
+mean_blank_t0 <- dat %>%
+  filter(is_blank, time_hr == t0_time, is.finite(value)) %>%
+  pull(value) %>%
+  mean(na.rm = TRUE)
+
+if (!is.finite(mean_blank_t0))
+  message("No blank readings found at T0 (", t0_time,
+          " hr); blank correction will produce NA.")
+
+# Per-plate per-timepoint mean blank expressed as fold-change relative to T0
+blank_fc_ref <- dat %>%
+  filter(is_blank, is.finite(value)) %>%
+  group_by(plate_id, time_hr) %>%
+  summarise(mean_blank_rfu = mean(value, na.rm = TRUE), .groups = "drop") %>%
+  mutate(mean_blank_fc = mean_blank_rfu / mean_blank_t0)
+
+str(blank_fc_ref)
+```
+
+    tibble [12 x 4] (S3: tbl_df/tbl/data.frame)
+     $ plate_id      : chr [1:12] "round1" "round1" "round1" "round1" ...
+     $ time_hr       : num [1:12] 0 1 2 3 0 1 2 3 0 1 ...
+     $ mean_blank_rfu: num [1:12] 568 715 612 630 632 ...
+     $ mean_blank_fc : num [1:12] 0.979 1.232 1.055 1.085 1.089 ...
+
+## 7.3 Step 3 – Subtract blank fold-change from sample fold-change
+
+``` r
+samples <- dat_fc %>%
+  filter(!is_blank, !exclude_from_analysis) %>%
+  mutate(
+    trace_id = if_else(
+      !is.na(sample_id_group) & trimws(as.character(sample_id_group)) != "",
+      as.character(sample_id_group),
+      paste(plate_id, well_id, sep = "_")
+    )
+  ) %>%
+  left_join(blank_fc_ref, by = c("plate_id", "time_hr")) %>%
+  mutate(corrected_fc = fold_change - mean_blank_fc)
+
+str(samples)
+```
+
+    tibble [1,080 x 25] (S3: tbl_df/tbl/data.frame)
+     $ row_id               : chr [1:1080] "A" "A" "A" "A" ...
+     $ col_id               : int [1:1080] 1 2 3 4 5 6 7 8 9 11 ...
+     $ well_id              : chr [1:1080] "A1" "A2" "A3" "A4" ...
+     $ value                : num [1:1080] 627 598 599 580 563 752 577 559 568 596 ...
+     $ plate_id             : chr [1:1080] "round1" "round1" "round1" "round1" ...
+     $ time_hr              : num [1:1080] 0 0 0 0 0 0 0 0 0 0 ...
+     $ is_blank             : logi [1:1080] FALSE FALSE FALSE FALSE FALSE FALSE ...
+     $ exclude_from_analysis: logi [1:1080] FALSE FALSE FALSE FALSE FALSE FALSE ...
+     $ exclude_reason       : chr [1:1080] NA NA NA NA ...
+     $ family_id_group      : chr [1:1080] "1" "2" "3" "5" ...
+     $ cup_id_group         : chr [1:1080] "1" "2" "3" "4" ...
+     $ round_group          : chr [1:1080] "1" "1" "1" "1" ...
+     $ sample_id_group      : chr [1:1080] "1_01" "1_02" "1_03" "1_04" ...
+     $ treatment_group      : chr [1:1080] NA NA NA NA ...
+     $ weight_g_measurement : num [1:1080] NA NA NA NA NA NA NA NA NA NA ...
+     $ width_mm_measurement : num [1:1080] NA NA NA NA NA NA NA NA NA NA ...
+     $ length_mm_measurement: num [1:1080] NA NA NA NA NA NA NA NA NA NA ...
+     $ area_mm2_measurement : num [1:1080] 1441 1594 1362 1860 1407 ...
+     $ sample_key           : chr [1:1080] "1_01" "1_02" "1_03" "1_04" ...
+     $ value_t0             : num [1:1080] 627 598 599 580 563 752 577 559 568 596 ...
+     $ fold_change          : num [1:1080] 1 1 1 1 1 1 1 1 1 1 ...
+     $ trace_id             : chr [1:1080] "1_01" "1_02" "1_03" "1_04" ...
+     $ mean_blank_rfu       : num [1:1080] 568 568 568 568 568 ...
+     $ mean_blank_fc        : num [1:1080] 0.979 0.979 0.979 0.979 0.979 ...
+     $ corrected_fc         : num [1:1080] 0.0206 0.0206 0.0206 0.0206 0.0206 ...
+
+# 8 Blank-Corrected Fold-Change
+
+## 8.1 Mean by family
+
+``` r
+bc_fc_summary <- samples %>%
+  filter(!is.na(family_id_group), !exclude_from_analysis) %>%
+  group_by(family_id_group, treatment_group, time_hr) %>%
+  summarise(
+    mean_val = mean(corrected_fc, na.rm = TRUE),
+    se_val   = sd(corrected_fc, na.rm = TRUE) /
+      sqrt(sum(!is.na(corrected_fc))),
+    n        = sum(!is.na(corrected_fc)),
+    .groups  = "drop"
+  ) %>%
+  mutate(group_var = if (has_trt)
+    paste(family_id_group, treatment_group, sep = ".")
+  else
+    family_id_group)
+
+p_bc_fc_mean <- ggplot(bc_fc_summary,
+    aes(x = time_hr, y = mean_val,
+        colour = family_id_group,
+        group = group_var)) +
+  geom_ribbon(aes(ymin = mean_val - se_val,
+                  ymax = mean_val + se_val,
+                  fill = family_id_group),
+              alpha = 0.15, colour = NA) +
+  geom_line(
+    mapping   = if (has_trt) aes(linetype = treatment_group) else NULL,
+    linewidth = 1) +
+  geom_point(size = 2) +
+  scale_colour_manual(values = fam_colours, name = "Family",
+                      breaks = families) +
+  scale_fill_manual(values = fam_colours, name = "Family",
+                    breaks = families) +
+  labs(x = "Time (h)",
+       y = "Mean blank-corrected fold-change (± SE)") +
+  theme_classic(base_size = 13) +
+  if (has_trt) scale_linetype_manual(values = trt_linetypes, name = "Treatment") else NULL
+
+p_bc_fc_mean
+```
+
+![](03--resazurin-20260624-mgig-33C_files/figure-gfm/bc-fc-mean-by-family-1.png)<!-- -->
+
+``` r
+ggsave(file.path(fig_dir, "blank_corrected_fc_mean_by_family.png"),
+       p_bc_fc_mean, width = 8, height = 5)
+```
+
+## 8.2 Individual traces by family
+
+``` r
+p_bc_fc_by_family <- samples %>%
+  filter(!is.na(family_id_group)) %>%
+  ggplot(aes(x = time_hr, y = corrected_fc, group = trace_id,
+             colour = .data[[if (has_trt) "treatment_group" else "family_id_group"]])) +
+  geom_line(alpha = 0.6) +
+  geom_point(size = 1.2, alpha = 0.7) +
+  facet_wrap(~ family_id_group) +
+  scale_colour_manual(
+    values = if (has_trt) trt_colours else fam_colours,
+    name   = if (has_trt) "Treatment" else "Family",
+    breaks = if (has_trt) treatments else families) +
+  labs(x = "Time (h)", y = "Blank-corrected fold-change") +
+  theme_classic(base_size = 12) +
+  theme(strip.background = element_blank(),
+        strip.text       = element_text(face = "bold"))
+
+p_bc_fc_by_family
+```
+
+![](03--resazurin-20260624-mgig-33C_files/figure-gfm/bc-fc-individual-by-family-1.png)<!-- -->
+
+``` r
+ggsave(file.path(fig_dir, "blank_corrected_fc_by_family.png"),
+       p_bc_fc_by_family, width = 10, height = 5)
+```
+
+## 8.3 Individual blank-corrected fold-change traces by treatment
+
+``` r
+if (has_trt) {
+  p_bc_fc_by_treatment <- samples %>%
+    ggplot(aes(x = time_hr, y = corrected_fc,
+               group = trace_id, colour = family_id_group)) +
+    geom_line(alpha = 0.6) +
+    geom_point(size = 1.2, alpha = 0.7) +
+    facet_wrap(~ treatment_group) +
+    scale_colour_manual(values = fam_colours, name = "Family",
+                        breaks = families) +
+    labs(x = "Time (h)", y = "Blank-corrected fold-change") +
+    theme_classic(base_size = 12) +
+    theme(strip.background = element_blank(),
+          strip.text       = element_text(face = "bold"))
+
+  p_bc_fc_by_treatment
+  ggsave(file.path(fig_dir, "blank_corrected_fc_by_treatment.png"),
+         p_bc_fc_by_treatment, width = 10, height = 5)
+}
+```
+
+# 9 Metabolism (Size-Normalised Fold-Change)
+
+Blank-corrected fold-change divided by each active measurement column.
+This is “metabolism” as defined in Huffmyer et al.
+
+``` r
+if (length(active_meas_cols) == 0) {
+  message("No active measurement columns: skipping metabolism calculation.")
+  metabolism_df <- tibble()
+} else {
+  metabolism_df <- samples
+  for (mc in active_meas_cols) {
+    out_col <- paste0("metabolism_per_", mc)
+    metabolism_df <- metabolism_df %>%
+      mutate(!!out_col := if_else(
+        is.finite(.data[[mc]]) & .data[[mc]] > 0 &
+          is.finite(corrected_fc),
+        corrected_fc / .data[[mc]],
+        NA_real_
+      ))
+  }
+}
+
+str(metabolism_df)
+```
+
+    tibble [1,080 x 26] (S3: tbl_df/tbl/data.frame)
+     $ row_id                             : chr [1:1080] "A" "A" "A" "A" ...
+     $ col_id                             : int [1:1080] 1 2 3 4 5 6 7 8 9 11 ...
+     $ well_id                            : chr [1:1080] "A1" "A2" "A3" "A4" ...
+     $ value                              : num [1:1080] 627 598 599 580 563 752 577 559 568 596 ...
+     $ plate_id                           : chr [1:1080] "round1" "round1" "round1" "round1" ...
+     $ time_hr                            : num [1:1080] 0 0 0 0 0 0 0 0 0 0 ...
+     $ is_blank                           : logi [1:1080] FALSE FALSE FALSE FALSE FALSE FALSE ...
+     $ exclude_from_analysis              : logi [1:1080] FALSE FALSE FALSE FALSE FALSE FALSE ...
+     $ exclude_reason                     : chr [1:1080] NA NA NA NA ...
+     $ family_id_group                    : chr [1:1080] "1" "2" "3" "5" ...
+     $ cup_id_group                       : chr [1:1080] "1" "2" "3" "4" ...
+     $ round_group                        : chr [1:1080] "1" "1" "1" "1" ...
+     $ sample_id_group                    : chr [1:1080] "1_01" "1_02" "1_03" "1_04" ...
+     $ treatment_group                    : chr [1:1080] NA NA NA NA ...
+     $ weight_g_measurement               : num [1:1080] NA NA NA NA NA NA NA NA NA NA ...
+     $ width_mm_measurement               : num [1:1080] NA NA NA NA NA NA NA NA NA NA ...
+     $ length_mm_measurement              : num [1:1080] NA NA NA NA NA NA NA NA NA NA ...
+     $ area_mm2_measurement               : num [1:1080] 1441 1594 1362 1860 1407 ...
+     $ sample_key                         : chr [1:1080] "1_01" "1_02" "1_03" "1_04" ...
+     $ value_t0                           : num [1:1080] 627 598 599 580 563 752 577 559 568 596 ...
+     $ fold_change                        : num [1:1080] 1 1 1 1 1 1 1 1 1 1 ...
+     $ trace_id                           : chr [1:1080] "1_01" "1_02" "1_03" "1_04" ...
+     $ mean_blank_rfu                     : num [1:1080] 568 568 568 568 568 ...
+     $ mean_blank_fc                      : num [1:1080] 0.979 0.979 0.979 0.979 0.979 ...
+     $ corrected_fc                       : num [1:1080] 0.0206 0.0206 0.0206 0.0206 0.0206 ...
+     $ metabolism_per_area_mm2_measurement: num [1:1080] 1.43e-05 1.29e-05 1.51e-05 1.11e-05 1.46e-05 ...
+
+## 9.1 Mean metabolism by family
+
+``` r
+if (nrow(metabolism_df) > 0) {
+
+  metab_cols <- paste0("metabolism_per_", active_meas_cols)
+
+  for (col in metab_cols) {
+    if (!col %in% names(metabolism_df)) next
+    mc_label <- str_remove(col, "^metabolism_per_")
+
+    metab_summary <- metabolism_df %>%
+      filter(!is.na(family_id_group), !exclude_from_analysis) %>%
+      group_by(family_id_group, treatment_group, time_hr) %>%
+      summarise(
+        mean_val = mean(.data[[col]], na.rm = TRUE),
+        se_val   = sd(.data[[col]], na.rm = TRUE) /
+          sqrt(sum(!is.na(.data[[col]]))),
+        .groups  = "drop"
+      ) %>%
+      mutate(group_var = if (has_trt)
+        paste(family_id_group, treatment_group, sep = ".")
+      else
+        family_id_group)
+
+    p_metab_mean <- ggplot(metab_summary,
+        aes(x = time_hr, y = mean_val,
+            colour = family_id_group,
+            group = group_var)) +
+      geom_ribbon(aes(ymin = mean_val - se_val,
+                      ymax = mean_val + se_val,
+                      fill = family_id_group),
+                  alpha = 0.15, colour = NA) +
+      geom_line(
+        mapping   = if (has_trt) aes(linetype = treatment_group) else NULL,
+        linewidth = 1) +
+      geom_point(size = 2) +
+      scale_colour_manual(values = fam_colours, name = "Family",
+                          breaks = families) +
+      scale_fill_manual(values = fam_colours, name = "Family",
+                        breaks = families) +
+      labs(x = "Time (h)",
+           y = paste0(metabolism_y_label(col), " (± SE)")) +
+      theme_classic(base_size = 13) +
+      if (has_trt) scale_linetype_manual(values = trt_linetypes, name = "Treatment") else NULL
+
+    print(p_metab_mean)
+    ggsave(
+      file.path(fig_dir,
+                paste0("metabolism_mean_", mc_label, ".png")),
+      p_metab_mean, width = 8, height = 5)
+  }
+}
+```
+
+![](03--resazurin-20260624-mgig-33C_files/figure-gfm/metabolism-mean-by-family-1.png)<!-- -->
+
+## 9.2 Individual metabolism traces by family
+
+``` r
+if (nrow(metabolism_df) > 0) {
+
+  for (col in metab_cols) {
+    if (!col %in% names(metabolism_df)) next
+    mc_label <- str_remove(col, "^metabolism_per_")
+
+    p_metab_by_family <- metabolism_df %>%
+      filter(!is.na(family_id_group)) %>%
+      ggplot(aes(x = time_hr, y = .data[[col]], group = trace_id,
+                 colour = .data[[if (has_trt) "treatment_group" else "family_id_group"]])) +
+      geom_line(alpha = 0.6) +
+      geom_point(size = 1.2, alpha = 0.7) +
+      facet_wrap(~ family_id_group) +
+      scale_colour_manual(
+        values = if (has_trt) trt_colours else fam_colours,
+        name   = if (has_trt) "Treatment" else "Family",
+        breaks = if (has_trt) treatments else families) +
+      labs(x = "Time (h)", y = metabolism_y_label(col)) +
+      theme_classic(base_size = 12) +
+      theme(strip.background = element_blank(),
+            strip.text       = element_text(face = "bold"))
+
+    print(p_metab_by_family)
+    ggsave(
+      file.path(fig_dir,
+                paste0("metabolism_individual_", mc_label, "_by_family.png")),
+      p_metab_by_family, width = 10, height = 5)
+
+    if (has_trt) {
+      p_metab_by_treatment <- ggplot(metabolism_df,
+          aes(x = time_hr, y = .data[[col]],
+              group = trace_id, colour = family_id_group)) +
+        geom_line(alpha = 0.6) +
+        geom_point(size = 1.2, alpha = 0.7) +
+        facet_wrap(~ treatment_group) +
+        scale_colour_manual(values = fam_colours, name = "Family",
+                            breaks = families) +
+        labs(x = "Time (h)", y = metabolism_y_label(col)) +
+        theme_classic(base_size = 12) +
+        theme(strip.background = element_blank(),
+              strip.text       = element_text(face = "bold"))
+
+      print(p_metab_by_treatment)
+      ggsave(
+        file.path(fig_dir,
+                  paste0("metabolism_individual_", mc_label, "_by_treatment.png")),
+        p_metab_by_treatment, width = 10, height = 5)
+    }
+  }
+}
+```
+
+![](03--resazurin-20260624-mgig-33C_files/figure-gfm/metabolism-individual-by-family-1.png)<!-- -->
+
+# 10 Time-Series Statistical Analysis
+
+Linear mixed effects models test the effect of experimental variables on
+metabolism over time. Individual (`sample_id_group`) is included as a
+random intercept to account for repeated measures across timepoints.
+Type III ANOVA with Satterthwaite’s approximation (lmerTest) assesses
+significance; post-hoc pairwise comparisons use estimated marginal means
+(emmeans, Tukey adjustment).
+
+``` r
+run_ts_stats <- function(df, value_col) {
+  if (!has_lme4 || !has_lmerTest || !has_emmeans) {
+    message("Skipping time-series mixed model for ", value_col,
+            ": lme4, lmerTest, and emmeans are required.")
+    return(NULL)
+  }
+
+  has_family    <- "family_id_group" %in% names(df) &&
+    length(unique(na.omit(df$family_id_group))) > 1
+  has_treatment <- "treatment_group" %in% names(df) &&
+    length(unique(na.omit(df$treatment_group))) > 1
+
+  if (!has_family && !has_treatment) return(NULL)
+
+  df <- df %>%
+    filter(is.finite(.data[[value_col]]), is.finite(time_hr)) %>%
+    mutate(
+      time_f     = factor(time_hr),
+      individual = factor(trace_id)
+    )
+
+  if (nrow(df) == 0) return(NULL)
+
+  if (has_family)    df <- df %>% mutate(family    = factor(family_id_group))
+  if (has_treatment) df <- df %>% mutate(treatment = factor(treatment_group))
+
+  if (has_family    && length(unique(na.omit(df$family)))    < 2) return(NULL)
+  if (has_treatment && length(unique(na.omit(df$treatment))) < 2) return(NULL)
+
+  fixed <- if (has_family && has_treatment) {
+    paste0(value_col, " ~ time_f * family * treatment")
+  } else if (has_family) {
+    paste0(value_col, " ~ time_f * family")
+  } else {
+    paste0(value_col, " ~ time_f * treatment")
+  }
+
+  model <- lme4::lmer(
+    as.formula(paste0(fixed, " + (1 | individual)")),
+    data = df
+  )
+
+  anova_res <- lmerTest::anova(model, type = 3, ddf = "Satterthwaite")
+
+  # Pairwise comparisons of group combinations at each timepoint
+  emm_spec <- if (has_family && has_treatment) {
+    ~ family * treatment | time_f
+  } else if (has_family) {
+    ~ family | time_f
+  } else {
+    ~ treatment | time_f
+  }
+
+  emm       <- emmeans::emmeans(model, emm_spec)
+  pairs_res <- as.data.frame(pairs(emm, adjust = "tukey"))
+
+  # Main-effect marginal means (collapsed across time)
+  emm_main <- if (has_family && has_treatment) {
+    emmeans::emmeans(model, ~ family * treatment)
+  } else if (has_family) {
+    emmeans::emmeans(model, ~ family)
+  } else {
+    emmeans::emmeans(model, ~ treatment)
+  }
+
+  pairs_main <- as.data.frame(pairs(emm_main, adjust = "tukey"))
+
+  list(
+    model         = model,
+    anova         = anova_res,
+    pairs_by_time = pairs_res,
+    pairs_main    = pairs_main,
+    has_family    = has_family,
+    has_treatment = has_treatment
+  )
+}
+
+ts_stats <- list()
+if (nrow(metabolism_df) > 0) {
+  for (mc in active_meas_cols) {
+    col <- paste0("metabolism_per_", mc)
+    if (col %in% names(metabolism_df))
+      ts_stats[[col]] <- run_ts_stats(metabolism_df, col)
+  }
+}
+```
+
+## 10.1 Results
+
+``` r
+for (col in names(ts_stats)) {
+  res <- ts_stats[[col]]
+  if (is.null(res)) next
+
+  cat("\n\n### Metric:", col, "\n\n")
+
+  cat("**Type III ANOVA (Satterthwaite approximation):**\n\n")
+  cat(knitr::kable(as.data.frame(res$anova), digits = 4, format = "pipe"), sep = "\n")
+  cat("\n")
+
+  cat("**Marginal means – main effects (collapsed across time):**\n\n")
+  cat(knitr::kable(as.data.frame(res$pairs_main), digits = 4, format = "pipe"), sep = "\n")
+  cat("\n")
+
+  cat("**Pairwise comparisons by timepoint (Tukey):**\n\n")
+  cat(knitr::kable(as.data.frame(res$pairs_by_time), digits = 4, format = "pipe"), sep = "\n")
+  cat("\n")
+}
+```
+
+# 11 Area Under the Curve (AUC)
+
+AUC computed per individual via the trapezoid rule across all
+timepoints. `metabolism_per_*` is the primary metric matching the paper;
+`corrected_fc` and `raw_fluorescence` are retained for reference.
+
+``` r
+compute_auc <- function(df, value_col, group_vars) {
+  df %>%
+    filter(is.finite(time_hr), is.finite(.data[[value_col]])) %>%
+    group_by(across(all_of(group_vars))) %>%
+    summarise(
+      AUC          = trapezoid_auc(time_hr, .data[[value_col]]),
+      n_timepoints = n(),
+      .groups      = "drop"
+    ) %>%
+    filter(is.finite(AUC))
+}
+
+# Only include grouping columns that are actually present in the data
+individual_vars <- intersect(
+  c("trace_id", "family_id_group", "treatment_group"),
+  names(metabolism_df)
+)
+
+auc_metab_list <- list()
+if (nrow(metabolism_df) > 0) {
+  for (mc in active_meas_cols) {
+    col <- paste0("metabolism_per_", mc)
+    if (col %in% names(metabolism_df)) {
+      auc_metab_list[[col]] <-
+        compute_auc(metabolism_df, col, individual_vars) %>%
+        mutate(metric = col)
+    }
+  }
+}
+
+auc_all <- bind_rows(auc_metab_list)
+
+str(auc_all)
+```
+
+    tibble [162 x 6] (S3: tbl_df/tbl/data.frame)
+     $ trace_id       : chr [1:162] "1_01" "1_02" "1_03" "1_04" ...
+     $ family_id_group: chr [1:162] "1" "2" "3" "5" ...
+     $ treatment_group: chr [1:162] NA NA NA NA ...
+     $ AUC            : num [1:162] 0.0023 0.0018 0.00275 0.0066 0.00341 ...
+     $ n_timepoints   : int [1:162] 4 4 4 4 4 4 4 4 4 4 ...
+     $ metric         : chr [1:162] "metabolism_per_area_mm2_measurement" "metabolism_per_area_mm2_measurement" "metabolism_per_area_mm2_measurement" "metabolism_per_area_mm2_measurement" ...
+
+## 11.1 AUC summary tables
+
+``` r
+sum_vars <- intersect(
+  c("metric", "family_id_group", "treatment_group"),
+  names(auc_all)
+)
+auc_summary <- auc_all %>%
+  group_by(across(all_of(sum_vars))) %>%
+  summarise(
+    n      = n(),
+    mean   = mean(AUC, na.rm = TRUE),
+    sd     = sd(AUC, na.rm = TRUE),
+    se     = sd / sqrt(n),
+    median = median(AUC, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+print(auc_summary)
+```
+
+    # A tibble: 9 x 8
+      metric   family_id_group treatment_group     n    mean      sd      se  median
+      <chr>    <chr>           <chr>           <int>   <dbl>   <dbl>   <dbl>   <dbl>
+    1 metabol~ 1               <NA>               18 0.00234 6.64e-4 1.57e-4 0.00236
+    2 metabol~ 10              <NA>               18 0.00265 8.16e-4 1.92e-4 0.00266
+    3 metabol~ 2               <NA>               18 0.00332 2.09e-3 4.94e-4 0.00233
+    4 metabol~ 3               <NA>               18 0.00377 1.76e-3 4.14e-4 0.00353
+    5 metabol~ 5               <NA>               18 0.00324 2.10e-3 4.95e-4 0.00268
+    6 metabol~ 6               <NA>               18 0.00313 2.60e-3 6.13e-4 0.00224
+    7 metabol~ 7               <NA>               18 0.00324 1.98e-3 4.67e-4 0.00327
+    8 metabol~ 8               <NA>               18 0.00294 1.11e-3 2.61e-4 0.00250
+    9 metabol~ 9               <NA>               18 0.00305 1.19e-3 2.80e-4 0.00268
+
+# 12 Statistical Analysis
+
+Each individual oyster (`sample_id_group`) is the observational unit.
+The model is built from whichever grouping factors are present: both
+family and treatment (with interaction) when both exist, or a one-way
+model when only one factor is available. Each plate maps to a unique
+family × treatment combination, so plate-level and group-level variance
+are confounded; interpret accordingly.
+
+``` r
+tidy_tukey <- function(model, term) {
+  tk <- tryCatch(TukeyHSD(aov(model), which = term)[[term]],
+                 error = function(e) NULL)
+  if (is.null(tk)) return(tibble())
+  as_tibble(tk, rownames = "contrast") %>%
+    rename(
+      estimate = diff,
+      p.value = `p adj`
+    ) %>%
+    mutate(SE = NA_real_, df = NA_real_, t.ratio = NA_real_) %>%
+    select(contrast, estimate, SE, df, t.ratio, p.value)
+}
+
+run_auc_stats <- function(auc_df) {
+  empty <- tibble()
+
+  has_family    <- "family_id_group" %in% names(auc_df) &&
+    length(unique(na.omit(auc_df$family_id_group))) > 1
+  has_treatment <- "treatment_group" %in% names(auc_df) &&
+    length(unique(na.omit(auc_df$treatment_group))) > 1
+
+  if (!has_family && !has_treatment) {
+    return(list(model = NULL, anova = NULL,
+                pairs_full = empty, pairs_family = empty,
+                pairs_trt = empty,
+                has_family = FALSE, has_treatment = FALSE))
+  }
+
+  if (has_family)    auc_df <- auc_df %>% mutate(family    = factor(family_id_group))
+  if (has_treatment) auc_df <- auc_df %>% mutate(treatment = factor(treatment_group))
+
+  formula_str <- if (has_family && has_treatment) {
+    "AUC ~ family * treatment"
+  } else if (has_family) {
+    "AUC ~ family"
+  } else {
+    "AUC ~ treatment"
+  }
+  model     <- lm(as.formula(formula_str), data = auc_df)
+  anova_res <- anova(model)
+
+  if (has_family && has_treatment) {
+    if (has_emmeans) {
+      pairs_full   <- as.data.frame(pairs(emmeans::emmeans(model, ~ family * treatment),
+                                          adjust = "tukey"))
+      pairs_family <- as.data.frame(pairs(emmeans::emmeans(model, ~ family),
+                                          adjust = "tukey"))
+      pairs_trt    <- as.data.frame(pairs(emmeans::emmeans(model, ~ treatment),
+                                          adjust = "tukey"))
+    } else {
+      pairs_full <- empty
+      pairs_family <- tidy_tukey(model, "family")
+      pairs_trt <- tidy_tukey(model, "treatment")
+    }
+  } else if (has_family) {
+    pairs_family <- if (has_emmeans) {
+      as.data.frame(pairs(emmeans::emmeans(model, ~ family),
+                          adjust = "tukey"))
+    } else {
+      tidy_tukey(model, "family")
+    }
+    pairs_full   <- pairs_family
+    pairs_trt    <- empty
+  } else {
+    pairs_trt    <- if (has_emmeans) {
+      as.data.frame(pairs(emmeans::emmeans(model, ~ treatment),
+                          adjust = "tukey"))
+    } else {
+      tidy_tukey(model, "treatment")
+    }
+    pairs_full   <- pairs_trt
+    pairs_family <- empty
+  }
+
+  list(
+    model         = model,
+    anova         = anova_res,
+    pairs_full    = pairs_full,
+    pairs_family  = pairs_family,
+    pairs_trt     = pairs_trt,
+    has_family    = has_family,
+    has_treatment = has_treatment
+  )
+}
+
+metrics_to_test <- unique(auc_all$metric)
+stats_results   <- map(
+  set_names(metrics_to_test),
+  ~ run_auc_stats(auc_all %>% filter(metric == .x))
+)
+```
+
+## 12.1 Results by metric
+
+``` r
+for (met in metrics_to_test) {
+  stats <- stats_results[[met]]
+  cat("\n\n### Metric:", met, "\n\n")
+  cat("**ANOVA:**\n\n")
+  cat(knitr::kable(as.data.frame(stats$anova), digits = 4, format = "pipe"), sep = "\n")
+  cat("\n")
+  if (stats$has_family && stats$has_treatment) {
+    cat("**Pairwise: family × treatment (Tukey):**\n\n")
+    cat(knitr::kable(as.data.frame(stats$pairs_full), digits = 4, format = "pipe"), sep = "\n")
+  cat("\n")
+    cat("**Pairwise: family main effect:**\n\n")
+    cat(knitr::kable(as.data.frame(stats$pairs_family), digits = 4, format = "pipe"), sep = "\n")
+  cat("\n")
+    cat("**Pairwise: treatment main effect:**\n\n")
+    cat(knitr::kable(as.data.frame(stats$pairs_trt), digits = 4, format = "pipe"), sep = "\n")
+  cat("\n")
+  } else if (stats$has_family) {
+    cat("**Pairwise: family (Tukey):**\n\n")
+    cat(knitr::kable(as.data.frame(stats$pairs_family), digits = 4, format = "pipe"), sep = "\n")
+  cat("\n")
+  } else if (stats$has_treatment) {
+    cat("**Pairwise: treatment (Tukey):**\n\n")
+    cat(knitr::kable(as.data.frame(stats$pairs_trt), digits = 4, format = "pipe"), sep = "\n")
+  cat("\n")
+  }
+}
+```
+
+### 12.1.1 Metric: metabolism\_per\_area\_mm2\_measurement
+
+**ANOVA:**
+
+|           |  Df | Sum Sq | Mean Sq | F value | Pr(&gt;F) |
+|-----------|----:|-------:|--------:|--------:|----------:|
+| family    |   8 |  0e+00 |       0 |  1.0252 |    0.4195 |
+| Residuals | 153 |  4e-04 |       0 |      NA |        NA |
+
+**Pairwise: family (Tukey):**
+
+| contrast | estimate |  SE |  df | t.ratio | p.value |
+|:---------|---------:|----:|----:|--------:|--------:|
+| 10-1     |   0.0003 |  NA |  NA |      NA |  0.9998 |
+| 2-1      |   0.0010 |  NA |  NA |      NA |  0.7339 |
+| 3-1      |   0.0014 |  NA |  NA |      NA |  0.2375 |
+| 5-1      |   0.0009 |  NA |  NA |      NA |  0.8147 |
+| 6-1      |   0.0008 |  NA |  NA |      NA |  0.8978 |
+| 7-1      |   0.0009 |  NA |  NA |      NA |  0.8085 |
+| 8-1      |   0.0006 |  NA |  NA |      NA |  0.9786 |
+| 9-1      |   0.0007 |  NA |  NA |      NA |  0.9429 |
+| 2-10     |   0.0007 |  NA |  NA |      NA |  0.9632 |
+| 3-10     |   0.0011 |  NA |  NA |      NA |  0.5817 |
+| 5-10     |   0.0006 |  NA |  NA |      NA |  0.9833 |
+| 6-10     |   0.0005 |  NA |  NA |      NA |  0.9955 |
+| 7-10     |   0.0006 |  NA |  NA |      NA |  0.9821 |
+| 8-10     |   0.0003 |  NA |  NA |      NA |  0.9999 |
+| 9-10     |   0.0004 |  NA |  NA |      NA |  0.9988 |
+| 3-2      |   0.0004 |  NA |  NA |      NA |  0.9971 |
+| 5-2      |  -0.0001 |  NA |  NA |      NA |  1.0000 |
+| 6-2      |  -0.0002 |  NA |  NA |      NA |  1.0000 |
+| 7-2      |  -0.0001 |  NA |  NA |      NA |  1.0000 |
+| 8-2      |  -0.0004 |  NA |  NA |      NA |  0.9992 |
+| 9-2      |  -0.0003 |  NA |  NA |      NA |  0.9999 |
+| 5-3      |  -0.0005 |  NA |  NA |      NA |  0.9911 |
+| 6-3      |  -0.0006 |  NA |  NA |      NA |  0.9720 |
+| 7-3      |  -0.0005 |  NA |  NA |      NA |  0.9918 |
+| 8-3      |  -0.0008 |  NA |  NA |      NA |  0.8790 |
+| 9-3      |  -0.0007 |  NA |  NA |      NA |  0.9430 |
+| 6-5      |  -0.0001 |  NA |  NA |      NA |  1.0000 |
+| 7-5      |   0.0000 |  NA |  NA |      NA |  1.0000 |
+| 8-5      |  -0.0003 |  NA |  NA |      NA |  0.9999 |
+| 9-5      |  -0.0002 |  NA |  NA |      NA |  1.0000 |
+| 7-6      |   0.0001 |  NA |  NA |      NA |  1.0000 |
+| 8-6      |  -0.0002 |  NA |  NA |      NA |  1.0000 |
+| 9-6      |  -0.0001 |  NA |  NA |      NA |  1.0000 |
+| 8-7      |  -0.0003 |  NA |  NA |      NA |  0.9998 |
+| 9-7      |  -0.0002 |  NA |  NA |      NA |  1.0000 |
+| 9-8      |   0.0001 |  NA |  NA |      NA |  1.0000 |
+
+# 13 AUC Box Plots with Statistical Annotations
+
+Significance labels: `***` p &lt; 0.001, `**` p &lt; 0.01, `*` p &lt;
+0.05. Brackets are drawn only for significant pairs (p &lt; 0.05). Plots
+are generated for whichever grouping factors are present:
+treatment-only, family-only, all-groups, within-family, and
+within-treatment.
+
+``` r
+sig_label <- function(p) {
+  case_when(p < 0.001 ~ "***", p < 0.01 ~ "**", p < 0.05 ~ "*",
+            TRUE ~ "ns")
+}
+
+# Add significance brackets to an existing ggplot.
+# pairs_df   : data frame with $contrast and $p.value columns
+# group_levels: ordered character vector matching x-axis factor levels
+# y_vals     : numeric vector of AUC values used to set bracket heights
+add_sig_brackets <- function(p, pairs_df, group_levels, y_vals) {
+  sig_pairs <- pairs_df %>%
+    mutate(label = sig_label(p.value)) %>%
+    filter(label != "ns")
+  if (nrow(sig_pairs) == 0) return(p)
+
+  y_max   <- max(y_vals, na.rm = TRUE)
+  y_range <- diff(range(y_vals, na.rm = TRUE))
+  step    <- y_range * 0.12
+
+  for (i in seq_len(nrow(sig_pairs))) {
+    parts <- str_split(as.character(sig_pairs$contrast[i]), " - ", 2)[[1]]
+    g1 <- trimws(parts[1])
+    g2 <- trimws(parts[2])
+    x1 <- match(g1, group_levels)
+    x2 <- match(g2, group_levels)
+    if (is.na(x1) || is.na(x2)) next
+    bar_y <- y_max + i * step
+    p <- p +
+      annotate("segment", x = x1, xend = x2,
+               y = bar_y, yend = bar_y,
+               colour = "black", linewidth = 0.6) +
+      annotate("segment", x = x1, xend = x1,
+               y = bar_y, yend = bar_y - step * 0.3,
+               colour = "black", linewidth = 0.6) +
+      annotate("segment", x = x2, xend = x2,
+               y = bar_y, yend = bar_y - step * 0.3,
+               colour = "black", linewidth = 0.6) +
+      annotate("text", x = (x1 + x2) / 2,
+               y = bar_y + step * 0.15,
+               label = sig_pairs$label[i], size = 4.5)
+  }
+  p
+}
+```
+
+``` r
+for (met in metrics_to_test) {
+  df      <- auc_all %>% filter(metric == met)
+  stats   <- stats_results[[met]]
+  y_lab   <- auc_y_label(met)
+  has_fam <- stats$has_family
+  has_trt <- stats$has_treatment
+
+  # ── Treatment main effect (x = treatment, tick = treatment name) ───────
+  if (has_trt) {
+    df_p <- df %>%
+      mutate(x = factor(treatment_group, levels = sort(unique(treatment_group))))
+    grps <- levels(df_p$x)
+    p <- ggplot(df_p, aes(x = x, y = AUC, fill = x)) +
+      geom_boxplot(alpha = 0.6, outlier.shape = NA) +
+      geom_jitter(width = 0.15, alpha = 0.4, size = 1.5) +
+      scale_fill_manual(values = trt_colours[grps], guide = "none") +
+      labs(x = "Treatment", y = y_lab) +
+      theme_classic(base_size = 13)
+    p <- add_sig_brackets(p, stats$pairs_trt, grps, df_p$AUC)
+    print(p)
+    ggsave(file.path(fig_dir, paste0("auc_treatment_", met, ".png")),
+           p, width = 5, height = 5)
+  }
+
+  # ── Family main effect (x = family, tick = family name) ───────────────
+  if (has_fam) {
+    df_p <- df %>%
+      mutate(x = factor(family_id_group,
+                        levels = str_sort(unique(family_id_group), numeric = TRUE)))
+    grps <- levels(df_p$x)
+    p <- ggplot(df_p, aes(x = x, y = AUC, fill = x)) +
+      geom_boxplot(alpha = 0.6, outlier.shape = NA) +
+      geom_jitter(width = 0.15, alpha = 0.4, size = 1.5) +
+      scale_fill_manual(values = fam_colours[grps], guide = "none") +
+      labs(x = "Family", y = y_lab) +
+      theme_classic(base_size = 13)
+    p <- add_sig_brackets(p, stats$pairs_family, grps, df_p$AUC)
+    print(p)
+    ggsave(file.path(fig_dir, paste0("auc_family_", met, ".png")),
+           p, width = 5, height = 5)
+  }
+
+  # Remaining plots require both factors
+  if (!has_fam || !has_trt) next
+
+  # ── All family:treatment groups (x = family:treatment) ─────────────────
+  # emmeans contrasts use spaces; convert to colon to match tick labels
+  pairs_fc <- stats$pairs_full %>%
+    mutate(contrast = str_replace_all(
+      contrast,
+      "([a-z]+) ([a-z]+)( - )([a-z]+) ([a-z]+)",
+      "\\1:\\2\\3\\4:\\5"
+    ))
+  df_p <- df %>%
+    mutate(x = factor(
+      paste(family_id_group, treatment_group, sep = ":"),
+      levels = str_sort(unique(paste(family_id_group, treatment_group, sep = ":")),
+                        numeric = TRUE)
+    ))
+  grps     <- levels(df_p$x)
+  fill_map <- setNames(make_palette(length(grps)), grps)
+  p <- ggplot(df_p, aes(x = x, y = AUC, fill = x)) +
+    geom_boxplot(alpha = 0.6, outlier.shape = NA) +
+    geom_jitter(width = 0.15, alpha = 0.4, size = 1.5) +
+    scale_fill_manual(values = fill_map, guide = "none") +
+    labs(x = "Family : Treatment", y = y_lab) +
+    theme_classic(base_size = 13) +
+    theme(axis.text.x = element_text(angle = 20, hjust = 1))
+  p <- add_sig_brackets(p, pairs_fc, grps, df_p$AUC)
+  print(p)
+  ggsave(file.path(fig_dir, paste0("auc_all_groups_", met, ".png")),
+         p, width = 6, height = 5)
+
+  # ── Within each family: treatment comparison (x = family:treatment) ────
+  # Tick labels are family:treatment so these plots are visually distinct
+  # from the treatment main-effect plot above.
+  for (fam in str_sort(unique(df$family_id_group), numeric = TRUE)) {
+    df_p <- df %>%
+      filter(family_id_group == fam) %>%
+      mutate(x = factor(
+        paste(family_id_group, treatment_group, sep = ":"),
+        levels = str_sort(unique(paste(family_id_group, treatment_group, sep = ":")),
+                          numeric = TRUE)
+      ))
+    grps     <- levels(df_p$x)
+    pairs_sub <- pairs_fc %>%
+      filter(str_count(contrast, paste0(fam, ":")) == 2)
+    p <- ggplot(df_p, aes(x = x, y = AUC, fill = x)) +
+      geom_boxplot(alpha = 0.6, outlier.shape = NA) +
+      geom_jitter(width = 0.15, alpha = 0.4, size = 1.5) +
+      scale_fill_manual(values = fill_map[grps], guide = "none") +
+      labs(x = "Family : Treatment", y = y_lab) +
+      theme_classic(base_size = 13)
+    p <- add_sig_brackets(p, pairs_sub, grps, df_p$AUC)
+    print(p)
+    ggsave(file.path(fig_dir, paste0("auc_", fam, "_trt_", met, ".png")),
+           p, width = 5, height = 5)
+  }
+
+  # ── Within each treatment: family comparison (x = family:treatment) ────
+  # Tick labels are family:treatment so these plots are visually distinct
+  # from the family main-effect plot above.
+  for (trt in sort(unique(df$treatment_group))) {
+    df_p <- df %>%
+      filter(treatment_group == trt) %>%
+      mutate(x = factor(
+        paste(family_id_group, treatment_group, sep = ":"),
+        levels = str_sort(unique(paste(family_id_group, treatment_group, sep = ":")),
+                          numeric = TRUE)
+      ))
+    grps      <- levels(df_p$x)
+    pairs_sub <- pairs_fc %>%
+      filter(str_count(contrast, paste0(":", trt)) == 2)
+    p <- ggplot(df_p, aes(x = x, y = AUC, fill = x)) +
+      geom_boxplot(alpha = 0.6, outlier.shape = NA) +
+      geom_jitter(width = 0.15, alpha = 0.4, size = 1.5) +
+      scale_fill_manual(values = fill_map[grps], guide = "none") +
+      labs(x = "Family : Treatment", y = y_lab) +
+      theme_classic(base_size = 13)
+    p <- add_sig_brackets(p, pairs_sub, grps, df_p$AUC)
+    print(p)
+    ggsave(file.path(fig_dir, paste0("auc_", trt, "_fam_", met, ".png")),
+           p, width = 5, height = 5)
+  }
+}
+```
+
+![](03--resazurin-20260624-mgig-33C_files/figure-gfm/auc-boxplots-1.png)<!-- -->
+
+# 14 Curve Feature Analysis: Which Aspects Best Distinguish Families?
+
+This section converts each individual’s resazurin trajectory into a
+suite of curve traits. These include metabolic capacity (`auc_total`,
+`metabolic_scope`), responsiveness (`initial_slope`, `vmax`,
+`time_to_vmax`, `time_to_peak`, `inflection_time`),
+trajectory/stress-like features (`late_early_auc_ratio`,
+`delta_auc_late_minus_early`, `metabolic_depression_index`,
+`final_delta`, `trajectory_class`), and metabolic stability
+(`stability_cv`). Traits are ranked by family effect size and
+FDR-adjusted significance to identify the most distinguishing aspects of
+the curves.
+
+``` r
+safe_divide <- function(num, den) {
+  if_else(is.finite(num) & is.finite(den) & abs(den) > .Machine$double.eps,
+          num / den, NA_real_)
+}
+
+segment_auc <- function(time_hr, value) {
+  ok <- is.finite(time_hr) & is.finite(value)
+  t <- time_hr[ok]
+  v <- value[ok]
+  if (length(t) < 2) {
+    return(tibble(t_start = numeric(), t_end = numeric(),
+                  t_mid = numeric(), auc = numeric()))
+  }
+  ord <- order(t)
+  t <- t[ord]
+  v <- v[ord]
+  tibble(
+    t_start = head(t, -1),
+    t_end   = tail(t, -1),
+    t_mid   = (head(t, -1) + tail(t, -1)) / 2,
+    auc     = diff(t) * (head(v, -1) + tail(v, -1)) / 2
+  )
+}
+
+classify_trajectory <- function(slopes, slope_tol = 1e-12) {
+  if (length(slopes) == 0 || all(!is.finite(slopes))) return(NA_character_)
+  s <- slopes[is.finite(slopes)]
+  signs <- case_when(
+    s >  slope_tol ~  1L,
+    s < -slope_tol ~ -1L,
+    TRUE           ~  0L
+  )
+  nonzero <- signs[signs != 0L]
+  if (length(nonzero) == 0) return("stable")
+  if (all(nonzero > 0)) return("monotonic_increase")
+  if (all(nonzero < 0)) return("monotonic_decrease")
+  if (any(nonzero > 0) && any(nonzero < 0)) {
+    first_neg <- which(nonzero < 0)[1]
+    first_pos <- which(nonzero > 0)[1]
+    if (first_pos < first_neg) return("rise_then_depress")
+    if (first_neg < first_pos) return("depress_then_recover")
+  }
+  "complex"
+}
+
+extract_curve_features_one <- function(df, value_col, metric_label) {
+  df <- df %>%
+    filter(is.finite(time_hr), is.finite(.data[[value_col]])) %>%
+    arrange(time_hr)
+
+  if (nrow(df) < 2) return(tibble())
+
+  t <- df$time_hr
+  v <- df[[value_col]]
+  dt <- diff(t)
+  dv <- diff(v)
+  valid_slope <- is.finite(dt) & dt > 0 & is.finite(dv)
+  slopes <- dv[valid_slope] / dt[valid_slope]
+  slope_midpoints <- (head(t, -1) + tail(t, -1)) / 2
+  slope_midpoints <- slope_midpoints[valid_slope]
+  seg_auc <- segment_auc(t, v)
+  split_time <- median(seg_auc$t_mid, na.rm = TRUE)
+  early_auc <- seg_auc %>%
+    filter(t_mid <= split_time) %>%
+    summarise(x = sum(auc, na.rm = TRUE)) %>%
+    pull(x)
+  late_auc <- seg_auc %>%
+    filter(t_mid > split_time) %>%
+    summarise(x = sum(auc, na.rm = TRUE)) %>%
+    pull(x)
+
+  if (length(early_auc) == 0) early_auc <- NA_real_
+  if (length(late_auc) == 0) late_auc <- NA_real_
+
+  baseline_value <- v[1]
+  final_value <- v[length(v)]
+  peak_idx <- which.max(v)
+  trough_idx <- which.min(v)
+  peak_value <- v[peak_idx]
+  trough_value <- v[trough_idx]
+  peak_after_baseline <- peak_value - baseline_value
+  depression_abs <- if (peak_idx < length(v)) {
+    max(peak_value - final_value, 0, na.rm = TRUE)
+  } else {
+    0
+  }
+
+  vmax_idx <- if (length(slopes) > 0) which.max(slopes) else NA_integer_
+  min_slope_idx <- if (length(slopes) > 0) which.min(slopes) else NA_integer_
+  curvature <- diff(slopes)
+  inflection_idx <- if (length(curvature) > 0) which.max(abs(curvature)) + 1L else NA_integer_
+
+  tibble(
+    value_metric = metric_label,
+    baseline_value = baseline_value,
+    final_value = final_value,
+    peak_value = peak_value,
+    trough_value = trough_value,
+    time_to_peak = t[peak_idx],
+    time_to_trough = t[trough_idx],
+    auc_total = trapezoid_auc(t, v),
+    auc_early = early_auc,
+    auc_late = late_auc,
+    delta_auc_late_minus_early = late_auc - early_auc,
+    late_early_auc_ratio = safe_divide(late_auc, early_auc),
+    initial_slope = slopes[1],
+    vmax = if (length(slopes) > 0) max(slopes, na.rm = TRUE) else NA_real_,
+    time_to_vmax = if (!is.na(vmax_idx)) slope_midpoints[vmax_idx] else NA_real_,
+    min_slope = if (length(slopes) > 0) min(slopes, na.rm = TRUE) else NA_real_,
+    time_to_min_slope = if (!is.na(min_slope_idx)) slope_midpoints[min_slope_idx] else NA_real_,
+    inflection_time = if (!is.na(inflection_idx)) slope_midpoints[inflection_idx] else NA_real_,
+    metabolic_scope = peak_after_baseline,
+    final_delta = final_value - baseline_value,
+    depression_abs = depression_abs,
+    metabolic_depression_index = safe_divide(depression_abs, abs(peak_after_baseline)),
+    resilience_ratio = safe_divide(final_value, peak_value),
+    stability_cv = safe_divide(sd(v, na.rm = TRUE), abs(mean(v, na.rm = TRUE))),
+    trajectory_class = classify_trajectory(slopes),
+    n_timepoints = nrow(df)
+  )
+}
+
+compute_curve_features <- function(df, value_col, metric_label) {
+  id_vars <- intersect(
+    c("trace_id", "family_id_group", "treatment_group", "round_group",
+      "cup_id_group", "sample_id_group"),
+    names(df)
+  )
+
+  df %>%
+    filter(!is.na(family_id_group), is.finite(.data[[value_col]])) %>%
+    group_by(across(all_of(id_vars))) %>%
+    group_modify(~ extract_curve_features_one(.x, value_col, metric_label)) %>%
+    ungroup()
+}
+```
+
+## 14.1 Per-individual Curve Features
+
+``` r
+feature_metric_cols <- c(
+  corrected_fc = "corrected_fc",
+  setNames(paste0("metabolism_per_", active_meas_cols),
+           paste0("metabolism_per_", active_meas_cols))
+)
+feature_metric_cols <- feature_metric_cols[
+  feature_metric_cols %in% names(metabolism_df)
+]
+
+curve_features <- imap_dfr(
+  feature_metric_cols,
+  ~ compute_curve_features(metabolism_df, .x, .y)
+)
+
+curve_feature_long <- curve_features %>%
+  pivot_longer(
+    cols = where(is.numeric) & !any_of(c("n_timepoints")),
+    names_to = "feature",
+    values_to = "feature_value"
+  ) %>%
+  filter(is.finite(feature_value))
+
+trajectory_features <- curve_features %>%
+  count(value_metric, family_id_group, trajectory_class, name = "n") %>%
+  group_by(value_metric, family_id_group) %>%
+  mutate(prop = n / sum(n)) %>%
+  ungroup()
+
+str(curve_features)
+```
+
+    tibble [324 x 32] (S3: tbl_df/tbl/data.frame)
+     $ trace_id                  : chr [1:324] "1_01" "1_02" "1_03" "1_04" ...
+     $ family_id_group           : chr [1:324] "1" "2" "3" "5" ...
+     $ treatment_group           : chr [1:324] NA NA NA NA ...
+     $ round_group               : chr [1:324] "1" "1" "1" "1" ...
+     $ cup_id_group              : chr [1:324] "1" "2" "3" "4" ...
+     $ sample_id_group           : chr [1:324] "1_01" "1_02" "1_03" "1_04" ...
+     $ value_metric              : chr [1:324] "corrected_fc" "corrected_fc" "corrected_fc" "corrected_fc" ...
+     $ baseline_value            : num [1:324] 0.0206 0.0206 0.0206 0.0206 0.0206 ...
+     $ final_value               : num [1:324] 2.02 1.83 2.16 5.55 2.43 ...
+     $ peak_value                : num [1:324] 2.02 1.83 2.16 5.55 2.43 ...
+     $ trough_value              : num [1:324] 0.0206 0.0206 0.0206 0.0206 0.0206 ...
+     $ time_to_peak              : num [1:324] 3 3 3 3 3 3 3 3 3 3 ...
+     $ time_to_trough            : num [1:324] 0 0 0 0 0 0 0 0 0 0 ...
+     $ auc_total                 : num [1:324] 3.32 2.88 3.74 12.29 4.8 ...
+     $ auc_early                 : num [1:324] 1.58 1.28 1.66 7.01 2.56 ...
+     $ auc_late                  : num [1:324] 1.74 1.59 2.08 5.27 2.24 ...
+     $ delta_auc_late_minus_early: num [1:324] 0.159 0.31 0.413 -1.743 -0.32 ...
+     $ late_early_auc_ratio      : num [1:324] 1.1 1.241 1.248 0.751 0.875 ...
+     $ initial_slope             : num [1:324] 0.821 0.573 0.634 4.487 1.504 ...
+     $ vmax                      : num [1:324] 0.821 0.764 1.344 4.487 1.504 ...
+     $ time_to_vmax              : num [1:324] 0.5 1.5 1.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 ...
+     $ min_slope                 : num [1:324] 0.56 0.47 0.157 0.485 0.382 ...
+     $ time_to_min_slope         : num [1:324] 2.5 2.5 2.5 1.5 2.5 1.5 1.5 1.5 1.5 2.5 ...
+     $ inflection_time           : num [1:324] 1.5 2.5 2.5 1.5 1.5 1.5 1.5 1.5 1.5 1.5 ...
+     $ metabolic_scope           : num [1:324] 2 1.81 2.13 5.53 2.41 ...
+     $ final_delta               : num [1:324] 2 1.81 2.13 5.53 2.41 ...
+     $ depression_abs            : num [1:324] 0 0 0 0 0 0 0 0 0 0 ...
+     $ metabolic_depression_index: num [1:324] 0 0 0 0 0 0 0 0 0 0 ...
+     $ resilience_ratio          : num [1:324] 1 1 1 1 1 1 1 1 1 1 ...
+     $ stability_cv              : num [1:324] 0.79 0.844 0.861 0.673 0.702 ...
+     $ trajectory_class          : chr [1:324] "monotonic_increase" "monotonic_increase" "monotonic_increase" "monotonic_increase" ...
+     $ n_timepoints              : int [1:324] 4 4 4 4 4 4 4 4 4 4 ...
+
+## 14.2 Family Summaries for Curve Features
+
+``` r
+curve_feature_family_summary <- curve_feature_long %>%
+  group_by(value_metric, feature, family_id_group) %>%
+  summarise(
+    n = n(),
+    mean = mean(feature_value, na.rm = TRUE),
+    sd = sd(feature_value, na.rm = TRUE),
+    se = sd / sqrt(n),
+    median = median(feature_value, na.rm = TRUE),
+    iqr = IQR(feature_value, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+print(curve_feature_family_summary)
+```
+
+    # A tibble: 414 x 9
+       value_metric feature   family_id_group     n  mean    sd    se median   iqr
+       <chr>        <chr>     <chr>           <int> <dbl> <dbl> <dbl>  <dbl> <dbl>
+     1 corrected_fc auc_early 1                  18  1.52 0.536 0.126   1.56 0.582
+     2 corrected_fc auc_early 10                 18  1.43 0.572 0.135   1.30 0.378
+     3 corrected_fc auc_early 2                  18  1.87 1.45  0.343   1.29 0.968
+     4 corrected_fc auc_early 3                  18  2.09 1.29  0.304   1.88 1.59 
+     5 corrected_fc auc_early 5                  18  1.98 1.80  0.424   1.50 1.17 
+     6 corrected_fc auc_early 6                  18  1.33 1.46  0.343   1.02 0.652
+     7 corrected_fc auc_early 7                  18  1.66 0.919 0.217   1.56 0.884
+     8 corrected_fc auc_early 8                  18  1.42 0.594 0.140   1.26 1.04 
+     9 corrected_fc auc_early 9                  18  1.62 0.844 0.199   1.35 0.638
+    10 corrected_fc auc_late  1                  18  1.52 0.535 0.126   1.47 0.534
+    # i 404 more rows
+
+## 14.3 Rank Features by Family Separation
+
+For each numeric feature, a one-way family model is fit using individual
+oysters as observational units. Features are ranked by adjusted p-value
+and eta-squared family effect size. `max_abs_pairwise_d` is the largest
+absolute pairwise standardized family mean difference and helps identify
+features with strong family separation even when sample sizes are
+modest.
+
+``` r
+run_feature_family_stats <- function(df) {
+  df <- df %>%
+    filter(is.finite(feature_value), !is.na(family_id_group)) %>%
+    mutate(family = factor(family_id_group))
+
+  if (nrow(df) < 3 || n_distinct(df$family) < 2) return(tibble())
+
+  model <- lm(feature_value ~ family, data = df)
+  aov_tab <- anova(model)
+
+  ss_family <- aov_tab["family", "Sum Sq"]
+  df_family <- aov_tab["family", "Df"]
+  ms_error <- aov_tab["Residuals", "Mean Sq"]
+  ss_total <- sum(aov_tab$`Sum Sq`, na.rm = TRUE)
+  eta_sq <- ss_family / ss_total
+  omega_sq <- (ss_family - df_family * ms_error) / (ss_total + ms_error)
+
+  fam_means <- df %>%
+    group_by(family) %>%
+    summarise(mean = mean(feature_value), .groups = "drop")
+
+  pair_grid <- tidyr::crossing(fam1 = fam_means$family,
+                               fam2 = fam_means$family) %>%
+    filter(as.character(fam1) < as.character(fam2)) %>%
+    left_join(fam_means, by = c("fam1" = "family")) %>%
+    rename(mean1 = mean) %>%
+    left_join(fam_means, by = c("fam2" = "family")) %>%
+    rename(mean2 = mean) %>%
+    mutate(abs_d = abs(mean1 - mean2) / sqrt(ms_error))
+
+  kw <- kruskal.test(feature_value ~ family, data = df)
+
+  tibble(
+    n = nrow(df),
+    n_family = n_distinct(df$family),
+    f_statistic = aov_tab["family", "F value"],
+    p_value = aov_tab["family", "Pr(>F)"],
+    kruskal_p_value = kw$p.value,
+    eta_sq = eta_sq,
+    omega_sq = max(omega_sq, 0, na.rm = TRUE),
+    max_abs_pairwise_d = max(pair_grid$abs_d, na.rm = TRUE)
+  )
+}
+
+curve_feature_family_stats <- curve_feature_long %>%
+  group_by(value_metric, feature) %>%
+  group_modify(~ run_feature_family_stats(.x)) %>%
+  ungroup() %>%
+  group_by(value_metric) %>%
+  mutate(
+    p_adj_bh = p.adjust(p_value, method = "BH"),
+    rank_within_metric = min_rank(p_adj_bh),
+    rank_score = dense_rank(desc(eta_sq)) + dense_rank(p_adj_bh)
+  ) %>%
+  ungroup() %>%
+  arrange(p_adj_bh, desc(eta_sq), desc(max_abs_pairwise_d))
+
+top_curve_features <- curve_feature_family_stats %>%
+  group_by(value_metric) %>%
+  slice_min(order_by = rank_score, n = 5, with_ties = FALSE) %>%
+  ungroup() %>%
+  arrange(value_metric, rank_score)
+
+best_curve_feature <- curve_feature_family_stats %>%
+  slice_min(order_by = rank_score, n = 1, with_ties = FALSE)
+
+print(curve_feature_family_stats)
+```
+
+    # A tibble: 46 x 13
+       value_metric       feature     n n_family f_statistic p_value kruskal_p_value
+       <chr>              <chr>   <int>    <int>       <dbl>   <dbl>           <dbl>
+     1 metabolism_per_ar~ min_sl~   162        9        1.92  0.0610          0.0592
+     2 metabolism_per_ar~ time_t~   162        9        1.60  0.128           0.218 
+     3 metabolism_per_ar~ delta_~   162        9        1.60  0.130           0.0512
+     4 metabolism_per_ar~ depres~   162        9        1.31  0.244           0.284 
+     5 metabolism_per_ar~ initia~   162        9        1.29  0.251           0.404 
+     6 metabolism_per_ar~ time_t~   162        9        1.22  0.289           0.288 
+     7 metabolism_per_ar~ vmax      162        9        1.19  0.306           0.294 
+     8 metabolism_per_ar~ auc_ea~   162        9        1.18  0.313           0.419 
+     9 metabolism_per_ar~ resili~   162        9        1.14  0.337           0.288 
+    10 metabolism_per_ar~ stabil~   162        9        1.14  0.341           0.452 
+    # i 36 more rows
+    # i 6 more variables: eta_sq <dbl>, omega_sq <dbl>, max_abs_pairwise_d <dbl>,
+    #   p_adj_bh <dbl>, rank_within_metric <int>, rank_score <int>
+
+## 14.4 Pairwise Family Comparisons for Curve Features
+
+``` r
+run_feature_pairwise <- function(df) {
+  df <- df %>%
+    filter(is.finite(feature_value), !is.na(family_id_group)) %>%
+    mutate(family = factor(family_id_group))
+
+  if (nrow(df) < 3 || n_distinct(df$family) < 2) return(tibble())
+
+  model <- lm(feature_value ~ family, data = df)
+  if (has_emmeans) {
+    as.data.frame(pairs(emmeans::emmeans(model, ~ family), adjust = "tukey")) %>%
+      as_tibble()
+  } else {
+    tidy_tukey(model, "family")
+  }
+}
+
+curve_feature_pairwise_stats <- curve_feature_long %>%
+  semi_join(top_curve_features, by = c("value_metric", "feature")) %>%
+  group_by(value_metric, feature) %>%
+  group_modify(~ run_feature_pairwise(.x)) %>%
+  ungroup()
+
+print(curve_feature_pairwise_stats)
+```
+
+    # A tibble: 360 x 8
+       value_metric feature            contrast estimate    SE    df t.ratio p.value
+       <chr>        <chr>              <chr>       <dbl> <dbl> <dbl>   <dbl>   <dbl>
+     1 corrected_fc delta_auc_late_mi~ 10-1      0.102      NA    NA      NA   0.997
+     2 corrected_fc delta_auc_late_mi~ 2-1      -0.130      NA    NA      NA   0.985
+     3 corrected_fc delta_auc_late_mi~ 3-1      -0.206      NA    NA      NA   0.814
+     4 corrected_fc delta_auc_late_mi~ 5-1      -0.135      NA    NA      NA   0.982
+     5 corrected_fc delta_auc_late_mi~ 6-1       0.0871     NA    NA      NA   0.999
+     6 corrected_fc delta_auc_late_mi~ 7-1      -0.00267    NA    NA      NA   1    
+     7 corrected_fc delta_auc_late_mi~ 8-1       0.0459     NA    NA      NA   1.00 
+     8 corrected_fc delta_auc_late_mi~ 9-1       0.0814     NA    NA      NA   0.999
+     9 corrected_fc delta_auc_late_mi~ 2-10     -0.233      NA    NA      NA   0.690
+    10 corrected_fc delta_auc_late_mi~ 3-10     -0.308      NA    NA      NA   0.310
+    # i 350 more rows
+
+## 14.5 Most Distinguishing Curve Aspects
+
+``` r
+cat("### Best overall numeric curve discriminator\n\n")
+```
+
+### 14.5.1 Best overall numeric curve discriminator
+
+``` r
+cat(knitr::kable(best_curve_feature, digits = 5, format = "pipe"), sep = "\n")
+```
+
+| value\_metric                           | feature    |   n | n\_family | f\_statistic | p\_value | kruskal\_p\_value | eta\_sq | omega\_sq | max\_abs\_pairwise\_d | p\_adj\_bh | rank\_within\_metric | rank\_score |
+|:----------------------------------------|:-----------|----:|----------:|-------------:|---------:|------------------:|--------:|----------:|----------------------:|-----------:|---------------------:|------------:|
+| metabolism\_per\_area\_mm2\_measurement | min\_slope | 162 |         9 |      1.91815 |  0.06099 |            0.0592 | 0.09115 |   0.04337 |               0.91344 |    0.71546 |                    1 |           2 |
+
+``` r
+cat("\n\n### Top numeric curve discriminators by metric\n\n")
+```
+
+### 14.5.2 Top numeric curve discriminators by metric
+
+``` r
+cat(knitr::kable(top_curve_features, digits = 5, format = "pipe"), sep = "\n")
+```
+
+| value\_metric                           | feature                        |   n | n\_family | f\_statistic | p\_value | kruskal\_p\_value | eta\_sq | omega\_sq | max\_abs\_pairwise\_d | p\_adj\_bh | rank\_within\_metric | rank\_score |
+|:----------------------------------------|:-------------------------------|----:|----------:|-------------:|---------:|------------------:|--------:|----------:|----------------------:|-----------:|---------------------:|------------:|
+| corrected\_fc                           | time\_to\_vmax                 | 162 |         9 |      1.60434 |  0.12778 |           0.21753 | 0.07739 |   0.02898 |               0.99824 |    0.84355 |                    1 |           2 |
+| corrected\_fc                           | delta\_auc\_late\_minus\_early | 162 |         9 |      1.49928 |  0.16171 |           0.13059 | 0.07269 |   0.02406 |               0.78911 |    0.84355 |                    1 |           3 |
+| corrected\_fc                           | min\_slope                     | 162 |         9 |      1.44992 |  0.18018 |           0.26391 | 0.07047 |   0.02174 |               0.92963 |    0.84355 |                    1 |           4 |
+| corrected\_fc                           | depression\_abs                | 162 |         9 |      1.24873 |  0.27463 |           0.28402 | 0.06129 |   0.01213 |               0.78129 |    0.84355 |                    1 |           5 |
+| corrected\_fc                           | time\_to\_peak                 | 162 |         9 |      1.22348 |  0.28883 |           0.28818 | 0.06013 |   0.01092 |               0.71774 |    0.84355 |                    1 |           6 |
+| metabolism\_per\_area\_mm2\_measurement | min\_slope                     | 162 |         9 |      1.91815 |  0.06099 |           0.05920 | 0.09115 |   0.04337 |               0.91344 |    0.71546 |                    1 |           2 |
+| metabolism\_per\_area\_mm2\_measurement | time\_to\_vmax                 | 162 |         9 |      1.60434 |  0.12778 |           0.21753 | 0.07739 |   0.02898 |               0.99824 |    0.71546 |                    1 |           3 |
+| metabolism\_per\_area\_mm2\_measurement | delta\_auc\_late\_minus\_early | 162 |         9 |      1.59700 |  0.12993 |           0.05116 | 0.07707 |   0.02864 |               0.93234 |    0.71546 |                    1 |           4 |
+| metabolism\_per\_area\_mm2\_measurement | depression\_abs                | 162 |         9 |      1.30589 |  0.24447 |           0.28402 | 0.06392 |   0.01488 |               0.81807 |    0.71546 |                    1 |           5 |
+| metabolism\_per\_area\_mm2\_measurement | initial\_slope                 | 162 |         9 |      1.29338 |  0.25084 |           0.40405 | 0.06334 |   0.01428 |               0.84531 |    0.71546 |                    1 |           6 |
+
+``` r
+rank_plot_df <- curve_feature_family_stats %>%
+  group_by(value_metric) %>%
+  slice_max(order_by = eta_sq, n = 12, with_ties = FALSE) %>%
+  ungroup() %>%
+  mutate(feature = fct_reorder(feature, eta_sq))
+
+p_feature_rank <- ggplot(rank_plot_df,
+                         aes(x = eta_sq, y = feature, fill = p_adj_bh < 0.05)) +
+  geom_col(width = 0.75) +
+  facet_wrap(~ value_metric, scales = "free_y") +
+  scale_fill_manual(values = c("FALSE" = "grey70", "TRUE" = "#0072B2"),
+                    name = "BH-adjusted p < 0.05") +
+  labs(x = "Family effect size (eta-squared)", y = "Curve feature") +
+  theme_classic(base_size = 12)
+
+p_feature_rank
+```
+
+![](03--resazurin-20260624-mgig-33C_files/figure-gfm/curve-feature-rank-plot-1.png)<!-- -->
+
+``` r
+ggsave(file.path(fig_dir, "curve_feature_family_effect_ranking.png"),
+       p_feature_rank, width = 9, height = 6)
+```
+
+``` r
+if (nrow(best_curve_feature) > 0) {
+  best_metric <- best_curve_feature$value_metric[1]
+  best_feature <- best_curve_feature$feature[1]
+
+  best_plot_df <- curve_feature_long %>%
+    filter(value_metric == best_metric, feature == best_feature) %>%
+    mutate(family_id_group = factor(
+      family_id_group,
+      levels = str_sort(unique(family_id_group), numeric = TRUE)
+    ))
+
+  p_best_feature <- ggplot(best_plot_df,
+      aes(x = family_id_group, y = feature_value, fill = family_id_group)) +
+    geom_boxplot(alpha = 0.65, outlier.shape = NA) +
+    geom_jitter(width = 0.15, alpha = 0.55, size = 1.8) +
+    scale_fill_manual(values = fam_colours[levels(best_plot_df$family_id_group)],
+                      guide = "none") +
+    labs(x = "Family",
+         y = best_feature,
+         title = paste("Most distinguishing curve feature:", best_feature),
+         subtitle = best_metric) +
+    theme_classic(base_size = 13)
+
+  p_best_feature
+  ggsave(file.path(fig_dir, "curve_feature_best_family_boxplot.png"),
+         p_best_feature, width = 8, height = 5)
+}
+```
+
+``` r
+heatmap_features <- curve_feature_family_stats %>%
+  group_by(value_metric) %>%
+  slice_max(order_by = eta_sq, n = 10, with_ties = FALSE) %>%
+  ungroup() %>%
+  select(value_metric, feature)
+
+curve_feature_heatmap_df <- curve_feature_family_summary %>%
+  semi_join(heatmap_features, by = c("value_metric", "feature")) %>%
+  group_by(value_metric, feature) %>%
+  mutate(mean_z = as.numeric(scale(mean))) %>%
+  ungroup() %>%
+  mutate(
+    feature_label = paste(value_metric, feature, sep = " | "),
+    family_id_group = factor(
+      family_id_group,
+      levels = str_sort(unique(family_id_group), numeric = TRUE)
+    )
+  )
+
+p_feature_heatmap <- ggplot(curve_feature_heatmap_df,
+    aes(x = family_id_group, y = feature_label, fill = mean_z)) +
+  geom_tile(colour = "white", linewidth = 0.25) +
+  scale_fill_gradient2(low = "#2166AC", mid = "white", high = "#B2182B",
+                       midpoint = 0, name = "Family mean z") +
+  labs(x = "Family", y = "Curve feature") +
+  theme_classic(base_size = 11) +
+  theme(axis.text.y = element_text(size = 8))
+
+p_feature_heatmap
+```
+
+![](03--resazurin-20260624-mgig-33C_files/figure-gfm/curve-feature-family-heatmap-1.png)<!-- -->
+
+``` r
+ggsave(file.path(fig_dir, "curve_feature_family_mean_heatmap.png"),
+       p_feature_heatmap, width = 10, height = 7)
+```
+
+``` r
+p_trajectory <- ggplot(trajectory_features,
+    aes(x = family_id_group, y = prop, fill = trajectory_class)) +
+  geom_col(position = "stack", colour = "white", linewidth = 0.2) +
+  facet_wrap(~ value_metric) +
+  scale_y_continuous(labels = scales::percent_format()) +
+  labs(x = "Family", y = "Individuals", fill = "Trajectory class") +
+  theme_classic(base_size = 12)
+
+p_trajectory
+```
+
+![](03--resazurin-20260624-mgig-33C_files/figure-gfm/trajectory-class-summary-1.png)<!-- -->
+
+``` r
+ggsave(file.path(fig_dir, "curve_feature_trajectory_classes.png"),
+       p_trajectory, width = 8, height = 5)
+```
+
+# 15 Save Output Data
+
+``` r
+write_csv(auc_all,      file.path(out_dir, "auc_all_metrics.csv"))
+write_csv(auc_summary,  file.path(out_dir, "auc_summary.csv"))
+write_csv(curve_features,
+          file.path(out_dir, "curve_features.csv"))
+write_csv(curve_feature_family_summary,
+          file.path(out_dir, "curve_feature_family_summary.csv"))
+write_csv(curve_feature_family_stats,
+          file.path(out_dir, "curve_feature_family_stats.csv"))
+write_csv(curve_feature_pairwise_stats,
+          file.path(out_dir, "curve_feature_pairwise_stats.csv"))
+write_csv(trajectory_features,
+          file.path(out_dir, "curve_feature_trajectory_classes.csv"))
+
+if (nrow(metabolism_df) > 0)
+  write_csv(metabolism_df,
+            file.path(out_dir, "metabolism.csv"))
+
+stats_compiled <- map_dfr(metrics_to_test, function(met) {
+  bind_rows(
+    stats_results[[met]]$pairs_full %>%
+      mutate(comparison = "family:treatment"),
+    stats_results[[met]]$pairs_family %>%
+      mutate(comparison = "family"),
+    stats_results[[met]]$pairs_trt %>%
+      mutate(comparison = "treatment")
+  ) %>% mutate(metric = met)
+})
+
+write_csv(stats_compiled,
+          file.path(out_dir, "pairwise_stats.csv"))
+
+message("Output files written to: ", out_dir)
+```
