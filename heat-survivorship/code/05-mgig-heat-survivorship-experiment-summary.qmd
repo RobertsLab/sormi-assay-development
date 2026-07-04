@@ -1,0 +1,495 @@
+---
+title: "Heat Survivorship Cross-Experiment Summary"
+author: "Steven Roberts"
+date: today
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    code-fold: false
+    embed-resources: true
+editor: visual
+---
+
+## Background
+
+This report summarizes the heat survivorship experiments in
+`heat-survivorship/data` and compares survival patterns across experiment dates,
+temperatures, and USDA families.
+
+The experiments were not all run with identical input formats or protocols. The
+20260604 data are stored in wide format, while the other experiments are stored
+as one observation per individual and time point. This report standardizes both
+formats into one survival-analysis table with one row per individual:
+
+- `time`: first observed death time, or final observed time if still alive
+- `status`: death event indicator, where `1 = dead` and `0 = censored/alive`
+- `Experiment`: experiment date and temperature label
+- `Family`: observed USDA family/group label
+- `Family_identity_note`: notes ambiguous labels that should not be interpreted
+  as confirmed biological family identity
+
+Cross-experiment comparisons should be interpreted as descriptive because
+temperature, container format, prior handling, and time-point schedules differ
+among experiments.
+
+Size data are also not available uniformly across experiments. The 20260427
+experiment includes ImageJ area measurements (`area_mm2.measurement` in
+`metadata.csv` and `area_mm2.measurment` in `survivorship.csv`), but the
+20260511, 20260604, and 20260609 survivorship files do not include comparable
+oyster size measurements. Therefore, size differences can be summarized for
+20260427 only and cannot be evaluated directly across all experiments with the
+current data files.
+
+Briefly, the family coverage also differs among experiments. The 20260427
+experiment examined families 1, 2, 3, 5, 6, 7, 8, 9, and 10; 20260511 examined
+families 1, 3, 5, 6, 7, 8, 9, 9B, and 10; 20260604 examined families 1, 2, 3,
+5, 6, 8, 9, and 10; and 20260609 examined families 1, 3, 5, 6, 7, 8, 9, 9B,
+and 10. In the 20260511 and 20260609 experiments, two groups were both
+originally labelled family 9. One of those groups was actually family 2 and the
+other was family 9, but the true identity of each group could not be resolved;
+therefore one group is retained as `9` and the other as `9B`. In this report,
+`9` and `9B` for those two experiments are treated as observed groups with
+ambiguous 2/9 identity, not as two confirmed biological families. Families 1, 3,
+5, 6, 8, and 10 are the clearly shared families across all experiments; family
+7 is absent from 20260604; and family 2 can only be interpreted directly in
+20260427 and 20260604.
+
+## Set up
+
+```{r setup, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(survival)
+library(ggplot2)
+```
+
+```{r config}
+experiments <- tribble(
+  ~experiment_id, ~experiment_label, ~temperature_C, ~format, ~data_path,
+  "20260427", "20260427 - 33 C", 33, "long",
+    "../data/20260427-33C-USDA-families/survivorship.csv",
+  "20260511", "20260511 - 33 C", 33, "long",
+    "../data/20260511-33C-USDA-families/survivorship.csv",
+  "20260604", "20260604 - 36 C", 36, "wide",
+    "../data/20260604-36C-USDA-families/survivorship.csv",
+  "20260609", "20260609 - 36 C", 36, "long",
+    "../data/20260609-36C-USDA-families/survivorship.csv"
+)
+
+out_dir <- "../outputs/05-mgig-heat-survivorship-experiment-summary/"
+dir.create(out_dir, showWarnings = FALSE, recursive = TRUE)
+```
+
+## Standardize data
+
+```{r helper-functions}
+parse_alive <- function(x) {
+  case_when(
+    toupper(trimws(as.character(x))) %in% c("TRUE", "T", "1", "YES", "Y") ~ TRUE,
+    toupper(trimws(as.character(x))) %in% c("FALSE", "F", "0", "NO", "N") ~ FALSE,
+    TRUE ~ NA
+  )
+}
+
+clean_family <- function(x) {
+  x <- as.character(x)
+  x <- str_remove(x, "^f")
+  x <- str_replace(x, "^0+", "")
+  str_to_upper(x)
+}
+
+family_identity_note <- function(family, experiment_id) {
+  case_when(
+    experiment_id %in% c("20260511", "20260609") & family %in% c("9", "9B") ~
+      "Ambiguous duplicate 9 label: one group is family 2 and one is family 9",
+    TRUE ~ "Observed label treated as family identity"
+  )
+}
+
+km_curve_data <- function(data, groups) {
+  data %>%
+    group_by(across(all_of(groups))) %>%
+    group_modify(\(.x, .y) {
+      fit <- survfit(Surv(time, status) ~ 1, data = .x)
+      fit_summary <- summary(fit)
+
+      tibble(
+        time = c(0, fit_summary$time),
+        survival = c(1, fit_summary$surv),
+        n_risk = c(nrow(.x), fit_summary$n.risk),
+        n_event = c(0, fit_summary$n.event)
+      )
+    }) %>%
+    ungroup()
+}
+
+read_long_survival <- function(path, experiment_id, experiment_label, temperature_C) {
+  raw <- readr::read_csv(path, show_col_types = FALSE) %>%
+    rename(Family = `familly_id.group`, alive_raw = `alive.measurement`) %>%
+    mutate(
+      Family = clean_family(Family),
+      timepoint_hrs = as.numeric(timepoint_hrs),
+      alive = parse_alive(alive_raw)
+    )
+
+  if ("is_blank" %in% names(raw)) {
+    raw <- raw %>%
+      filter(!parse_alive(is_blank))
+  }
+
+  if (all(c("plate_ID", "plate_well") %in% names(raw))) {
+    raw <- raw %>% mutate(uid = paste(plate_ID, plate_well, sep = "_"))
+  } else {
+    raw <- raw %>% mutate(uid = as.character(individual_id))
+  }
+
+  raw %>%
+    filter(!is.na(uid), !is.na(timepoint_hrs), !is.na(alive), !is.na(Family)) %>%
+    group_by(uid) %>%
+    summarise(
+      Family = first(Family[!is.na(Family)]),
+      time = if (any(!alive)) min(timepoint_hrs[!alive]) else max(timepoint_hrs),
+      status = as.integer(any(!alive)),
+      n_observations = n(),
+      .groups = "drop"
+    ) %>%
+    mutate(
+      experiment_id = experiment_id,
+      Experiment = experiment_label,
+      temperature_C = temperature_C,
+      Family_identity_note = family_identity_note(Family, experiment_id)
+    )
+}
+
+read_wide_survival <- function(path, experiment_id, experiment_label, temperature_C) {
+  raw <- readr::read_csv(path, show_col_types = FALSE)
+
+  time_cols <- names(raw)[!is.na(suppressWarnings(as.numeric(names(raw))))]
+
+  raw %>%
+    mutate(
+      uid = as.character(ID),
+      Family = clean_family(Family)
+    ) %>%
+    pivot_longer(
+      cols = all_of(time_cols),
+      names_to = "time",
+      values_to = "status_at_time"
+    ) %>%
+    mutate(
+      time = as.numeric(time),
+      status_at_time = as.integer(status_at_time)
+    ) %>%
+    filter(!is.na(uid), !is.na(time), !is.na(status_at_time), !is.na(Family)) %>%
+    group_by(uid, Family) %>%
+    summarise(
+      time = if (any(status_at_time == 1)) min(time[status_at_time == 1]) else max(time),
+      status = as.integer(any(status_at_time == 1)),
+      n_observations = n(),
+      .groups = "drop"
+    ) %>%
+    mutate(
+      experiment_id = experiment_id,
+      Experiment = experiment_label,
+      temperature_C = temperature_C,
+      Family_identity_note = family_identity_note(Family, experiment_id)
+    )
+}
+
+read_experiment <- function(experiment_id, experiment_label, temperature_C, format, data_path) {
+  if (format == "long") {
+    read_long_survival(data_path, experiment_id, experiment_label, temperature_C)
+  } else if (format == "wide") {
+    read_wide_survival(data_path, experiment_id, experiment_label, temperature_C)
+  } else {
+    stop("Unsupported experiment format: ", format)
+  }
+}
+```
+
+```{r build-standardized-data}
+survival_data <- pmap_dfr(experiments, read_experiment) %>%
+  mutate(
+    Experiment = factor(Experiment, levels = experiments$experiment_label),
+    temperature_C = factor(temperature_C),
+    Family = factor(Family, levels = unique(Family[order(readr::parse_number(Family), Family)]))
+  )
+
+readr::write_csv(survival_data, file.path(out_dir, "standardized_survival_data.csv"))
+
+glimpse(survival_data)
+```
+
+## Experiment summaries
+
+```{r experiment-summary}
+overall_summary <- survival_data %>%
+  group_by(Experiment, temperature_C) %>%
+  summarise(
+    individuals = n(),
+    observed_family_groups = n_distinct(Family),
+    deaths = sum(status),
+    death_percent = 100 * mean(status),
+    first_event_hr = min(time[status == 1], na.rm = TRUE),
+    last_observed_hr = max(time, na.rm = TRUE),
+    median_survival_hr = summary(survfit(Surv(time, status) ~ 1))$table["median"],
+    .groups = "drop"
+  ) %>%
+  mutate(
+    first_event_hr = if_else(is.infinite(first_event_hr), NA_real_, first_event_hr),
+    median_survival_hr = if_else(is.na(median_survival_hr), NA_real_, median_survival_hr)
+  )
+
+overall_summary %>%
+  mutate(across(
+    c(death_percent, first_event_hr, last_observed_hr, median_survival_hr),
+    \(x) round(x, 1)
+  )) %>%
+  knitr::kable()
+```
+
+```{r family-summary}
+family_summary <- survival_data %>%
+  group_by(Experiment, temperature_C, Family, Family_identity_note) %>%
+  summarise(
+    individuals = n(),
+    deaths = sum(status),
+    death_percent = 100 * mean(status),
+    median_survival_hr = summary(survfit(Surv(time, status) ~ 1))$table["median"],
+    .groups = "drop"
+  ) %>%
+  mutate(median_survival_hr = if_else(is.na(median_survival_hr), NA_real_, median_survival_hr))
+
+readr::write_csv(family_summary, file.path(out_dir, "family_survival_summary.csv"))
+
+family_summary %>%
+  arrange(Experiment, readr::parse_number(as.character(Family))) %>%
+  mutate(across(c(death_percent, median_survival_hr), \(x) round(x, 1))) %>%
+  knitr::kable()
+```
+
+## Size data availability
+
+```{r size-data-availability}
+size_metadata_20260427 <- readr::read_csv(
+  "../data/20260427-33C-USDA-families/metadata.csv",
+  show_col_types = FALSE
+) %>%
+  mutate(Family = clean_family(`familly_id.group`))
+
+size_overall_20260427 <- size_metadata_20260427 %>%
+  summarise(
+    Experiment = "20260427 - 33 C",
+    individuals = n(),
+    individuals_with_area = sum(!is.na(area_mm2.measurement)),
+    mean_area_mm2 = mean(area_mm2.measurement, na.rm = TRUE),
+    median_area_mm2 = median(area_mm2.measurement, na.rm = TRUE),
+    min_area_mm2 = min(area_mm2.measurement, na.rm = TRUE),
+    max_area_mm2 = max(area_mm2.measurement, na.rm = TRUE)
+  )
+
+size_by_family_20260427 <- size_metadata_20260427 %>%
+  group_by(Family) %>%
+  summarise(
+    individuals = n(),
+    individuals_with_area = sum(!is.na(area_mm2.measurement)),
+    mean_area_mm2 = mean(area_mm2.measurement, na.rm = TRUE),
+    median_area_mm2 = median(area_mm2.measurement, na.rm = TRUE),
+    min_area_mm2 = min(area_mm2.measurement, na.rm = TRUE),
+    max_area_mm2 = max(area_mm2.measurement, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  arrange(readr::parse_number(Family), Family)
+
+readr::write_csv(size_overall_20260427, file.path(out_dir, "size_summary_20260427.csv"))
+readr::write_csv(size_by_family_20260427, file.path(out_dir, "size_by_family_20260427.csv"))
+
+size_overall_20260427 %>%
+  mutate(across(ends_with("_mm2"), \(x) round(x, 1))) %>%
+  knitr::kable()
+```
+
+```{r size-by-family-20260427}
+size_by_family_20260427 %>%
+  mutate(across(ends_with("_mm2"), \(x) round(x, 1))) %>%
+  knitr::kable()
+```
+
+Only 20260427 has explicit oyster size measurements in the files currently in
+this directory. Across that experiment, all 128 individuals have ImageJ area
+measurements, with a mean area of 779.1 mm2 and median area of 741.6 mm2. Family
+means range from 674.6 mm2 in family 5 to 878.1 mm2 in family 10. Because the
+other experiments lack comparable size columns, these values should not be used
+to infer size differences across experiment dates.
+
+## Speculative identity of 9 and 9B
+
+Because `9` and `9B` in 20260511 and 20260609 represent two unresolved groups,
+one truly family 2 and one truly family 9, the analysis below compares their
+survival summaries with experiments where families 2 and 9 were labelled
+directly. This is a hypothesis-generating comparison only; it should not be used
+to recode the data.
+
+```{r speculative-identity}
+two_nine_summary <- family_summary %>%
+  filter(Family %in% c("2", "9", "9B")) %>%
+  mutate(
+    label_status = case_when(
+      Family %in% c("9", "9B") &
+        as.character(Experiment) %in% c("20260511 - 33 C", "20260609 - 36 C") ~
+        "ambiguous 2/9 group",
+      TRUE ~ "known family label"
+    )
+  ) %>%
+  arrange(temperature_C, Experiment, Family)
+
+two_nine_summary %>%
+  select(
+    Experiment,
+    temperature_C,
+    Family,
+    label_status,
+    individuals,
+    deaths,
+    death_percent,
+    median_survival_hr
+  ) %>%
+  mutate(across(c(death_percent, median_survival_hr), \(x) round(x, 1))) %>%
+  knitr::kable()
+```
+
+Known-label experiments provide limited guidance. In the 20260427 33 C
+experiment, known families 2 and 9 were similar, with family 2 at 37.5% deaths
+and family 9 at 33.3% deaths, and neither reached median survival. In the
+20260604 36 C experiment, known family 2 appeared more susceptible than known
+family 9: family 2 had 100% deaths and median survival of 17 h, while family 9
+had 80% deaths and median survival of 42 h.
+
+Using that 36 C pattern as the strongest available clue, the 20260609 ambiguous
+groups weakly suggest that `9B` could be family 2 and `9` could be family 9,
+because `9B` had slightly higher mortality than `9` (72.7% vs. 63.6%). This is
+weak evidence because both groups had the same median survival estimate (48 h)
+and the experiment differs from 20260604 in design and timing. For 20260511,
+there is no useful survival-based distinction: both ambiguous groups had 100%
+deaths and median survival of 43 h, so the identities cannot be inferred from
+these survivorship data.
+
+## Survival curves
+
+```{r survival-by-experiment, warning=FALSE}
+plot_by_experiment <- km_curve_data(survival_data, "Experiment") %>%
+  ggplot(aes(x = time, y = survival, color = Experiment)) +
+  geom_step(linewidth = 0.9) +
+  labs(x = "Time (hours)", y = "Survival probability", color = "Experiment") +
+  ylim(0, 1) +
+  theme_classic()
+
+plot_by_experiment
+```
+
+```{r survival-by-temperature, warning=FALSE}
+plot_by_temperature <- km_curve_data(survival_data, "temperature_C") %>%
+  ggplot(aes(x = time, y = survival, color = temperature_C)) +
+  geom_step(linewidth = 0.9) +
+  labs(x = "Time (hours)", y = "Survival probability", color = "Temperature (C)") +
+  ylim(0, 1) +
+  theme_classic()
+
+plot_by_temperature
+```
+
+```{r survival-family-facets, fig.width=9, fig.height=7, warning=FALSE}
+plot_family_facets <- km_curve_data(survival_data, c("Experiment", "Family")) %>%
+  ggplot(aes(x = time, y = survival, color = Family)) +
+  geom_step(linewidth = 0.7) +
+  labs(x = "Time (hours)", y = "Survival probability", color = "Family/group") +
+  ylim(0, 1) +
+  facet_wrap(~Experiment, scales = "free_x") +
+  theme_classic() +
+  theme(legend.position = "right")
+
+plot_family_facets
+```
+
+```{r save-plots}
+ggsave(file.path(out_dir, "survival_by_experiment.png"),
+       plot_by_experiment, width = 7, height = 5, dpi = 300)
+ggsave(file.path(out_dir, "survival_by_temperature.png"),
+       plot_by_temperature, width = 7, height = 5, dpi = 300)
+ggsave(file.path(out_dir, "survival_by_family_faceted_by_experiment.png"),
+       plot_family_facets, width = 9, height = 7, dpi = 300)
+```
+
+## Statistical comparisons
+
+```{r log-rank-tests}
+logrank_experiment <- survdiff(Surv(time, status) ~ Experiment, data = survival_data)
+logrank_temperature <- survdiff(Surv(time, status) ~ temperature_C, data = survival_data)
+
+logrank_by_experiment <- survival_data %>%
+  group_by(Experiment) %>%
+  group_modify(\(.x, .y) {
+    fit <- survdiff(Surv(time, status) ~ Family, data = .x)
+    tibble(
+      chisq = unname(fit$chisq),
+      df = length(fit$n) - 1,
+      p_value = 1 - pchisq(fit$chisq, df = length(fit$n) - 1)
+    )
+  }) %>%
+  ungroup()
+
+comparison_summary <- tribble(
+  ~comparison, ~chisq, ~df, ~p_value,
+  "Across experiments", unname(logrank_experiment$chisq),
+    length(logrank_experiment$n) - 1,
+    1 - pchisq(logrank_experiment$chisq, df = length(logrank_experiment$n) - 1),
+  "Across temperatures", unname(logrank_temperature$chisq),
+    length(logrank_temperature$n) - 1,
+    1 - pchisq(logrank_temperature$chisq, df = length(logrank_temperature$n) - 1)
+)
+
+comparison_summary %>%
+  bind_rows(
+    logrank_by_experiment %>%
+      transmute(
+        comparison = paste("Across observed family/groups within", Experiment),
+        chisq,
+        df,
+        p_value
+      )
+  ) %>%
+  mutate(p_value = signif(p_value, 4)) %>%
+  mutate(chisq = round(chisq, 3)) %>%
+  knitr::kable()
+```
+
+```{r cox-model}
+cox_experiment <- coxph(Surv(time, status) ~ Experiment, data = survival_data)
+cox_temperature <- coxph(Surv(time, status) ~ temperature_C, data = survival_data)
+
+summary(cox_experiment)
+summary(cox_temperature)
+```
+
+## Take homes
+
+```{r take-homes}
+ranked_experiments <- overall_summary %>%
+  arrange(desc(death_percent), median_survival_hr)
+
+most_severe <- ranked_experiments %>% slice(1)
+least_severe <- ranked_experiments %>% slice_tail(n = 1)
+
+cat("Experiments summarized:", n_distinct(survival_data$Experiment), "\n")
+cat("Total individuals:", nrow(survival_data), "\n")
+cat("Most severe by death percent:", as.character(most_severe$Experiment),
+    sprintf("(%.1f%% deaths)\n", most_severe$death_percent))
+cat("Least severe by death percent:", as.character(least_severe$Experiment),
+    sprintf("(%.1f%% deaths)\n", least_severe$death_percent))
+cat("Cross-experiment log-rank p-value:",
+    signif(comparison_summary$p_value[comparison_summary$comparison == "Across experiments"], 4),
+    "\n")
+cat("Temperature log-rank p-value:",
+    signif(comparison_summary$p_value[comparison_summary$comparison == "Across temperatures"], 4),
+    "\n")
+```

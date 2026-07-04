@@ -1,0 +1,36 @@
+Experiment,temperature_C,Family,Family_identity_note,individuals,deaths,death_percent,median_survival_hr
+20260427 - 33 C,33,1,Observed label treated as family identity,20,12,60,93
+20260427 - 33 C,33,2,Observed label treated as family identity,8,3,37.5,NA
+20260427 - 33 C,33,3,Observed label treated as family identity,20,8,40,NA
+20260427 - 33 C,33,5,Observed label treated as family identity,20,8,40,NA
+20260427 - 33 C,33,6,Observed label treated as family identity,9,4,44.44444444444444,NA
+20260427 - 33 C,33,7,Observed label treated as family identity,17,10,58.82352941176471,96.5
+20260427 - 33 C,33,8,Observed label treated as family identity,10,8,80,72.75
+20260427 - 33 C,33,9,Observed label treated as family identity,15,5,33.33333333333333,NA
+20260427 - 33 C,33,10,Observed label treated as family identity,9,5,55.55555555555556,99.5
+20260511 - 33 C,33,1,Observed label treated as family identity,12,12,100,43
+20260511 - 33 C,33,3,Observed label treated as family identity,12,12,100,35
+20260511 - 33 C,33,5,Observed label treated as family identity,12,12,100,43
+20260511 - 33 C,33,6,Observed label treated as family identity,12,12,100,27
+20260511 - 33 C,33,7,Observed label treated as family identity,12,12,100,24.83
+20260511 - 33 C,33,8,Observed label treated as family identity,12,11,91.66666666666666,27
+20260511 - 33 C,33,9,Ambiguous duplicate 9 label: one group is family 2 and one is family 9,12,12,100,43
+20260511 - 33 C,33,9B,Ambiguous duplicate 9 label: one group is family 2 and one is family 9,12,12,100,43
+20260511 - 33 C,33,10,Observed label treated as family identity,12,12,100,22
+20260604 - 36 C,36,1,Observed label treated as family identity,5,5,100,17
+20260604 - 36 C,36,2,Observed label treated as family identity,5,5,100,17
+20260604 - 36 C,36,3,Observed label treated as family identity,3,3,100,24
+20260604 - 36 C,36,5,Observed label treated as family identity,5,4,80,42
+20260604 - 36 C,36,6,Observed label treated as family identity,5,5,100,17
+20260604 - 36 C,36,8,Observed label treated as family identity,5,5,100,24
+20260604 - 36 C,36,9,Observed label treated as family identity,5,4,80,42
+20260604 - 36 C,36,10,Observed label treated as family identity,5,5,100,24
+20260609 - 36 C,36,1,Observed label treated as family identity,11,11,100,48
+20260609 - 36 C,36,3,Observed label treated as family identity,11,10,90.9090909090909,48
+20260609 - 36 C,36,5,Observed label treated as family identity,11,8,72.72727272727273,48
+20260609 - 36 C,36,6,Observed label treated as family identity,11,9,81.81818181818183,48
+20260609 - 36 C,36,7,Observed label treated as family identity,11,11,100,48
+20260609 - 36 C,36,8,Observed label treated as family identity,11,7,63.63636363636363,50
+20260609 - 36 C,36,9,Ambiguous duplicate 9 label: one group is family 2 and one is family 9,11,7,63.63636363636363,48
+20260609 - 36 C,36,9B,Ambiguous duplicate 9 label: one group is family 2 and one is family 9,11,8,72.72727272727273,48
+20260609 - 36 C,36,10,Observed label treated as family identity,11,10,90.9090909090909,29

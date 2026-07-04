@@ -1,0 +1,10 @@
+experiment,experiment_label,n_rows,n_individuals,n_families,n_treatments,min_time_hr,max_time_hr,n_timepoints
+01.00-resazurin-20260415-36C,20260415-36C,879,376,9,0,1,7,5
+01.00-resazurin-20260429-freshwater_stress,20260429-freshwater_stress,990,99,9,0,0,32,10
+01.00-resazurin-20260505-mgig-freshwater-36C,20260505-mgig-freshwater-36C,495,99,9,0,0,4,5
+01.00-resazurin-20260505-mgig-freshwater-RT,20260505-mgig-freshwater-RT,693,99,9,0,0,28,7
+01.00-resazurin-20260511-mgig-freshwater-RT,20260511-mgig-freshwater-RT,1376,99,9,0,0,76,14
+01.00-resazurin-20260602-mgig-36C,20260602-mgig-36C,891,99,9,0,0,4,9
+01.00-resazurin-20260602-mgig-freshwater-RT,20260602-mgig-freshwater-RT,693,99,9,0,0,48,7
+01.00-resazurin-20260604-mgig-36C,20260604-mgig-36C,869,99,9,0,0,4,9
+01.00-resazurin-20260624-mgig-33C,20260624-mgig-33C,1080,270,9,0,0,3,4

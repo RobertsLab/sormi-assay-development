@@ -1,0 +1,374 @@
+uid,Family,time,status,n_observations,experiment_id,Experiment,temperature_C,Family_identity_note
+1,6,99.5,0,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+101,9,99.5,0,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+102,5,99.5,0,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+103,3,93,1,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+104,9,99.5,0,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+105,7,99.5,0,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+106,9,99.5,0,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+107,2,99.5,1,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+108,9,99.5,0,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+109,3,93,1,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+110,5,99.5,0,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+112,9,99.5,0,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+113,7,99.5,0,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+114,3,99.5,0,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+115,7,52.5,1,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+116,2,99.5,0,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+117,3,99.5,0,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+118,7,69.5,1,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+119,5,99.5,0,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+120,3,99.5,0,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+13,6,24,1,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+130,7,99.5,0,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+131,5,93,1,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+132,6,93,1,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+133,6,99.5,0,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+14,9,99.5,0,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+141,8,52.5,1,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+142,8,52.5,1,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+143,9,99.5,0,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+144,2,99.5,0,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+145,8,52.5,1,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+146,9,44,1,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+147,7,96.5,1,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+148,8,52.5,1,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+149,8,93,1,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+15,7,99.5,0,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+150,3,99.5,0,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+151,3,99.5,0,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+152,9,93,1,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+153,8,48,1,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+16,3,99.5,0,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+160,5,99.5,0,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+161,5,99.5,0,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+172,5,99.5,0,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+173,9,99.5,0,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+174,5,99.5,0,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+175,5,52.5,1,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+176,10,93,1,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+177,10,99.5,1,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+178,3,99.5,0,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+179,3,99.5,0,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+18,8,93,1,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+180,10,99.5,0,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+181,10,99.5,0,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+182,3,69.5,1,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+183,10,99.5,0,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+184,1,52.5,1,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+185,10,99.5,1,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+186,3,52.5,1,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+187,10,99.5,0,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+189,10,99.5,1,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+19,9,96.5,1,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+190,10,93,1,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+191,1,52.5,1,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+192,1,93,1,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+193,1,52.5,1,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+194,1,99.5,0,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+195,1,52.5,1,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+196,1,93,1,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+197,1,52.5,1,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+198,1,99.5,0,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+199,1,99.5,0,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+20,9,99.5,0,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+201,1,20,1,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+202,1,99.5,0,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+203,1,99.5,0,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+204,1,99.5,0,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+205,1,99.5,0,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+206,1,52.5,1,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+207,1,52.5,1,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+208,1,93,1,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+209,1,99.5,0,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+210,1,93,1,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+22,9,93,1,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+23,3,52.5,1,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+24,8,99.5,0,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+25,8,93,1,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+26,7,52.5,1,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+28,5,99.5,0,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+29,7,99.5,1,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+35,7,69.5,1,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+36,5,93,1,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+37,3,52.5,1,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+38,2,99.5,0,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+39,2,99.5,0,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+41,5,93,1,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+43,9,96.5,1,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+44,6,48,1,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+45,5,99.5,0,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+46,5,93,1,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+47,5,99.5,0,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+48,7,99.5,0,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+49,3,99.5,0,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+51,6,99.5,0,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+52,3,99.5,0,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+53,5,99.5,0,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+55,5,99.5,1,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+56,9,99.5,0,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+57,7,96.5,1,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+58,3,99.5,0,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+59,6,99.5,0,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+60,7,96.5,1,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+65,3,96.5,1,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+66,3,99.5,0,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+68,3,93,1,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+70,7,52.5,1,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+72,8,99.5,0,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+73,5,99.5,0,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+74,2,99.5,0,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+76,5,52.5,1,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+77,5,52.5,1,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+79,7,52.5,1,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+81,2,93,1,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+84,7,99.5,0,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+87,7,99.5,0,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+88,6,20,1,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+89,2,52.5,1,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+90,6,99.5,0,15,20260427,20260427 - 33 C,33,Observed label treated as family identity
+plate-A_A01,3,48,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-A_A02,3,43,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-A_A03,3,43,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-A_A04,3,24.83,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-A_B01,3,27,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-A_B02,3,43,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-A_B03,3,27,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-A_B04,3,24.83,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-A_C01,3,27,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-A_C02,3,48,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-A_C03,3,67,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-A_C04,3,27,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-C_A01,1,27,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-C_A02,1,43,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-C_A03,1,43,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-C_A04,1,27,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-C_B01,1,43,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-C_B02,1,45,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-C_B03,1,43,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-C_B04,1,67,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-C_C01,1,27,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-C_C02,1,48,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-C_C03,1,43,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-C_C04,1,22,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-E_A01,9B,43,1,10,20260511,20260511 - 33 C,33,Ambiguous duplicate 9 label: one group is family 2 and one is family 9
+plate-E_A02,9B,43,1,10,20260511,20260511 - 33 C,33,Ambiguous duplicate 9 label: one group is family 2 and one is family 9
+plate-E_A03,9B,43,1,10,20260511,20260511 - 33 C,33,Ambiguous duplicate 9 label: one group is family 2 and one is family 9
+plate-E_A04,9B,27,1,10,20260511,20260511 - 33 C,33,Ambiguous duplicate 9 label: one group is family 2 and one is family 9
+plate-E_B01,9B,43,1,10,20260511,20260511 - 33 C,33,Ambiguous duplicate 9 label: one group is family 2 and one is family 9
+plate-E_B02,9B,46,1,10,20260511,20260511 - 33 C,33,Ambiguous duplicate 9 label: one group is family 2 and one is family 9
+plate-E_B03,9B,43,1,10,20260511,20260511 - 33 C,33,Ambiguous duplicate 9 label: one group is family 2 and one is family 9
+plate-E_B04,9B,43,1,10,20260511,20260511 - 33 C,33,Ambiguous duplicate 9 label: one group is family 2 and one is family 9
+plate-E_C01,9B,43,1,10,20260511,20260511 - 33 C,33,Ambiguous duplicate 9 label: one group is family 2 and one is family 9
+plate-E_C02,9B,46,1,10,20260511,20260511 - 33 C,33,Ambiguous duplicate 9 label: one group is family 2 and one is family 9
+plate-E_C03,9B,43,1,10,20260511,20260511 - 33 C,33,Ambiguous duplicate 9 label: one group is family 2 and one is family 9
+plate-E_C04,9B,43,1,10,20260511,20260511 - 33 C,33,Ambiguous duplicate 9 label: one group is family 2 and one is family 9
+plate-G_A01,8,24.83,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-G_A02,8,27,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-G_A03,8,24.83,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-G_A04,8,67,0,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-G_B01,8,24.83,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-G_B02,8,27,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-G_B03,8,27,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-G_B04,8,27,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-G_C01,8,22,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-G_C02,8,22,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-G_C03,8,27,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-G_C04,8,27,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-I_A01,10,22,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-I_A02,10,22,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-I_A03,10,22,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-I_A04,10,24.83,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-I_B01,10,22,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-I_B02,10,24.83,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-I_B03,10,22,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-I_B04,10,67,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-I_C01,10,24.83,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-I_C02,10,22,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-I_C03,10,27,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-I_C04,10,22,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-K_A01,9,43,1,10,20260511,20260511 - 33 C,33,Ambiguous duplicate 9 label: one group is family 2 and one is family 9
+plate-K_A02,9,43,1,10,20260511,20260511 - 33 C,33,Ambiguous duplicate 9 label: one group is family 2 and one is family 9
+plate-K_A03,9,43,1,10,20260511,20260511 - 33 C,33,Ambiguous duplicate 9 label: one group is family 2 and one is family 9
+plate-K_A04,9,43,1,10,20260511,20260511 - 33 C,33,Ambiguous duplicate 9 label: one group is family 2 and one is family 9
+plate-K_B01,9,43,1,10,20260511,20260511 - 33 C,33,Ambiguous duplicate 9 label: one group is family 2 and one is family 9
+plate-K_B02,9,43,1,10,20260511,20260511 - 33 C,33,Ambiguous duplicate 9 label: one group is family 2 and one is family 9
+plate-K_B03,9,43,1,10,20260511,20260511 - 33 C,33,Ambiguous duplicate 9 label: one group is family 2 and one is family 9
+plate-K_B04,9,43,1,10,20260511,20260511 - 33 C,33,Ambiguous duplicate 9 label: one group is family 2 and one is family 9
+plate-K_C01,9,43,1,10,20260511,20260511 - 33 C,33,Ambiguous duplicate 9 label: one group is family 2 and one is family 9
+plate-K_C02,9,48,1,10,20260511,20260511 - 33 C,33,Ambiguous duplicate 9 label: one group is family 2 and one is family 9
+plate-K_C03,9,67,1,10,20260511,20260511 - 33 C,33,Ambiguous duplicate 9 label: one group is family 2 and one is family 9
+plate-K_C04,9,43,1,10,20260511,20260511 - 33 C,33,Ambiguous duplicate 9 label: one group is family 2 and one is family 9
+plate-M_A01,5,43,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-M_A02,5,43,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-M_A03,5,24.83,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-M_A04,5,46,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-M_B01,5,67,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-M_B02,5,43,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-M_B03,5,43,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-M_B04,5,46,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-M_C01,5,67,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-M_C02,5,67,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-M_C03,5,43,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-M_C04,5,43,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-O_A01,7,24.83,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-O_A02,7,27,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-O_A03,7,43,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-O_A04,7,22,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-O_B01,7,27,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-O_B02,7,22,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-O_B03,7,22,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-O_B04,7,22,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-O_C01,7,22,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-O_C02,7,43,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-O_C03,7,24.83,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-O_C04,7,43,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-Q_A01,6,24.83,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-Q_A02,6,22,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-Q_A03,6,43,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-Q_A04,6,22,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-Q_B01,6,43,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-Q_B02,6,27,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-Q_B03,6,27,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-Q_B04,6,22,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-Q_C01,6,43,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-Q_C02,6,22,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-Q_C03,6,43,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+plate-Q_C04,6,27,1,10,20260511,20260511 - 33 C,33,Observed label treated as family identity
+100,2,17,1,4,20260604,20260604 - 36 C,36,Observed label treated as family identity
+11,1,17,1,4,20260604,20260604 - 36 C,36,Observed label treated as family identity
+111,5,42,1,4,20260604,20260604 - 36 C,36,Observed label treated as family identity
+136,10,24,1,4,20260604,20260604 - 36 C,36,Observed label treated as family identity
+137,6,17,1,4,20260604,20260604 - 36 C,36,Observed label treated as family identity
+138,9,42,0,4,20260604,20260604 - 36 C,36,Observed label treated as family identity
+139,8,17,1,4,20260604,20260604 - 36 C,36,Observed label treated as family identity
+163,2,17,1,4,20260604,20260604 - 36 C,36,Observed label treated as family identity
+164,6,42,1,4,20260604,20260604 - 36 C,36,Observed label treated as family identity
+167,10,17,1,4,20260604,20260604 - 36 C,36,Observed label treated as family identity
+2,1,17,1,4,20260604,20260604 - 36 C,36,Observed label treated as family identity
+200,10,24,1,4,20260604,20260604 - 36 C,36,Observed label treated as family identity
+201,1,20,1,4,20260604,20260604 - 36 C,36,Observed label treated as family identity
+206,9,42,1,4,20260604,20260604 - 36 C,36,Observed label treated as family identity
+207,1,17,1,4,20260604,20260604 - 36 C,36,Observed label treated as family identity
+208,5,42,1,4,20260604,20260604 - 36 C,36,Observed label treated as family identity
+210,3,24,1,4,20260604,20260604 - 36 C,36,Observed label treated as family identity
+211,9,42,1,4,20260604,20260604 - 36 C,36,Observed label treated as family identity
+212,9,42,1,4,20260604,20260604 - 36 C,36,Observed label treated as family identity
+213,5,24,1,4,20260604,20260604 - 36 C,36,Observed label treated as family identity
+214,5,42,0,4,20260604,20260604 - 36 C,36,Observed label treated as family identity
+215,8,20,1,4,20260604,20260604 - 36 C,36,Observed label treated as family identity
+216,6,17,1,4,20260604,20260604 - 36 C,36,Observed label treated as family identity
+217,8,24,1,4,20260604,20260604 - 36 C,36,Observed label treated as family identity
+32,8,42,1,4,20260604,20260604 - 36 C,36,Observed label treated as family identity
+42,2,17,1,4,20260604,20260604 - 36 C,36,Observed label treated as family identity
+5,2,24,1,4,20260604,20260604 - 36 C,36,Observed label treated as family identity
+61,1,24,1,4,20260604,20260604 - 36 C,36,Observed label treated as family identity
+62,2,24,1,4,20260604,20260604 - 36 C,36,Observed label treated as family identity
+63,9,24,1,4,20260604,20260604 - 36 C,36,Observed label treated as family identity
+71,8,24,1,4,20260604,20260604 - 36 C,36,Observed label treated as family identity
+75,5,24,1,8,20260604,20260604 - 36 C,36,Observed label treated as family identity
+83,3,17,1,4,20260604,20260604 - 36 C,36,Observed label treated as family identity
+86,6,17,1,4,20260604,20260604 - 36 C,36,Observed label treated as family identity
+9,10,17,1,4,20260604,20260604 - 36 C,36,Observed label treated as family identity
+92,3,24,1,4,20260604,20260604 - 36 C,36,Observed label treated as family identity
+93,6,24,1,4,20260604,20260604 - 36 C,36,Observed label treated as family identity
+94,10,24,1,4,20260604,20260604 - 36 C,36,Observed label treated as family identity
+plate-A_A01,7,48,1,7,20260609,20260609 - 36 C,36,Observed label treated as family identity
+plate-A_A02,9,48,1,7,20260609,20260609 - 36 C,36,Ambiguous duplicate 9 label: one group is family 2 and one is family 9
+plate-A_A03,5,48,1,7,20260609,20260609 - 36 C,36,Observed label treated as family identity
+plate-A_A04,6,48,1,7,20260609,20260609 - 36 C,36,Observed label treated as family identity
+plate-A_B01,10,29,1,7,20260609,20260609 - 36 C,36,Observed label treated as family identity
+plate-A_B02,8,52,0,7,20260609,20260609 - 36 C,36,Observed label treated as family identity
+plate-A_B03,9B,48,1,7,20260609,20260609 - 36 C,36,Ambiguous duplicate 9 label: one group is family 2 and one is family 9
+plate-A_B04,1,48,1,7,20260609,20260609 - 36 C,36,Observed label treated as family identity
+plate-A_C01,3,50,1,7,20260609,20260609 - 36 C,36,Observed label treated as family identity
+plate-A_C02,3,50,1,7,20260609,20260609 - 36 C,36,Observed label treated as family identity
+plate-A_C03,7,48,1,7,20260609,20260609 - 36 C,36,Observed label treated as family identity
+plate-B_A02,7,48,1,7,20260609,20260609 - 36 C,36,Observed label treated as family identity
+plate-B_A03,9,48,1,7,20260609,20260609 - 36 C,36,Ambiguous duplicate 9 label: one group is family 2 and one is family 9
+plate-B_A04,5,48,1,7,20260609,20260609 - 36 C,36,Observed label treated as family identity
+plate-B_B01,6,48,1,7,20260609,20260609 - 36 C,36,Observed label treated as family identity
+plate-B_B02,10,26,1,7,20260609,20260609 - 36 C,36,Observed label treated as family identity
+plate-B_B03,8,52,0,7,20260609,20260609 - 36 C,36,Observed label treated as family identity
+plate-B_B04,9B,52,0,7,20260609,20260609 - 36 C,36,Ambiguous duplicate 9 label: one group is family 2 and one is family 9
+plate-B_C01,1,48,1,7,20260609,20260609 - 36 C,36,Observed label treated as family identity
+plate-B_C02,3,52,0,7,20260609,20260609 - 36 C,36,Observed label treated as family identity
+plate-B_C03,3,48,1,7,20260609,20260609 - 36 C,36,Observed label treated as family identity
+plate-B_C04,6,52,0,7,20260609,20260609 - 36 C,36,Observed label treated as family identity
+plate-C_A01,6,26,1,7,20260609,20260609 - 36 C,36,Observed label treated as family identity
+plate-C_A03,7,24,1,7,20260609,20260609 - 36 C,36,Observed label treated as family identity
+plate-C_A04,9,52,0,7,20260609,20260609 - 36 C,36,Ambiguous duplicate 9 label: one group is family 2 and one is family 9
+plate-C_B01,5,29,1,7,20260609,20260609 - 36 C,36,Observed label treated as family identity
+plate-C_B02,6,52,0,7,20260609,20260609 - 36 C,36,Observed label treated as family identity
+plate-C_B03,10,24,1,7,20260609,20260609 - 36 C,36,Observed label treated as family identity
+plate-C_B04,8,48,1,7,20260609,20260609 - 36 C,36,Observed label treated as family identity
+plate-C_C01,9B,50,1,7,20260609,20260609 - 36 C,36,Ambiguous duplicate 9 label: one group is family 2 and one is family 9
+plate-C_C02,1,48,1,7,20260609,20260609 - 36 C,36,Observed label treated as family identity
+plate-C_C03,3,48,1,7,20260609,20260609 - 36 C,36,Observed label treated as family identity
+plate-C_C04,9B,50,1,7,20260609,20260609 - 36 C,36,Ambiguous duplicate 9 label: one group is family 2 and one is family 9
+plate-D_A01,9B,52,0,7,20260609,20260609 - 36 C,36,Ambiguous duplicate 9 label: one group is family 2 and one is family 9
+plate-D_A02,5,50,1,7,20260609,20260609 - 36 C,36,Observed label treated as family identity
+plate-D_A04,7,24,1,7,20260609,20260609 - 36 C,36,Observed label treated as family identity
+plate-D_B01,9,48,1,7,20260609,20260609 - 36 C,36,Ambiguous duplicate 9 label: one group is family 2 and one is family 9
+plate-D_B02,5,52,0,7,20260609,20260609 - 36 C,36,Observed label treated as family identity
+plate-D_B03,6,24,1,7,20260609,20260609 - 36 C,36,Observed label treated as family identity
+plate-D_B04,10,26,1,7,20260609,20260609 - 36 C,36,Observed label treated as family identity
+plate-D_C01,8,50,1,7,20260609,20260609 - 36 C,36,Observed label treated as family identity
+plate-D_C02,9B,29,1,7,20260609,20260609 - 36 C,36,Ambiguous duplicate 9 label: one group is family 2 and one is family 9
+plate-D_C03,1,50,1,7,20260609,20260609 - 36 C,36,Observed label treated as family identity
+plate-D_C04,3,29,1,7,20260609,20260609 - 36 C,36,Observed label treated as family identity
+plate-E_A01,3,29,1,7,20260609,20260609 - 36 C,36,Observed label treated as family identity
+plate-E_A02,10,48,1,7,20260609,20260609 - 36 C,36,Observed label treated as family identity
+plate-E_A03,5,50,1,7,20260609,20260609 - 36 C,36,Observed label treated as family identity
+plate-E_B01,7,48,1,7,20260609,20260609 - 36 C,36,Observed label treated as family identity
+plate-E_B02,9,48,1,7,20260609,20260609 - 36 C,36,Ambiguous duplicate 9 label: one group is family 2 and one is family 9
+plate-E_B03,5,48,1,7,20260609,20260609 - 36 C,36,Observed label treated as family identity
+plate-E_B04,6,48,1,7,20260609,20260609 - 36 C,36,Observed label treated as family identity
+plate-E_C01,10,48,1,7,20260609,20260609 - 36 C,36,Observed label treated as family identity
+plate-E_C02,8,52,0,7,20260609,20260609 - 36 C,36,Observed label treated as family identity
+plate-E_C03,9B,48,1,7,20260609,20260609 - 36 C,36,Ambiguous duplicate 9 label: one group is family 2 and one is family 9
+plate-E_C04,1,24,1,7,20260609,20260609 - 36 C,36,Observed label treated as family identity
+plate-F_A01,1,50,1,7,20260609,20260609 - 36 C,36,Observed label treated as family identity
+plate-F_A02,3,48,1,7,20260609,20260609 - 36 C,36,Observed label treated as family identity
+plate-F_A03,10,52,0,7,20260609,20260609 - 36 C,36,Observed label treated as family identity
+plate-F_A04,1,50,1,7,20260609,20260609 - 36 C,36,Observed label treated as family identity
+plate-F_B02,7,48,1,7,20260609,20260609 - 36 C,36,Observed label treated as family identity
+plate-F_B03,9,52,1,7,20260609,20260609 - 36 C,36,Ambiguous duplicate 9 label: one group is family 2 and one is family 9
+plate-F_B04,5,52,0,7,20260609,20260609 - 36 C,36,Observed label treated as family identity
+plate-F_C01,6,48,1,7,20260609,20260609 - 36 C,36,Observed label treated as family identity
+plate-F_C02,10,26,1,7,20260609,20260609 - 36 C,36,Observed label treated as family identity
+plate-F_C03,8,50,1,7,20260609,20260609 - 36 C,36,Observed label treated as family identity
+plate-F_C04,9B,48,1,7,20260609,20260609 - 36 C,36,Ambiguous duplicate 9 label: one group is family 2 and one is family 9
+plate-G_A01,9B,52,0,7,20260609,20260609 - 36 C,36,Ambiguous duplicate 9 label: one group is family 2 and one is family 9
+plate-G_A02,1,24,1,7,20260609,20260609 - 36 C,36,Observed label treated as family identity
+plate-G_A03,3,50,1,7,20260609,20260609 - 36 C,36,Observed label treated as family identity
+plate-G_A04,8,48,1,7,20260609,20260609 - 36 C,36,Observed label treated as family identity
+plate-G_B01,1,50,1,7,20260609,20260609 - 36 C,36,Observed label treated as family identity
+plate-G_B03,7,48,1,7,20260609,20260609 - 36 C,36,Observed label treated as family identity
+plate-G_B04,9,52,0,7,20260609,20260609 - 36 C,36,Ambiguous duplicate 9 label: one group is family 2 and one is family 9
+plate-G_C01,5,52,0,7,20260609,20260609 - 36 C,36,Observed label treated as family identity
+plate-G_C02,6,48,1,7,20260609,20260609 - 36 C,36,Observed label treated as family identity
+plate-G_C03,10,29,1,7,20260609,20260609 - 36 C,36,Observed label treated as family identity
+plate-G_C04,8,48,1,7,20260609,20260609 - 36 C,36,Observed label treated as family identity
+plate-H_A01,8,52,0,7,20260609,20260609 - 36 C,36,Observed label treated as family identity
+plate-H_A02,9B,48,1,7,20260609,20260609 - 36 C,36,Ambiguous duplicate 9 label: one group is family 2 and one is family 9
+plate-H_A03,1,52,1,7,20260609,20260609 - 36 C,36,Observed label treated as family identity
+plate-H_A04,3,24,1,7,20260609,20260609 - 36 C,36,Observed label treated as family identity
+plate-H_B01,8,48,1,7,20260609,20260609 - 36 C,36,Observed label treated as family identity
+plate-H_B02,9,48,1,7,20260609,20260609 - 36 C,36,Ambiguous duplicate 9 label: one group is family 2 and one is family 9
+plate-H_B04,7,48,1,7,20260609,20260609 - 36 C,36,Observed label treated as family identity
+plate-H_C01,9,52,0,7,20260609,20260609 - 36 C,36,Ambiguous duplicate 9 label: one group is family 2 and one is family 9
+plate-H_C02,5,48,1,7,20260609,20260609 - 36 C,36,Observed label treated as family identity
+plate-H_C03,6,48,1,7,20260609,20260609 - 36 C,36,Observed label treated as family identity
+plate-H_C04,10,48,1,7,20260609,20260609 - 36 C,36,Observed label treated as family identity
+plate-I_A01,10,26,1,7,20260609,20260609 - 36 C,36,Observed label treated as family identity
+plate-I_A02,8,26,1,7,20260609,20260609 - 36 C,36,Observed label treated as family identity
+plate-I_A03,9B,48,1,7,20260609,20260609 - 36 C,36,Ambiguous duplicate 9 label: one group is family 2 and one is family 9
+plate-I_A04,1,29,1,7,20260609,20260609 - 36 C,36,Observed label treated as family identity
+plate-I_B01,3,48,1,7,20260609,20260609 - 36 C,36,Observed label treated as family identity
+plate-I_B02,7,48,1,7,20260609,20260609 - 36 C,36,Observed label treated as family identity
+plate-I_B03,9,52,0,7,20260609,20260609 - 36 C,36,Ambiguous duplicate 9 label: one group is family 2 and one is family 9
+plate-I_C01,7,48,1,7,20260609,20260609 - 36 C,36,Observed label treated as family identity
+plate-I_C02,9,48,1,7,20260609,20260609 - 36 C,36,Ambiguous duplicate 9 label: one group is family 2 and one is family 9
+plate-I_C03,5,48,1,7,20260609,20260609 - 36 C,36,Observed label treated as family identity
+plate-I_C04,6,50,1,7,20260609,20260609 - 36 C,36,Observed label treated as family identity
