@@ -3152,11 +3152,16 @@ vertical-align: -.125em;
 <section id="set-up" class="level2">
 <h2 class="anchored" data-anchor-id="set-up">Set up</h2>
 <div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(survival)</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 </div>
 <div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>experiments <span class="ot">&lt;-</span> <span class="fu">tribble</span>(</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="sc">~</span>experiment_id, <span class="sc">~</span>experiment_label, <span class="sc">~</span>temperature_C, <span class="sc">~</span>format, <span class="sc">~</span>data_path,</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;20260427&quot;</span>, <span class="st">&quot;20260427 - 33 C&quot;</span>, <span class="dv">33</span>, <span class="st">&quot;long&quot;</span>,</span>
@@ -3171,11 +3176,14 @@ vertical-align: -.125em;
 <span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>out_dir <span class="ot">&lt;-</span> <span class="st">&quot;../outputs/05-mgig-heat-survivorship-experiment-summary/&quot;</span></span>
 <span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="fu">dir.create</span>(out_dir, <span class="at">showWarnings =</span> <span class="cn">FALSE</span>, <span class="at">recursive =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 </div>
 </section>
 <section id="standardize-data" class="level2">
 <h2 class="anchored" data-anchor-id="standardize-data">Standardize data</h2>
 <div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>parse_alive <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">case_when</span>(</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">toupper</span>(<span class="fu">trimws</span>(<span class="fu">as.character</span>(x))) <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">&quot;TRUE&quot;</span>, <span class="st">&quot;T&quot;</span>, <span class="st">&quot;1&quot;</span>, <span class="st">&quot;YES&quot;</span>, <span class="st">&quot;Y&quot;</span>) <span class="sc">~</span> <span class="cn">TRUE</span>,</span>
@@ -3298,8 +3306,11 @@ vertical-align: -.125em;
 <span id="cb3-120"><a href="#cb3-120" aria-hidden="true" tabindex="-1"></a>    <span class="fu">stop</span>(<span class="st">&quot;Unsupported experiment format: &quot;</span>, format)</span>
 <span id="cb3-121"><a href="#cb3-121" aria-hidden="true" tabindex="-1"></a>  }</span>
 <span id="cb3-122"><a href="#cb3-122" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 </div>
 <div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>survival_data <span class="ot">&lt;-</span> <span class="fu">pmap_dfr</span>(experiments, read_experiment) <span class="sc">%&gt;%</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">Experiment =</span> <span class="fu">factor</span>(Experiment, <span class="at">levels =</span> experiments<span class="sc">$</span>experiment_label),</span>
@@ -3310,24 +3321,27 @@ vertical-align: -.125em;
 <span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>readr<span class="sc">::</span><span class="fu">write_csv</span>(survival_data, <span class="fu">file.path</span>(out_dir, <span class="st">&quot;standardized_survival_data.csv&quot;</span>))</span>
 <span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(survival_data)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Rows: 373
 Columns: 9
-$ uid                  &lt;chr&gt; &quot;1&quot;, &quot;101&quot;, &quot;102&quot;, &quot;103&quot;, &quot;104&quot;, &quot;105&quot;, &quot;106&quot;, &quot;1~
-$ Family               &lt;fct&gt; 6, 9, 5, 3, 9, 7, 9, 2, 9, 3, 5, 9, 7, 3, 7, 2, 3~
-$ time                 &lt;dbl&gt; 99.5, 99.5, 99.5, 93.0, 99.5, 99.5, 99.5, 99.5, 9~
-$ status               &lt;int&gt; 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0~
-$ n_observations       &lt;int&gt; 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 1~
-$ experiment_id        &lt;chr&gt; &quot;20260427&quot;, &quot;20260427&quot;, &quot;20260427&quot;, &quot;20260427&quot;, &quot;~
-$ Experiment           &lt;fct&gt; 20260427 - 33 C, 20260427 - 33 C, 20260427 - 33 C~
-$ temperature_C        &lt;fct&gt; 33, 33, 33, 33, 33, 33, 33, 33, 33, 33, 33, 33, 3~
-$ Family_identity_note &lt;chr&gt; &quot;Observed label treated as family identity&quot;, &quot;Obs~</code></pre>
+$ uid                  &lt;chr&gt; &quot;1&quot;, &quot;101&quot;, &quot;102&quot;, &quot;103&quot;, &quot;104&quot;, &quot;105&quot;, &quot;106&quot;, &quot;1…
+$ Family               &lt;fct&gt; 6, 9, 5, 3, 9, 7, 9, 2, 9, 3, 5, 9, 7, 3, 7, 2, 3…
+$ time                 &lt;dbl&gt; 99.5, 99.5, 99.5, 93.0, 99.5, 99.5, 99.5, 99.5, 9…
+$ status               &lt;int&gt; 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0…
+$ n_observations       &lt;int&gt; 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 1…
+$ experiment_id        &lt;chr&gt; &quot;20260427&quot;, &quot;20260427&quot;, &quot;20260427&quot;, &quot;20260427&quot;, &quot;…
+$ Experiment           &lt;fct&gt; 20260427 - 33 C, 20260427 - 33 C, 20260427 - 33 C…
+$ temperature_C        &lt;fct&gt; 33, 33, 33, 33, 33, 33, 33, 33, 33, 33, 33, 33, 3…
+$ Family_identity_note &lt;chr&gt; &quot;Observed label treated as family identity&quot;, &quot;Obs…</code></pre>
 </div>
 </div>
 </section>
 <section id="experiment-summaries" class="level2">
 <h2 class="anchored" data-anchor-id="experiment-summaries">Experiment summaries</h2>
 <div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>overall_summary <span class="ot">&lt;-</span> survival_data <span class="sc">%&gt;%</span></span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(Experiment, temperature_C) <span class="sc">%&gt;%</span></span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
@@ -3351,6 +3365,7 @@ $ Family_identity_note &lt;chr&gt; &quot;Observed label treated as family identi
 <span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>    \(x) <span class="fu">round</span>(x, <span class="dv">1</span>)</span>
 <span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>  )) <span class="sc">%&gt;%</span></span>
 <span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>  knitr<span class="sc">::</span><span class="fu">kable</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
 <colgroup>
@@ -3427,6 +3442,8 @@ $ Family_identity_note &lt;chr&gt; &quot;Observed label treated as family identi
 </div>
 </div>
 <div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>family_summary <span class="ot">&lt;-</span> survival_data <span class="sc">%&gt;%</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(Experiment, temperature_C, Family, Family_identity_note) <span class="sc">%&gt;%</span></span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
@@ -3444,6 +3461,7 @@ $ Family_identity_note &lt;chr&gt; &quot;Observed label treated as family identi
 <span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(Experiment, readr<span class="sc">::</span><span class="fu">parse_number</span>(<span class="fu">as.character</span>(Family))) <span class="sc">%&gt;%</span></span>
 <span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">c</span>(death_percent, median_survival_hr), \(x) <span class="fu">round</span>(x, <span class="dv">1</span>))) <span class="sc">%&gt;%</span></span>
 <span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>  knitr<span class="sc">::</span><span class="fu">kable</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
 <colgroup>
@@ -3827,6 +3845,8 @@ $ Family_identity_note &lt;chr&gt; &quot;Observed label treated as family identi
 <section id="size-data-availability" class="level2">
 <h2 class="anchored" data-anchor-id="size-data-availability">Size data availability</h2>
 <div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>size_metadata_20260427 <span class="ot">&lt;-</span> readr<span class="sc">::</span><span class="fu">read_csv</span>(</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;../data/20260427-33C-USDA-families/metadata.csv&quot;</span>,</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">show_col_types =</span> <span class="cn">FALSE</span></span>
@@ -3863,6 +3883,7 @@ $ Family_identity_note &lt;chr&gt; &quot;Observed label treated as family identi
 <span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>size_overall_20260427 <span class="sc">%&gt;%</span></span>
 <span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">ends_with</span>(<span class="st">&quot;_mm2&quot;</span>), \(x) <span class="fu">round</span>(x, <span class="dv">1</span>))) <span class="sc">%&gt;%</span></span>
 <span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a>  knitr<span class="sc">::</span><span class="fu">kable</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
 <colgroup>
@@ -3900,9 +3921,12 @@ $ Family_identity_note &lt;chr&gt; &quot;Observed label treated as family identi
 </div>
 </div>
 <div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>size_by_family_20260427 <span class="sc">%&gt;%</span></span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">ends_with</span>(<span class="st">&quot;_mm2&quot;</span>), \(x) <span class="fu">round</span>(x, <span class="dv">1</span>))) <span class="sc">%&gt;%</span></span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  knitr<span class="sc">::</span><span class="fu">kable</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
 <colgroup>
@@ -4017,6 +4041,8 @@ $ Family_identity_note &lt;chr&gt; &quot;Observed label treated as family identi
 <h2 class="anchored" data-anchor-id="speculative-identity-of-9-and-9b">Speculative identity of 9 and 9B</h2>
 <p>Because <code>9</code> and <code>9B</code> in 20260511 and 20260609 represent two unresolved groups, one truly family 2 and one truly family 9, the analysis below compares their survival summaries with experiments where families 2 and 9 were labelled directly. This is a hypothesis-generating comparison only; it should not be used to recode the data.</p>
 <div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>two_nine_summary <span class="ot">&lt;-</span> family_summary <span class="sc">%&gt;%</span></span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Family <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">&quot;2&quot;</span>, <span class="st">&quot;9&quot;</span>, <span class="st">&quot;9B&quot;</span>)) <span class="sc">%&gt;%</span></span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
@@ -4042,6 +4068,7 @@ $ Family_identity_note &lt;chr&gt; &quot;Observed label treated as family identi
 <span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
 <span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">c</span>(death_percent, median_survival_hr), \(x) <span class="fu">round</span>(x, <span class="dv">1</span>))) <span class="sc">%&gt;%</span></span>
 <span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a>  knitr<span class="sc">::</span><span class="fu">kable</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
 <colgroup>
@@ -4157,6 +4184,8 @@ $ Family_identity_note &lt;chr&gt; &quot;Observed label treated as family identi
 <section id="survival-curves" class="level2">
 <h2 class="anchored" data-anchor-id="survival-curves">Survival curves</h2>
 <div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>plot_by_experiment <span class="ot">&lt;-</span> <span class="fu">km_curve_data</span>(survival_data, <span class="st">&quot;Experiment&quot;</span>) <span class="sc">%&gt;%</span></span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> time, <span class="at">y =</span> survival, <span class="at">color =</span> Experiment)) <span class="sc">+</span></span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_step</span>(<span class="at">linewidth =</span> <span class="fl">0.9</span>) <span class="sc">+</span></span>
@@ -4165,6 +4194,7 @@ $ Family_identity_note &lt;chr&gt; &quot;Observed label treated as family identi
 <span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_classic</span>()</span>
 <span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>plot_by_experiment</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -4174,6 +4204,8 @@ $ Family_identity_note &lt;chr&gt; &quot;Observed label treated as family identi
 </div>
 </div>
 <div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>plot_by_temperature <span class="ot">&lt;-</span> <span class="fu">km_curve_data</span>(survival_data, <span class="st">&quot;temperature_C&quot;</span>) <span class="sc">%&gt;%</span></span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> time, <span class="at">y =</span> survival, <span class="at">color =</span> temperature_C)) <span class="sc">+</span></span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_step</span>(<span class="at">linewidth =</span> <span class="fl">0.9</span>) <span class="sc">+</span></span>
@@ -4182,6 +4214,7 @@ $ Family_identity_note &lt;chr&gt; &quot;Observed label treated as family identi
 <span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_classic</span>()</span>
 <span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>plot_by_temperature</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -4191,6 +4224,8 @@ $ Family_identity_note &lt;chr&gt; &quot;Observed label treated as family identi
 </div>
 </div>
 <div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>plot_family_facets <span class="ot">&lt;-</span> <span class="fu">km_curve_data</span>(survival_data, <span class="fu">c</span>(<span class="st">&quot;Experiment&quot;</span>, <span class="st">&quot;Family&quot;</span>)) <span class="sc">%&gt;%</span></span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> time, <span class="at">y =</span> survival, <span class="at">color =</span> Family)) <span class="sc">+</span></span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_step</span>(<span class="at">linewidth =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
@@ -4201,6 +4236,7 @@ $ Family_identity_note &lt;chr&gt; &quot;Observed label treated as family identi
 <span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;right&quot;</span>)</span>
 <span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>plot_family_facets</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -4210,17 +4246,22 @@ $ Family_identity_note &lt;chr&gt; &quot;Observed label treated as family identi
 </div>
 </div>
 <div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggsave</span>(<span class="fu">file.path</span>(out_dir, <span class="st">&quot;survival_by_experiment.png&quot;</span>),</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>       plot_by_experiment, <span class="at">width =</span> <span class="dv">7</span>, <span class="at">height =</span> <span class="dv">5</span>, <span class="at">dpi =</span> <span class="dv">300</span>)</span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="fu">ggsave</span>(<span class="fu">file.path</span>(out_dir, <span class="st">&quot;survival_by_temperature.png&quot;</span>),</span>
 <span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>       plot_by_temperature, <span class="at">width =</span> <span class="dv">7</span>, <span class="at">height =</span> <span class="dv">5</span>, <span class="at">dpi =</span> <span class="dv">300</span>)</span>
 <span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="fu">ggsave</span>(<span class="fu">file.path</span>(out_dir, <span class="st">&quot;survival_by_family_faceted_by_experiment.png&quot;</span>),</span>
 <span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>       plot_family_facets, <span class="at">width =</span> <span class="dv">9</span>, <span class="at">height =</span> <span class="dv">7</span>, <span class="at">dpi =</span> <span class="dv">300</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 </div>
 </section>
 <section id="statistical-comparisons" class="level2">
 <h2 class="anchored" data-anchor-id="statistical-comparisons">Statistical comparisons</h2>
 <div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>logrank_experiment <span class="ot">&lt;-</span> <span class="fu">survdiff</span>(<span class="fu">Surv</span>(time, status) <span class="sc">~</span> Experiment, <span class="at">data =</span> survival_data)</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>logrank_temperature <span class="ot">&lt;-</span> <span class="fu">survdiff</span>(<span class="fu">Surv</span>(time, status) <span class="sc">~</span> temperature_C, <span class="at">data =</span> survival_data)</span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -4259,6 +4300,7 @@ $ Family_identity_note &lt;chr&gt; &quot;Observed label treated as family identi
 <span id="cb15-36"><a href="#cb15-36" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">p_value =</span> <span class="fu">signif</span>(p_value, <span class="dv">4</span>)) <span class="sc">%&gt;%</span></span>
 <span id="cb15-37"><a href="#cb15-37" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">chisq =</span> <span class="fu">round</span>(chisq, <span class="dv">3</span>)) <span class="sc">%&gt;%</span></span>
 <span id="cb15-38"><a href="#cb15-38" aria-hidden="true" tabindex="-1"></a>  knitr<span class="sc">::</span><span class="fu">kable</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
 <colgroup>
@@ -4317,10 +4359,13 @@ $ Family_identity_note &lt;chr&gt; &quot;Observed label treated as family identi
 </div>
 </div>
 <div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>cox_experiment <span class="ot">&lt;-</span> <span class="fu">coxph</span>(<span class="fu">Surv</span>(time, status) <span class="sc">~</span> Experiment, <span class="at">data =</span> survival_data)</span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>cox_temperature <span class="ot">&lt;-</span> <span class="fu">coxph</span>(<span class="fu">Surv</span>(time, status) <span class="sc">~</span> temperature_C, <span class="at">data =</span> survival_data)</span>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(cox_experiment)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Call:
 coxph(formula = Surv(time, status) ~ Experiment, data = survival_data)
@@ -4344,7 +4389,10 @@ Likelihood ratio test= 365.3  on 3 df,   p=&lt;2e-16
 Wald test            = 288.2  on 3 df,   p=&lt;2e-16
 Score (logrank) test = 440.1  on 3 df,   p=&lt;2e-16</code></pre>
 </div>
+<details class="code-fold">
+<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(cox_temperature)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Call:
 coxph(formula = Surv(time, status) ~ temperature_C, data = survival_data)
@@ -4369,6 +4417,8 @@ Score (logrank) test = 45.65  on 1 df,   p=1e-11</code></pre>
 <section id="take-homes" class="level2">
 <h2 class="anchored" data-anchor-id="take-homes">Take homes</h2>
 <div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>ranked_experiments <span class="ot">&lt;-</span> overall_summary <span class="sc">%&gt;%</span></span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(death_percent), median_survival_hr)</span>
 <span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -4376,32 +4426,48 @@ Score (logrank) test = 45.65  on 1 df,   p=1e-11</code></pre>
 <span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>least_severe <span class="ot">&lt;-</span> ranked_experiments <span class="sc">%&gt;%</span> <span class="fu">slice_tail</span>(<span class="at">n =</span> <span class="dv">1</span>)</span>
 <span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Experiments summarized:&quot;</span>, <span class="fu">n_distinct</span>(survival_data<span class="sc">$</span>Experiment), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Experiments summarized: 4 </code></pre>
 </div>
+<details class="code-fold">
+<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Total individuals:&quot;</span>, <span class="fu">nrow</span>(survival_data), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Total individuals: 373 </code></pre>
 </div>
+<details class="code-fold">
+<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Most severe by death percent:&quot;</span>, <span class="fu">as.character</span>(most_severe<span class="sc">$</span>Experiment),</span>
 <span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">sprintf</span>(<span class="st">&quot;(%.1f%% deaths)</span><span class="sc">\n</span><span class="st">&quot;</span>, most_severe<span class="sc">$</span>death_percent))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Most severe by death percent: 20260511 - 33 C (99.1% deaths)</code></pre>
 </div>
+<details class="code-fold">
+<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Least severe by death percent:&quot;</span>, <span class="fu">as.character</span>(least_severe<span class="sc">$</span>Experiment),</span>
 <span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">sprintf</span>(<span class="st">&quot;(%.1f%% deaths)</span><span class="sc">\n</span><span class="st">&quot;</span>, least_severe<span class="sc">$</span>death_percent))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Least severe by death percent: 20260427 - 33 C (49.2% deaths)</code></pre>
 </div>
+<details class="code-fold">
+<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Cross-experiment log-rank p-value:&quot;</span>,</span>
 <span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">signif</span>(comparison_summary<span class="sc">$</span>p_value[comparison_summary<span class="sc">$</span>comparison <span class="sc">==</span> <span class="st">&quot;Across experiments&quot;</span>], <span class="dv">4</span>),</span>
 <span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Cross-experiment log-rank p-value: 0 </code></pre>
 </div>
+<details class="code-fold">
+<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Temperature log-rank p-value:&quot;</span>,</span>
 <span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">signif</span>(comparison_summary<span class="sc">$</span>p_value[comparison_summary<span class="sc">$</span>comparison <span class="sc">==</span> <span class="st">&quot;Across temperatures&quot;</span>], <span class="dv">4</span>),</span>
 <span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Temperature log-rank p-value: 5.57e-11 </code></pre>
 </div>

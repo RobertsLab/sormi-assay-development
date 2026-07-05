@@ -6,54 +6,28 @@ format:
   html:
     toc: true
     toc-depth: 3
-    code-fold: false
+    code-fold: true
     embed-resources: true
 editor: visual
 ---
 
 ## Background
 
-This report summarizes the heat survivorship experiments in
-`heat-survivorship/data` and compares survival patterns across experiment dates,
-temperatures, and USDA families.
+This report summarizes the heat survivorship experiments in `heat-survivorship/data` and compares survival patterns across experiment dates, temperatures, and USDA families.
 
-The experiments were not all run with identical input formats or protocols. The
-20260604 data are stored in wide format, while the other experiments are stored
-as one observation per individual and time point. This report standardizes both
-formats into one survival-analysis table with one row per individual:
+The experiments were not all run with identical input formats or protocols. The 20260604 data are stored in wide format, while the other experiments are stored as one observation per individual and time point. This report standardizes both formats into one survival-analysis table with one row per individual:
 
-- `time`: first observed death time, or final observed time if still alive
-- `status`: death event indicator, where `1 = dead` and `0 = censored/alive`
-- `Experiment`: experiment date and temperature label
-- `Family`: observed USDA family/group label
-- `Family_identity_note`: notes ambiguous labels that should not be interpreted
-  as confirmed biological family identity
+-   `time`: first observed death time, or final observed time if still alive
+-   `status`: death event indicator, where `1 = dead` and `0 = censored/alive`
+-   `Experiment`: experiment date and temperature label
+-   `Family`: observed USDA family/group label
+-   `Family_identity_note`: notes ambiguous labels that should not be interpreted as confirmed biological family identity
 
-Cross-experiment comparisons should be interpreted as descriptive because
-temperature, container format, prior handling, and time-point schedules differ
-among experiments.
+Cross-experiment comparisons should be interpreted as descriptive because temperature, container format, prior handling, and time-point schedules differ among experiments.
 
-Size data are also not available uniformly across experiments. The 20260427
-experiment includes ImageJ area measurements (`area_mm2.measurement` in
-`metadata.csv` and `area_mm2.measurment` in `survivorship.csv`), but the
-20260511, 20260604, and 20260609 survivorship files do not include comparable
-oyster size measurements. Therefore, size differences can be summarized for
-20260427 only and cannot be evaluated directly across all experiments with the
-current data files.
+Size data are also not available uniformly across experiments. The 20260427 experiment includes ImageJ area measurements (`area_mm2.measurement` in `metadata.csv` and `area_mm2.measurment` in `survivorship.csv`), but the 20260511, 20260604, and 20260609 survivorship files do not include comparable oyster size measurements. Therefore, size differences can be summarized for 20260427 only and cannot be evaluated directly across all experiments with the current data files.
 
-Briefly, the family coverage also differs among experiments. The 20260427
-experiment examined families 1, 2, 3, 5, 6, 7, 8, 9, and 10; 20260511 examined
-families 1, 3, 5, 6, 7, 8, 9, 9B, and 10; 20260604 examined families 1, 2, 3,
-5, 6, 8, 9, and 10; and 20260609 examined families 1, 3, 5, 6, 7, 8, 9, 9B,
-and 10. In the 20260511 and 20260609 experiments, two groups were both
-originally labelled family 9. One of those groups was actually family 2 and the
-other was family 9, but the true identity of each group could not be resolved;
-therefore one group is retained as `9` and the other as `9B`. In this report,
-`9` and `9B` for those two experiments are treated as observed groups with
-ambiguous 2/9 identity, not as two confirmed biological families. Families 1, 3,
-5, 6, 8, and 10 are the clearly shared families across all experiments; family
-7 is absent from 20260604; and family 2 can only be interpreted directly in
-20260427 and 20260604.
+Briefly, the family coverage also differs among experiments. The 20260427 experiment examined families 1, 2, 3, 5, 6, 7, 8, 9, and 10; 20260511 examined families 1, 3, 5, 6, 7, 8, 9, 9B, and 10; 20260604 examined families 1, 2, 3, 5, 6, 8, 9, and 10; and 20260609 examined families 1, 3, 5, 6, 7, 8, 9, 9B, and 10. In the 20260511 and 20260609 experiments, two groups were both originally labelled family 9. One of those groups was actually family 2 and the other was family 9, but the true identity of each group could not be resolved; therefore one group is retained as `9` and the other as `9B`. In this report, `9` and `9B` for those two experiments are treated as observed groups with ambiguous 2/9 identity, not as two confirmed biological families. Families 1, 3, 5, 6, 8, and 10 are the clearly shared families across all experiments; family 7 is absent from 20260604; and family 2 can only be interpreted directly in 20260427 and 20260604.
 
 ## Set up
 
@@ -315,20 +289,11 @@ size_by_family_20260427 %>%
   knitr::kable()
 ```
 
-Only 20260427 has explicit oyster size measurements in the files currently in
-this directory. Across that experiment, all 128 individuals have ImageJ area
-measurements, with a mean area of 779.1 mm2 and median area of 741.6 mm2. Family
-means range from 674.6 mm2 in family 5 to 878.1 mm2 in family 10. Because the
-other experiments lack comparable size columns, these values should not be used
-to infer size differences across experiment dates.
+Only 20260427 has explicit oyster size measurements in the files currently in this directory. Across that experiment, all 128 individuals have ImageJ area measurements, with a mean area of 779.1 mm2 and median area of 741.6 mm2. Family means range from 674.6 mm2 in family 5 to 878.1 mm2 in family 10. Because the other experiments lack comparable size columns, these values should not be used to infer size differences across experiment dates.
 
 ## Speculative identity of 9 and 9B
 
-Because `9` and `9B` in 20260511 and 20260609 represent two unresolved groups,
-one truly family 2 and one truly family 9, the analysis below compares their
-survival summaries with experiments where families 2 and 9 were labelled
-directly. This is a hypothesis-generating comparison only; it should not be used
-to recode the data.
+Because `9` and `9B` in 20260511 and 20260609 represent two unresolved groups, one truly family 2 and one truly family 9, the analysis below compares their survival summaries with experiments where families 2 and 9 were labelled directly. This is a hypothesis-generating comparison only; it should not be used to recode the data.
 
 ```{r speculative-identity}
 two_nine_summary <- family_summary %>%
@@ -358,21 +323,9 @@ two_nine_summary %>%
   knitr::kable()
 ```
 
-Known-label experiments provide limited guidance. In the 20260427 33 C
-experiment, known families 2 and 9 were similar, with family 2 at 37.5% deaths
-and family 9 at 33.3% deaths, and neither reached median survival. In the
-20260604 36 C experiment, known family 2 appeared more susceptible than known
-family 9: family 2 had 100% deaths and median survival of 17 h, while family 9
-had 80% deaths and median survival of 42 h.
+Known-label experiments provide limited guidance. In the 20260427 33 C experiment, known families 2 and 9 were similar, with family 2 at 37.5% deaths and family 9 at 33.3% deaths, and neither reached median survival. In the 20260604 36 C experiment, known family 2 appeared more susceptible than known family 9: family 2 had 100% deaths and median survival of 17 h, while family 9 had 80% deaths and median survival of 42 h.
 
-Using that 36 C pattern as the strongest available clue, the 20260609 ambiguous
-groups weakly suggest that `9B` could be family 2 and `9` could be family 9,
-because `9B` had slightly higher mortality than `9` (72.7% vs. 63.6%). This is
-weak evidence because both groups had the same median survival estimate (48 h)
-and the experiment differs from 20260604 in design and timing. For 20260511,
-there is no useful survival-based distinction: both ambiguous groups had 100%
-deaths and median survival of 43 h, so the identities cannot be inferred from
-these survivorship data.
+Using that 36 C pattern as the strongest available clue, the 20260609 ambiguous groups weakly suggest that `9B` could be family 2 and `9` could be family 9, because `9B` had slightly higher mortality than `9` (72.7% vs. 63.6%). This is weak evidence because both groups had the same median survival estimate (48 h) and the experiment differs from 20260604 in design and timing. For 20260511, there is no useful survival-based distinction: both ambiguous groups had 100% deaths and median survival of 43 h, so the identities cannot be inferred from these survivorship data.
 
 ## Survival curves
 
