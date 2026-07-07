@@ -7,3 +7,5 @@ Oysters were brought back from Manchester on July 2.
 
 
 at 11am July 7 mortality was recorded with dead measured.
+
+at 4pm on July 7 the tripours were filled with FW (from tap) and moved to annex (Room Temperature)

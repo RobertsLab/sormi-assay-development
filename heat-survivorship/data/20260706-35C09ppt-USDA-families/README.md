@@ -17,4 +17,3 @@ Limited mortality
 Heat turned back on at Noon.
 
 
-ß
