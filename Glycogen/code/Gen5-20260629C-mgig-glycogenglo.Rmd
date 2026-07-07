@@ -1,0 +1,1268 @@
+---
+title: "Gen5-20260629C-mgig-glycogenglo"
+author: "Hazel Abrahamson-Amerine"
+date: "2026-07-07"
+output:  
+    github_document:
+      toc: true
+      number_sections: true
+---
+
+```{r setup, include=TRUE}
+library(knitr)
+library(ggplot2)
+library(dplyr)
+knitr::opts_chunk$set(
+  echo = TRUE,         # Display code chunks
+  eval = TRUE,        # Evaluate code chunks
+  warning = FALSE,     # Hide warnings
+  message = FALSE,     # Hide messages
+  comment = "",         # Prevents appending '##' to beginning of lines in code output
+  results = 'hold'     # Holds output so it's all printed together after code chunk
+)
+```
+
+# Load plate reader, luminescence, and sample weight data
+```{r data, include=TRUE}
+#load data
+#layout and luminescence
+#plate 1 - standard curve
+plate_layout1 <- read.csv("https://raw.githubusercontent.com/RobertsLab/sormi-assay-development/refs/heads/main/Glycogen/data/raw_luminescence/layout-Gen5-20260629A-mgig-glycogenglo.csv", header = FALSE)
+raw_luminescence1 <- read.csv("https://raw.githubusercontent.com/RobertsLab/sormi-assay-development/refs/heads/main/Glycogen/data/raw_luminescence/raw_lum-Gen5-20260629A-mgig-glycogenglo.csv", header = FALSE)
+
+cat("Plate layout1:\n")
+str(plate_layout1)
+
+cat("\n\n")
+
+cat("Raw luminescence1:\n")
+str(raw_luminescence1)
+
+#plate 2 - samples
+plate_layout2 <- read.csv("https://raw.githubusercontent.com/RobertsLab/sormi-assay-development/refs/heads/main/Glycogen/data/raw_luminescence/layout-Gen5-20260629C-mgig-glycogenglo.csv", header = FALSE)
+raw_luminescence2 <- read.csv("https://raw.githubusercontent.com/RobertsLab/sormi-assay-development/refs/heads/main/Glycogen/data/raw_luminescence/raw_lum-Gen5-20260629C-mgig-glycogenglo.csv", header = FALSE)
+
+cat("Plate layout2:\n")
+str(plate_layout2)
+
+cat("\n\n")
+
+cat("Raw luminescence2:\n")
+str(raw_luminescence2)
+
+#sample weights
+sample_weights <- read.csv("https://raw.githubusercontent.com/RobertsLab/sormi-assay-development/refs/heads/main/Glycogen/data/20260630_mgig_wholetissue_weights_GlycogenGlo.csv", header = FALSE)
+
+cat("Sample Weights:\n")
+str(sample_weights)
+```
+
+# Glycogen Standard Curve
+
+## Extract luminescence data
+```{r glycogen standard data, include=TRUE}
+# Extract glycogen standard curve data from plate layout and raw luminescence.
+# Rows F, G, H (rows 6, 7, 8) correspond to glycogen standards
+# Columns 1-5 contain the standard curve concentrations
+
+# Extract concentration values from plate layout (row 6, columns 1-5)
+# Parse concentration from labels like "STD-glyc-20" -> 20
+glyc_concentrations <- as.numeric(gsub("STD-glyc-", "", plate_layout1[6, 1:5]))
+glyc_concentrations
+
+# Extract standard curve luminescence values for each replicate from raw_luminescence
+glyc_row_F <- as.numeric(raw_luminescence1[6, 1:5])  # Row 6 (F)
+glyc_row_G <- as.numeric(raw_luminescence1[7, 1:5])  # Row 7 (G)
+glyc_row_H <- as.numeric(raw_luminescence1[8, 1:5])  # Row 8 (H)
+```
+
+```{r glycogen samples, include=TRUE}
+#Extract glycogen sample data
+#plate 1
+glyc_sample_cols1 <- c(1,2,3)
+glyc_N0.A_dilution <- as.numeric(gsub(".*-df\\.", "", plate_layout2[1, 1]))
+glyc_N0.A_luminescence <- as.numeric(raw_luminescence2[1, glyc_sample_cols1])
+
+glyc_N0.B_dilution <- as.numeric(gsub(".*-df\\.", "", plate_layout2[2, 1]))
+glyc_N0.B_luminescence <- as.numeric(raw_luminescence2[2, glyc_sample_cols1])
+
+glyc_N0.C_dilution <- as.numeric(gsub(".*-df\\.", "", plate_layout2[3, 1]))
+glyc_N0.C_luminescence <- as.numeric(raw_luminescence2[3, glyc_sample_cols1])
+
+glyc_H0.A_dilution <- as.numeric(gsub(".*-df\\.", "", plate_layout2[4, 1]))
+glyc_H0.A_luminescence <- as.numeric(raw_luminescence2[4, glyc_sample_cols1])
+
+glyc_H0.B_dilution <- as.numeric(gsub(".*-df\\.", "", plate_layout2[5, 1]))
+glyc_H0.B_luminescence <- as.numeric(raw_luminescence2[5, glyc_sample_cols1])
+
+glyc_H0.C_dilution <- as.numeric(gsub(".*-df\\.", "", plate_layout2[6, 1]))
+glyc_H0.C_luminescence <- as.numeric(raw_luminescence2[6, glyc_sample_cols1])
+
+glyc_HH.A_dilution <- as.numeric(gsub(".*-df\\.", "", plate_layout2[7, 1]))
+glyc_HH.A_luminescence <- as.numeric(raw_luminescence2[7, glyc_sample_cols1])
+
+glyc_HH.B_dilution <- as.numeric(gsub(".*-df\\.", "", plate_layout2[8, 1]))
+glyc_HH.B_luminescence <- as.numeric(raw_luminescence2[8, glyc_sample_cols1])
+
+
+glyc_sample_cols2 <- c(4,5,6)
+glyc_HH.E_dilution <- as.numeric(gsub(".*-df\\.", "", plate_layout2[1, 4]))
+glyc_HH.E_luminescence <- as.numeric(raw_luminescence2[1, glyc_sample_cols2])
+
+glyc_HH.F_dilution <- as.numeric(gsub(".*-df\\.", "", plate_layout2[2, 4]))
+glyc_HH.F_luminescence <- as.numeric(raw_luminescence2[2, glyc_sample_cols2])
+
+glyc_NH.A_dilution <- as.numeric(gsub(".*-df\\.", "", plate_layout2[3, 4]))
+glyc_NH.A_luminescence <- as.numeric(raw_luminescence2[3, glyc_sample_cols2])
+
+glyc_NH.C_dilution <- as.numeric(gsub(".*-df\\.", "", plate_layout2[4, 4]))
+glyc_NH.C_luminescence <- as.numeric(raw_luminescence2[4, glyc_sample_cols2])
+
+glyc_NH.D_dilution <- as.numeric(gsub(".*-df\\.", "", plate_layout2[5, 4]))
+glyc_NH.D_luminescence <- as.numeric(raw_luminescence2[5, glyc_sample_cols2])
+
+glyc_NH.F_dilution <- as.numeric(gsub(".*-df\\.", "", plate_layout2[6, 4]))
+glyc_NH.F_luminescence <- as.numeric(raw_luminescence2[6, glyc_sample_cols2])
+
+glyc_HN.A_dilution <- as.numeric(gsub(".*-df\\.", "", plate_layout2[7, 4]))
+glyc_HN.A_luminescence <- as.numeric(raw_luminescence2[7, glyc_sample_cols2])
+
+glyc_HN.B_dilution <- as.numeric(gsub(".*-df\\.", "", plate_layout2[8, 4]))
+glyc_HN.B_luminescence <- as.numeric(raw_luminescence2[8, glyc_sample_cols2])
+
+
+glyc_sample_cols3 <- c(7,8,9)
+glyc_HN.C_dilution <- as.numeric(gsub(".*-df\\.", "", plate_layout2[1, 7]))
+glyc_HN.C_luminescence <- as.numeric(raw_luminescence2[1, glyc_sample_cols3]) 
+
+glyc_HN.D_dilution <- as.numeric(gsub(".*-df\\.", "", plate_layout2[2, 7]))
+glyc_HN.D_luminescence <- as.numeric(raw_luminescence2[2, glyc_sample_cols3]) 
+
+glyc_NN.A_dilution <- as.numeric(gsub(".*-df\\.", "", plate_layout2[3, 7]))
+glyc_NN.A_luminescence <- as.numeric(raw_luminescence2[3, glyc_sample_cols3]) 
+
+glyc_NN.B_dilution <- as.numeric(gsub(".*-df\\.", "", plate_layout2[4, 7]))
+glyc_NN.B_luminescence <- as.numeric(raw_luminescence2[4, glyc_sample_cols3]) 
+
+glyc_NN.D_dilution <- as.numeric(gsub(".*-df\\.", "", plate_layout2[5, 7]))
+glyc_NN.D_luminescence <- as.numeric(raw_luminescence2[5, glyc_sample_cols3])
+
+glyc_NN.E_dilution <- as.numeric(gsub(".*-df\\.", "", plate_layout2[6, 7]))
+glyc_NN.E_luminescence <- as.numeric(raw_luminescence2[6, glyc_sample_cols3]) 
+
+glyc_NN.F_dilution <- as.numeric(gsub(".*-df\\.", "", plate_layout2[7, 7]))
+glyc_NN.F_luminescence <- as.numeric(raw_luminescence2[7, glyc_sample_cols3])
+```
+
+## Glycogen standard curve summary statistics and linear regression
+
+```{r glycogen summary statistics and linear regression,include=TRUE}
+# Calculate mean and standard error for each concentration
+glyc_means <- numeric(length(glyc_concentrations))
+glyc_std_errors <- numeric(length(glyc_concentrations))
+glyc_std_devs <- numeric(length(glyc_concentrations))
+
+for (i in 1:length(glyc_concentrations)) {
+  glyc_values <- c(glyc_row_F[i], glyc_row_G[i], glyc_row_H[i])
+  glyc_means[i] <- mean(glyc_values)
+  glyc_std_devs[i] <- sd(glyc_values)
+  glyc_std_errors[i] <- sd(glyc_values) / sqrt(length(glyc_values))
+}
+
+# Create data frame for plotting
+glycogen_summary_data <- data.frame(
+  glyc_concentration = glyc_concentrations,
+  glyc_mean_luminescence = glyc_means,
+  glyc_se = glyc_std_errors,
+  glyc_sd = glyc_std_devs,
+  glyc_cv = (glyc_std_devs / glyc_means) * 100
+)
+
+# Calculate linear regression and R-squared
+lm_model <- lm(glyc_mean_luminescence ~ glyc_concentration, data = glycogen_summary_data)
+glyc_r_squared <- summary(lm_model)$r.squared
+glyc_slope <- coef(lm_model)[2]
+glyc_intercept <- coef(lm_model)[1]
+
+glyc_r_squared
+glyc_slope
+glyc_intercept
+```
+
+## Calculate sample glycogen levels
+```{r add N0.A glycogen to standard curve, include=TRUE}
+# Create sample data frame for N0.A
+# Calculate glycogen concentration from luminescence using the standard curve equation
+# Rearranging y = mx + b to solve for x: x = (y - b) / m
+
+# Calculate mean and SE for each dilution factor across replicates
+glyc_N0.A_mean_lum <- numeric(length(glyc_N0.A_dilution))
+glyc_N0.A_se_lum <- numeric(length(glyc_N0.A_dilution))
+glyc_N0.A_mean_conc <- numeric(length(glyc_N0.A_dilution))
+
+for (i in 1:length(glyc_N0.A_dilution)) {
+  df_val <- glyc_N0.A_dilution[i]
+  # Get luminescence values for this dilution factor from both rows
+  glyc_N0.A_lum_values <- c(glyc_N0.A_luminescence[glyc_N0.A_dilution == df_val])
+  glyc_N0.A_mean_lum[i] <- mean(glyc_N0.A_lum_values)
+  glyc_N0.A_se_lum[i] <- sd(glyc_N0.A_lum_values) / sqrt(length(glyc_N0.A_lum_values))
+  # Calculate concentration from mean luminescence
+  glyc_N0.A_mean_conc[i] <- (glyc_N0.A_mean_lum[i] - glyc_intercept) / glyc_slope
+}
+
+glyc_N0.A_data <- data.frame(
+  glyc_N0.A_dilution_factor = glyc_N0.A_dilution,
+  glyc_N0.A_mean_luminescence = glyc_N0.A_mean_lum,
+  glyc_N0.A_se = glyc_N0.A_se_lum,
+  glyc_N0.A_conc =  glyc_N0.A_mean_conc,
+  label = paste0("N0.Adf.", glyc_N0.A_dilution)
+)
+glyc_N0.A_mean_lum
+glyc_N0.A_mean_conc
+```
+
+```{r add N0.B glycogen to standard curve, include=TRUE}
+# Create sample data frame for N0.B
+# Calculate glycogen concentration from luminescence using the standard curve equation
+# Rearranging y = mx + b to solve for x: x = (y - b) / m
+
+# Calculate mean and SE for each dilution factor across replicates
+glyc_N0.B_mean_lum <- numeric(length(glyc_N0.B_dilution))
+glyc_N0.B_se_lum <- numeric(length(glyc_N0.B_dilution))
+glyc_N0.B_mean_conc <- numeric(length(glyc_N0.B_dilution))
+
+for (i in 1:length(glyc_N0.B_dilution)) {
+  df_val <- glyc_N0.B_dilution[i]
+  # Get luminescence values for this dilution factor from both rows
+  glyc_N0.B_lum_values <- c(glyc_N0.B_luminescence[glyc_N0.B_dilution == df_val])
+  glyc_N0.B_mean_lum[i] <- mean(glyc_N0.B_lum_values)
+  glyc_N0.B_se_lum[i] <- sd(glyc_N0.B_lum_values) / sqrt(length(glyc_N0.B_lum_values))
+  # Calculate concentration from mean luminescence
+  glyc_N0.B_mean_conc[i] <- (glyc_N0.B_mean_lum[i] - glyc_intercept) / glyc_slope
+}
+
+glyc_N0.B_data <- data.frame(
+  glyc_N0.B_dilution_factor = glyc_N0.B_dilution,
+  glyc_N0.B_mean_luminescence = glyc_N0.B_mean_lum,
+  glyc_N0.B_se = glyc_N0.B_se_lum,
+  glyc_N0.B_conc =  glyc_N0.B_mean_conc,
+  label = paste0("N0.Bdf.", glyc_N0.B_dilution)
+)
+glyc_N0.B_mean_lum
+glyc_N0.B_mean_conc
+```
+
+```{r add N0.C glycogen to standard curve, include=TRUE}
+# Create sample data frame for N0.C
+# Calculate glycogen concentration from luminescence using the standard curve equation
+# Rearranging y = mx + b to solve for x: x = (y - b) / m
+
+# Calculate mean and SE for each dilution factor across replicates
+glyc_N0.C_mean_lum <- numeric(length(glyc_N0.C_dilution))
+glyc_N0.C_se_lum <- numeric(length(glyc_N0.C_dilution))
+glyc_N0.C_mean_conc <- numeric(length(glyc_N0.C_dilution))
+
+for (i in 1:length(glyc_N0.C_dilution)) {
+  df_val <- glyc_N0.C_dilution[i]
+  # Get luminescence values for this dilution factor from both rows
+  glyc_N0.C_lum_values <- c(glyc_N0.C_luminescence[glyc_N0.C_dilution == df_val])
+  glyc_N0.C_mean_lum[i] <- mean(glyc_N0.C_lum_values)
+  glyc_N0.C_se_lum[i] <- sd(glyc_N0.C_lum_values) / sqrt(length(glyc_N0.C_lum_values))
+  # Calculate concentration from mean luminescence
+  glyc_N0.C_mean_conc[i] <- (glyc_N0.C_mean_lum[i] - glyc_intercept) / glyc_slope
+}
+
+glyc_N0.C_data <- data.frame(
+  glyc_N0.C_dilution_factor = glyc_N0.C_dilution,
+  glyc_N0.C_mean_luminescence = glyc_N0.C_mean_lum,
+  glyc_N0.C_se = glyc_N0.C_se_lum,
+  glyc_N0.C_conc =  glyc_N0.C_mean_conc,
+  label = paste0("N0.Cdf.", glyc_N0.C_dilution)
+)
+glyc_N0.C_mean_lum
+glyc_N0.C_mean_conc
+```
+
+```{r add H0.A glycogen to standard curve, include=TRUE}
+# Create sample data frame for H0.A
+# Calculate glycogen concentration from luminescence using the standard curve equation
+# Rearranging y = mx + b to solve for x: x = (y - b) / m
+
+# Calculate mean and SE for each dilution factor across replicates
+glyc_H0.A_mean_lum <- numeric(length(glyc_H0.A_dilution))
+glyc_H0.A_se_lum <- numeric(length(glyc_H0.A_dilution))
+glyc_H0.A_mean_conc <- numeric(length(glyc_H0.A_dilution))
+
+for (i in 1:length(glyc_H0.A_dilution)) {
+  df_val <- glyc_H0.A_dilution[i]
+  # Get luminescence values for this dilution factor from both rows
+  glyc_H0.A_lum_values <- c(glyc_H0.A_luminescence[glyc_H0.A_dilution == df_val])
+  glyc_H0.A_mean_lum[i] <- mean(glyc_H0.A_lum_values)
+  glyc_H0.A_se_lum[i] <- sd(glyc_H0.A_lum_values) / sqrt(length(glyc_H0.A_lum_values))
+  # Calculate concentration from mean luminescence
+  glyc_H0.A_mean_conc[i] <- (glyc_H0.A_mean_lum[i] - glyc_intercept) / glyc_slope
+}
+
+glyc_H0.A_data <- data.frame(
+  glyc_H0.A_dilution_factor = glyc_H0.A_dilution,
+  glyc_H0.A_mean_luminescence = glyc_H0.A_mean_lum,
+  glyc_H0.A_se = glyc_H0.A_se_lum,
+  glyc_H0.A_conc =  glyc_H0.A_mean_conc,
+  label = paste0("H0.Adf.", glyc_H0.A_dilution)
+)
+glyc_H0.A_mean_lum
+glyc_H0.A_mean_conc
+```
+
+```{r add H0.B glycogen to standard curve, include=TRUE}
+# Create sample data frame for H0.B
+# Calculate glycogen concentration from luminescence using the standard curve equation
+# Rearranging y = mx + b to solve for x: x = (y - b) / m
+
+# Calculate mean and SE for each dilution factor across replicates
+glyc_H0.B_mean_lum <- numeric(length(glyc_H0.B_dilution))
+glyc_H0.B_se_lum <- numeric(length(glyc_H0.B_dilution))
+glyc_H0.B_mean_conc <- numeric(length(glyc_H0.B_dilution))
+
+for (i in 1:length(glyc_H0.B_dilution)) {
+  df_val <- glyc_H0.B_dilution[i]
+  # Get luminescence values for this dilution factor from both rows
+  glyc_H0.B_lum_values <- c(glyc_H0.B_luminescence[glyc_H0.B_dilution == df_val])
+  glyc_H0.B_mean_lum[i] <- mean(glyc_H0.B_lum_values)
+  glyc_H0.B_se_lum[i] <- sd(glyc_H0.B_lum_values) / sqrt(length(glyc_H0.B_lum_values))
+  # Calculate concentration from mean luminescence
+  glyc_H0.B_mean_conc[i] <- (glyc_H0.B_mean_lum[i] - glyc_intercept) / glyc_slope
+}
+
+glyc_H0.B_data <- data.frame(
+  glyc_H0.B_dilution_factor = glyc_H0.B_dilution,
+  glyc_H0.B_mean_luminescence = glyc_H0.B_mean_lum,
+  glyc_H0.B_se = glyc_H0.B_se_lum,
+  glyc_H0.B_conc =  glyc_H0.B_mean_conc,
+  label = paste0("H0.Bdf.", glyc_H0.B_dilution)
+)
+glyc_H0.B_mean_lum
+glyc_H0.B_mean_conc
+```
+
+```{r add H0.C glycogen to standard curve, include=TRUE}
+# Create sample data frame for H0.C
+# Calculate glycogen concentration from luminescence using the standard curve equation
+# Rearranging y = mx + b to solve for x: x = (y - b) / m
+
+# Calculate mean and SE for each dilution factor across replicates
+glyc_H0.C_mean_lum <- numeric(length(glyc_H0.C_dilution))
+glyc_H0.C_se_lum <- numeric(length(glyc_H0.C_dilution))
+glyc_H0.C_mean_conc <- numeric(length(glyc_H0.C_dilution))
+
+for (i in 1:length(glyc_H0.C_dilution)) {
+  df_val <- glyc_H0.C_dilution[i]
+  # Get luminescence values for this dilution factor from both rows
+  glyc_H0.C_lum_values <- c(glyc_H0.C_luminescence[glyc_H0.C_dilution == df_val])
+  glyc_H0.C_mean_lum[i] <- mean(glyc_H0.C_lum_values)
+  glyc_H0.C_se_lum[i] <- sd(glyc_H0.C_lum_values) / sqrt(length(glyc_H0.C_lum_values))
+  # Calculate concentration from mean luminescence
+  glyc_H0.C_mean_conc[i] <- (glyc_H0.C_mean_lum[i] - glyc_intercept) / glyc_slope
+}
+
+glyc_H0.C_data <- data.frame(
+  glyc_H0.C_dilution_factor = glyc_H0.C_dilution,
+  glyc_H0.C_mean_luminescence = glyc_H0.C_mean_lum,
+  glyc_H0.C_se = glyc_H0.C_se_lum,
+  glyc_H0.C_conc =  glyc_H0.C_mean_conc,
+  label = paste0("H0.Cdf.", glyc_H0.C_dilution)
+)
+glyc_H0.C_mean_lum
+glyc_H0.C_mean_conc
+```
+
+```{r add HH.A glycogen to standard curve, include=TRUE}
+# Create sample data frame for HH.A
+# Calculate glycogen concentration from luminescence using the standard curve equation
+# Rearranging y = mx + b to solve for x: x = (y - b) / m
+
+# Calculate mean and SE for each dilution factor across replicates
+glyc_HH.A_mean_lum <- numeric(length(glyc_HH.A_dilution))
+glyc_HH.A_se_lum <- numeric(length(glyc_HH.A_dilution))
+glyc_HH.A_mean_conc <- numeric(length(glyc_HH.A_dilution))
+
+for (i in 1:length(glyc_HH.A_dilution)) {
+  df_val <- glyc_HH.A_dilution[i]
+  # Get luminescence values for this dilution factor from both rows
+  glyc_HH.A_lum_values <- c(glyc_HH.A_luminescence[glyc_HH.A_dilution == df_val])
+  glyc_HH.A_mean_lum[i] <- mean(glyc_HH.A_lum_values)
+  glyc_HH.A_se_lum[i] <- sd(glyc_HH.A_lum_values) / sqrt(length(glyc_HH.A_lum_values))
+  # Calculate concentration from mean luminescence
+  glyc_HH.A_mean_conc[i] <- (glyc_HH.A_mean_lum[i] - glyc_intercept) / glyc_slope
+}
+
+glyc_HH.A_data <- data.frame(
+  glyc_HH.A_dilution_factor = glyc_HH.A_dilution,
+  glyc_HH.A_mean_luminescence = glyc_HH.A_mean_lum,
+  glyc_HH.A_se = glyc_HH.A_se_lum,
+  glyc_HH.A_conc =  glyc_HH.A_mean_conc,
+  label = paste0("HH.Adf.", glyc_HH.A_dilution)
+)
+glyc_HH.A_mean_lum
+glyc_HH.A_mean_conc
+```
+
+```{r add HH.B glycogen to standard curve, include=TRUE}
+# Create sample data frame for HH.B
+# Calculate glycogen concentration from luminescence using the standard curve equation
+# Rearranging y = mx + b to solve for x: x = (y - b) / m
+
+# Calculate mean and SE for each dilution factor across replicates
+glyc_HH.B_mean_lum <- numeric(length(glyc_HH.B_dilution))
+glyc_HH.B_se_lum <- numeric(length(glyc_HH.B_dilution))
+glyc_HH.B_mean_conc <- numeric(length(glyc_HH.B_dilution))
+
+for (i in 1:length(glyc_HH.B_dilution)) {
+  df_val <- glyc_HH.B_dilution[i]
+  # Get luminescence values for this dilution factor from both rows
+  glyc_HH.B_lum_values <- c(glyc_HH.B_luminescence[glyc_HH.B_dilution == df_val])
+  glyc_HH.B_mean_lum[i] <- mean(glyc_HH.B_lum_values)
+  glyc_HH.B_se_lum[i] <- sd(glyc_HH.B_lum_values) / sqrt(length(glyc_HH.B_lum_values))
+  # Calculate concentration from mean luminescence
+  glyc_HH.B_mean_conc[i] <- (glyc_HH.B_mean_lum[i] - glyc_intercept) / glyc_slope
+}
+
+glyc_HH.B_data <- data.frame(
+  glyc_HH.B_dilution_factor = glyc_HH.B_dilution,
+  glyc_HH.B_mean_luminescence = glyc_HH.B_mean_lum,
+  glyc_HH.B_se = glyc_HH.B_se_lum,
+  glyc_HH.B_conc =  glyc_HH.B_mean_conc,
+  label = paste0("HH.Bdf.", glyc_HH.B_dilution)
+)
+glyc_HH.B_mean_lum
+glyc_HH.B_mean_conc
+```
+
+```{r add HH.E glycogen to standard curve, include=TRUE}
+# Create sample data frame for HH.E
+# Calculate glycogen concentration from luminescence using the standard curve equation
+# Rearranging y = mx + b to solve for x: x = (y - b) / m
+
+# Calculate mean and SE for each dilution factor across replicates
+glyc_HH.E_mean_lum <- numeric(length(glyc_HH.E_dilution))
+glyc_HH.E_se_lum <- numeric(length(glyc_HH.E_dilution))
+glyc_HH.E_mean_conc <- numeric(length(glyc_HH.E_dilution))
+
+for (i in 1:length(glyc_HH.E_dilution)) {
+  df_val <- glyc_HH.E_dilution[i]
+  # Get luminescence values for this dilution factor from both rows
+  glyc_HH.E_lum_values <- c(glyc_HH.E_luminescence[glyc_HH.E_dilution == df_val])
+  glyc_HH.E_mean_lum[i] <- mean(glyc_HH.E_lum_values)
+  glyc_HH.E_se_lum[i] <- sd(glyc_HH.E_lum_values) / sqrt(length(glyc_HH.E_lum_values))
+  # Calculate concentration from mean luminescence
+  glyc_HH.E_mean_conc[i] <- (glyc_HH.E_mean_lum[i] - glyc_intercept) / glyc_slope
+}
+
+glyc_HH.E_data <- data.frame(
+  glyc_HH.E_dilution_factor = glyc_HH.E_dilution,
+  glyc_HH.E_mean_luminescence = glyc_HH.E_mean_lum,
+  glyc_HH.E_se = glyc_HH.E_se_lum,
+  glyc_HH.E_conc =  glyc_HH.E_mean_conc,
+  label = paste0("HH.Edf.", glyc_HH.E_dilution)
+)
+glyc_HH.E_mean_lum
+glyc_HH.E_mean_conc
+```
+
+```{r add HH.F glycogen to standard curve, include=TRUE}
+# Create sample data frame for HH.F
+# Calculate glycogen concentration from luminescence using the standard curve equation
+# Rearranging y = mx + b to solve for x: x = (y - b) / m
+
+# Calculate mean and SE for each dilution factor across replicates
+glyc_HH.F_mean_lum <- numeric(length(glyc_HH.F_dilution))
+glyc_HH.F_se_lum <- numeric(length(glyc_HH.F_dilution))
+glyc_HH.F_mean_conc <- numeric(length(glyc_HH.F_dilution))
+
+for (i in 1:length(glyc_HH.F_dilution)) {
+  df_val <- glyc_HH.F_dilution[i]
+  # Get luminescence values for this dilution factor from both rows
+  glyc_HH.F_lum_values <- c(glyc_HH.F_luminescence[glyc_HH.F_dilution == df_val])
+  glyc_HH.F_mean_lum[i] <- mean(glyc_HH.F_lum_values)
+  glyc_HH.F_se_lum[i] <- sd(glyc_HH.F_lum_values) / sqrt(length(glyc_HH.F_lum_values))
+  # Calculate concentration from mean luminescence
+  glyc_HH.F_mean_conc[i] <- (glyc_HH.F_mean_lum[i] - glyc_intercept) / glyc_slope
+}
+
+glyc_HH.F_data <- data.frame(
+  glyc_HH.F_dilution_factor = glyc_HH.F_dilution,
+  glyc_HH.F_mean_luminescence = glyc_HH.F_mean_lum,
+  glyc_HH.F_se = glyc_HH.F_se_lum,
+  glyc_HH.F_conc =  glyc_HH.F_mean_conc,
+  label = paste0("HH.Fdf.", glyc_HH.F_dilution)
+)
+glyc_HH.F_mean_lum
+glyc_HH.F_mean_conc
+```
+
+```{r add NH.A glycogen to standard curve, include=TRUE}
+# Create sample data frame for NH.A
+# Calculate glycogen concentration from luminescence using the standard curve equation
+# Rearranging y = mx + b to solve for x: x = (y - b) / m
+
+# Calculate mean and SE for each dilution factor across replicates
+glyc_NH.A_mean_lum <- numeric(length(glyc_NH.A_dilution))
+glyc_NH.A_se_lum <- numeric(length(glyc_NH.A_dilution))
+glyc_NH.A_mean_conc <- numeric(length(glyc_NH.A_dilution))
+
+for (i in 1:length(glyc_NH.A_dilution)) {
+  df_val <- glyc_NH.A_dilution[i]
+  # Get luminescence values for this dilution factor from both rows
+  glyc_NH.A_lum_values <- c(glyc_NH.A_luminescence[glyc_NH.A_dilution == df_val])
+  glyc_NH.A_mean_lum[i] <- mean(glyc_NH.A_lum_values)
+  glyc_NH.A_se_lum[i] <- sd(glyc_NH.A_lum_values) / sqrt(length(glyc_NH.A_lum_values))
+  # Calculate concentration from mean luminescence
+  glyc_NH.A_mean_conc[i] <- (glyc_NH.A_mean_lum[i] - glyc_intercept) / glyc_slope
+}
+
+glyc_NH.A_data <- data.frame(
+  glyc_NH.A_dilution_factor = glyc_NH.A_dilution,
+  glyc_NH.A_mean_luminescence = glyc_NH.A_mean_lum,
+  glyc_NH.A_se = glyc_NH.A_se_lum,
+  glyc_NH.A_conc =  glyc_NH.A_mean_conc,
+  label = paste0("NH.Adf.", glyc_NH.A_dilution)
+)
+glyc_NH.A_mean_lum
+glyc_NH.A_mean_conc
+```
+
+```{r add NH.C glycogen to standard curve, include=TRUE}
+# Create sample data frame for NH.C
+# Calculate glycogen concentration from luminescence using the standard curve equation
+# Rearranging y = mx + b to solve for x: x = (y - b) / m
+
+# Calculate mean and SE for each dilution factor across replicates
+glyc_NH.C_mean_lum <- numeric(length(glyc_NH.C_dilution))
+glyc_NH.C_se_lum <- numeric(length(glyc_NH.C_dilution))
+glyc_NH.C_mean_conc <- numeric(length(glyc_NH.C_dilution))
+
+for (i in 1:length(glyc_NH.C_dilution)) {
+  df_val <- glyc_NH.C_dilution[i]
+  # Get luminescence values for this dilution factor from both rows
+  glyc_NH.C_lum_values <- c(glyc_NH.C_luminescence[glyc_NH.C_dilution == df_val])
+  glyc_NH.C_mean_lum[i] <- mean(glyc_NH.C_lum_values)
+  glyc_NH.C_se_lum[i] <- sd(glyc_NH.C_lum_values) / sqrt(length(glyc_NH.C_lum_values))
+  # Calculate concentration from mean luminescence
+  glyc_NH.C_mean_conc[i] <- (glyc_NH.C_mean_lum[i] - glyc_intercept) / glyc_slope
+}
+
+glyc_NH.C_data <- data.frame(
+  glyc_NH.C_dilution_factor = glyc_NH.C_dilution,
+  glyc_NH.C_mean_luminescence = glyc_NH.C_mean_lum,
+  glyc_NH.C_se = glyc_NH.C_se_lum,
+  glyc_NH.C_conc =  glyc_NH.C_mean_conc,
+  label = paste0("NH.Cdf.", glyc_NH.C_dilution)
+)
+glyc_NH.C_mean_lum
+glyc_NH.C_mean_conc
+```
+
+```{r add NH.D glycogen to standard curve, include=TRUE}
+# Create sample data frame for NH.D
+# Calculate glycogen concentration from luminescence using the standard curve equation
+# Rearranging y = mx + b to solve for x: x = (y - b) / m
+
+# Calculate mean and SE for each dilution factor across replicates
+glyc_NH.D_mean_lum <- numeric(length(glyc_NH.D_dilution))
+glyc_NH.D_se_lum <- numeric(length(glyc_NH.D_dilution))
+glyc_NH.D_mean_conc <- numeric(length(glyc_NH.D_dilution))
+
+for (i in 1:length(glyc_NH.D_dilution)) {
+  df_val <- glyc_NH.D_dilution[i]
+  # Get luminescence values for this dilution factor from both rows
+  glyc_NH.D_lum_values <- c(glyc_NH.D_luminescence[glyc_NH.D_dilution == df_val])
+  glyc_NH.D_mean_lum[i] <- mean(glyc_NH.D_lum_values)
+  glyc_NH.D_se_lum[i] <- sd(glyc_NH.D_lum_values) / sqrt(length(glyc_NH.D_lum_values))
+  # Calculate concentration from mean luminescence
+  glyc_NH.D_mean_conc[i] <- (glyc_NH.D_mean_lum[i] - glyc_intercept) / glyc_slope
+}
+
+glyc_NH.D_data <- data.frame(
+  glyc_NH.D_dilution_factor = glyc_NH.D_dilution,
+  glyc_NH.D_mean_luminescence = glyc_NH.D_mean_lum,
+  glyc_NH.D_se = glyc_NH.D_se_lum,
+  glyc_NH.D_conc =  glyc_NH.D_mean_conc,
+  label = paste0("NH.Ddf.", glyc_NH.D_dilution)
+)
+glyc_NH.D_mean_lum
+glyc_NH.D_mean_conc
+```
+
+```{r add NH.F glycogen to standard curve, include=TRUE}
+# Create sample data frame for NH.F
+# Calculate glycogen concentration from luminescence using the standard curve equation
+# Rearranging y = mx + b to solve for x: x = (y - b) / m
+
+# Calculate mean and SE for each dilution factor across replicates
+glyc_NH.F_mean_lum <- numeric(length(glyc_NH.F_dilution))
+glyc_NH.F_se_lum <- numeric(length(glyc_NH.F_dilution))
+glyc_NH.F_mean_conc <- numeric(length(glyc_NH.F_dilution))
+
+for (i in 1:length(glyc_NH.F_dilution)) {
+  df_val <- glyc_NH.F_dilution[i]
+  # Get luminescence values for this dilution factor from both rows
+  glyc_NH.F_lum_values <- c(glyc_NH.F_luminescence[glyc_NH.F_dilution == df_val])
+  glyc_NH.F_mean_lum[i] <- mean(glyc_NH.F_lum_values)
+  glyc_NH.F_se_lum[i] <- sd(glyc_NH.F_lum_values) / sqrt(length(glyc_NH.F_lum_values))
+  # Calculate concentration from mean luminescence
+  glyc_NH.F_mean_conc[i] <- (glyc_NH.F_mean_lum[i] - glyc_intercept) / glyc_slope
+}
+
+glyc_NH.F_data <- data.frame(
+  glyc_NH.F_dilution_factor = glyc_NH.F_dilution,
+  glyc_NH.F_mean_luminescence = glyc_NH.F_mean_lum,
+  glyc_NH.F_se = glyc_NH.F_se_lum,
+  glyc_NH.F_conc =  glyc_NH.F_mean_conc,
+  label = paste0("NH.Fdf.", glyc_NH.F_dilution)
+)
+glyc_NH.F_mean_lum
+glyc_NH.F_mean_conc
+```
+
+```{r add HN.A glycogen to standard curve, include=TRUE}
+# Create sample data frame for HN.A
+# Calculate glycogen concentration from luminescence using the standard curve equation
+# Rearranging y = mx + b to solve for x: x = (y - b) / m
+
+# Calculate mean and SE for each dilution factor across replicates
+glyc_HN.A_mean_lum <- numeric(length(glyc_HN.A_dilution))
+glyc_HN.A_se_lum <- numeric(length(glyc_HN.A_dilution))
+glyc_HN.A_mean_conc <- numeric(length(glyc_HN.A_dilution))
+
+for (i in 1:length(glyc_HN.A_dilution)) {
+  df_val <- glyc_HN.A_dilution[i]
+  # Get luminescence values for this dilution factor from both rows
+  glyc_HN.A_lum_values <- c(glyc_HN.A_luminescence[glyc_HN.A_dilution == df_val])
+  glyc_HN.A_mean_lum[i] <- mean(glyc_HN.A_lum_values)
+  glyc_HN.A_se_lum[i] <- sd(glyc_HN.A_lum_values) / sqrt(length(glyc_HN.A_lum_values))
+  # Calculate concentration from mean luminescence
+  glyc_HN.A_mean_conc[i] <- (glyc_HN.A_mean_lum[i] - glyc_intercept) / glyc_slope
+}
+
+glyc_HN.A_data <- data.frame(
+  glyc_HN.A_dilution_factor = glyc_HN.A_dilution,
+  glyc_HN.A_mean_luminescence = glyc_HN.A_mean_lum,
+  glyc_HN.A_se = glyc_HN.A_se_lum,
+  glyc_HN.A_conc =  glyc_HN.A_mean_conc,
+  label = paste0("HN.Adf.", glyc_HN.A_dilution)
+)
+glyc_HN.A_mean_lum
+glyc_HN.A_mean_conc
+```
+
+```{r add HN.B glycogen to standard curve, include=TRUE}
+# Create sample data frame for HN.B
+# Calculate glycogen concentration from luminescence using the standard curve equation
+# Rearranging y = mx + b to solve for x: x = (y - b) / m
+
+# Calculate mean and SE for each dilution factor across replicates
+glyc_HN.B_mean_lum <- numeric(length(glyc_HN.B_dilution))
+glyc_HN.B_se_lum <- numeric(length(glyc_HN.B_dilution))
+glyc_HN.B_mean_conc <- numeric(length(glyc_HN.B_dilution))
+
+for (i in 1:length(glyc_HN.B_dilution)) {
+  df_val <- glyc_HN.B_dilution[i]
+  # Get luminescence values for this dilution factor from both rows
+  glyc_HN.B_lum_values <- c(glyc_HN.B_luminescence[glyc_HN.B_dilution == df_val])
+  glyc_HN.B_mean_lum[i] <- mean(glyc_HN.B_lum_values)
+  glyc_HN.B_se_lum[i] <- sd(glyc_HN.B_lum_values) / sqrt(length(glyc_HN.B_lum_values))
+  # Calculate concentration from mean luminescence
+  glyc_HN.B_mean_conc[i] <- (glyc_HN.B_mean_lum[i] - glyc_intercept) / glyc_slope
+}
+
+glyc_HN.B_data <- data.frame(
+  glyc_HN.B_dilution_factor = glyc_HN.B_dilution,
+  glyc_HN.B_mean_luminescence = glyc_HN.B_mean_lum,
+  glyc_HN.B_se = glyc_HN.B_se_lum,
+  glyc_HN.B_conc =  glyc_HN.B_mean_conc,
+  label = paste0("HN.Bdf.", glyc_HN.B_dilution)
+)
+glyc_HN.B_mean_lum
+glyc_HN.B_mean_conc
+```
+
+```{r add HN.C glycogen to standard curve, include=TRUE}
+# Create sample data frame for HN.C
+# Calculate glycogen concentration from luminescence using the standard curve equation
+# Rearranging y = mx + b to solve for x: x = (y - b) / m
+
+# Calculate mean and SE for each dilution factor across replicates
+glyc_HN.C_mean_lum <- numeric(length(glyc_HN.C_dilution))
+glyc_HN.C_se_lum <- numeric(length(glyc_HN.C_dilution))
+glyc_HN.C_mean_conc <- numeric(length(glyc_HN.C_dilution))
+
+for (i in 1:length(glyc_HN.C_dilution)) {
+  df_val <- glyc_HN.C_dilution[i]
+  # Get luminescence values for this dilution factor from both rows
+  glyc_HN.C_lum_values <- c(glyc_HN.C_luminescence[glyc_HN.C_dilution == df_val])
+  glyc_HN.C_mean_lum[i] <- mean(glyc_HN.C_lum_values)
+  glyc_HN.C_se_lum[i] <- sd(glyc_HN.C_lum_values) / sqrt(length(glyc_HN.C_lum_values))
+  # Calculate concentration from mean luminescence
+  glyc_HN.C_mean_conc[i] <- (glyc_HN.C_mean_lum[i] - glyc_intercept) / glyc_slope
+}
+
+glyc_HN.C_data <- data.frame(
+  glyc_HN.C_dilution_factor = glyc_HN.C_dilution,
+  glyc_HN.C_mean_luminescence = glyc_HN.C_mean_lum,
+  glyc_HN.C_se = glyc_HN.C_se_lum,
+  glyc_HN.C_conc =  glyc_HN.C_mean_conc,
+  label = paste0("HN.Cdf.", glyc_HN.C_dilution)
+)
+glyc_HN.C_mean_lum
+glyc_HN.C_mean_conc
+```
+
+```{r add HN.D glycogen to standard curve, include=TRUE}
+# Create sample data frame for HN.D
+# Calculate glycogen concentration from luminescence using the standard curve equation
+# Rearranging y = mx + b to solve for x: x = (y - b) / m
+
+# Calculate mean and SE for each dilution factor across replicates
+glyc_HN.D_mean_lum <- numeric(length(glyc_HN.D_dilution))
+glyc_HN.D_se_lum <- numeric(length(glyc_HN.D_dilution))
+glyc_HN.D_mean_conc <- numeric(length(glyc_HN.D_dilution))
+
+for (i in 1:length(glyc_HN.D_dilution)) {
+  df_val <- glyc_HN.D_dilution[i]
+  # Get luminescence values for this dilution factor from both rows
+  glyc_HN.D_lum_values <- c(glyc_HN.D_luminescence[glyc_HN.D_dilution == df_val])
+  glyc_HN.D_mean_lum[i] <- mean(glyc_HN.D_lum_values)
+  glyc_HN.D_se_lum[i] <- sd(glyc_HN.D_lum_values) / sqrt(length(glyc_HN.D_lum_values))
+  # Calculate concentration from mean luminescence
+  glyc_HN.D_mean_conc[i] <- (glyc_HN.D_mean_lum[i] - glyc_intercept) / glyc_slope
+}
+
+glyc_HN.D_data <- data.frame(
+  glyc_HN.D_dilution_factor = glyc_HN.D_dilution,
+  glyc_HN.D_mean_luminescence = glyc_HN.D_mean_lum,
+  glyc_HN.D_se = glyc_HN.D_se_lum,
+  glyc_HN.D_conc =  glyc_HN.D_mean_conc,
+  label = paste0("HN.Ddf.", glyc_HN.D_dilution)
+)
+glyc_HN.D_mean_lum
+glyc_HN.D_mean_conc
+```
+
+```{r add NN.A glycogen to standard curve, include=TRUE}
+# Create sample data frame for NN.A
+# Calculate glycogen concentration from luminescence using the standard curve equation
+# Rearranging y = mx + b to solve for x: x = (y - b) / m
+
+# Calculate mean and SE for each dilution factor across replicates
+glyc_NN.A_mean_lum <- numeric(length(glyc_NN.A_dilution))
+glyc_NN.A_se_lum <- numeric(length(glyc_NN.A_dilution))
+glyc_NN.A_mean_conc <- numeric(length(glyc_NN.A_dilution))
+
+for (i in 1:length(glyc_NN.A_dilution)) {
+  df_val <- glyc_NN.A_dilution[i]
+  # Get luminescence values for this dilution factor from both rows
+  glyc_NN.A_lum_values <- c(glyc_NN.A_luminescence[glyc_NN.A_dilution == df_val])
+  glyc_NN.A_mean_lum[i] <- mean(glyc_NN.A_lum_values)
+  glyc_NN.A_se_lum[i] <- sd(glyc_NN.A_lum_values) / sqrt(length(glyc_NN.A_lum_values))
+  # Calculate concentration from mean luminescence
+  glyc_NN.A_mean_conc[i] <- (glyc_NN.A_mean_lum[i] - glyc_intercept) / glyc_slope
+}
+
+glyc_NN.A_data <- data.frame(
+  glyc_NN.A_dilution_factor = glyc_NN.A_dilution,
+  glyc_NN.A_mean_luminescence = glyc_NN.A_mean_lum,
+  glyc_NN.A_se = glyc_NN.A_se_lum,
+  glyc_NN.A_conc =  glyc_NN.A_mean_conc,
+  label = paste0("NN.Adf.", glyc_NN.A_dilution)
+)
+glyc_NN.A_mean_lum
+glyc_NN.A_mean_conc
+```
+
+```{r add NN.B glycogen to standard curve, include=TRUE}
+# Create sample data frame for NN.B
+# Calculate glycogen concentration from luminescence using the standard curve equation
+# Rearranging y = mx + b to solve for x: x = (y - b) / m
+
+# Calculate mean and SE for each dilution factor across replicates
+glyc_NN.B_mean_lum <- numeric(length(glyc_NN.B_dilution))
+glyc_NN.B_se_lum <- numeric(length(glyc_NN.B_dilution))
+glyc_NN.B_mean_conc <- numeric(length(glyc_NN.B_dilution))
+
+for (i in 1:length(glyc_NN.B_dilution)) {
+  df_val <- glyc_NN.B_dilution[i]
+  # Get luminescence values for this dilution factor from both rows
+  glyc_NN.B_lum_values <- c(glyc_NN.B_luminescence[glyc_NN.B_dilution == df_val])
+  glyc_NN.B_mean_lum[i] <- mean(glyc_NN.B_lum_values)
+  glyc_NN.B_se_lum[i] <- sd(glyc_NN.B_lum_values) / sqrt(length(glyc_NN.B_lum_values))
+  # Calculate concentration from mean luminescence
+  glyc_NN.B_mean_conc[i] <- (glyc_NN.B_mean_lum[i] - glyc_intercept) / glyc_slope
+}
+
+glyc_NN.B_data <- data.frame(
+  glyc_NN.B_dilution_factor = glyc_NN.B_dilution,
+  glyc_NN.B_mean_luminescence = glyc_NN.B_mean_lum,
+  glyc_NN.B_se = glyc_NN.B_se_lum,
+  glyc_NN.B_conc =  glyc_NN.B_mean_conc,
+  label = paste0("NN.Bdf.", glyc_NN.B_dilution)
+)
+glyc_NN.B_mean_lum
+glyc_NN.B_mean_conc
+```
+
+```{r add NN.D glycogen to standard curve, include=TRUE}
+# Create sample data frame for NN.D
+# Calculate glycogen concentration from luminescence using the standard curve equation
+# Rearranging y = mx + b to solve for x: x = (y - b) / m
+
+# Calculate mean and SE for each dilution factor across replicates
+glyc_NN.D_mean_lum <- numeric(length(glyc_NN.D_dilution))
+glyc_NN.D_se_lum <- numeric(length(glyc_NN.D_dilution))
+glyc_NN.D_mean_conc <- numeric(length(glyc_NN.D_dilution))
+
+for (i in 1:length(glyc_NN.D_dilution)) {
+  df_val <- glyc_NN.D_dilution[i]
+  # Get luminescence values for this dilution factor from both rows
+  glyc_NN.D_lum_values <- c(glyc_NN.D_luminescence[glyc_NN.D_dilution == df_val])
+  glyc_NN.D_mean_lum[i] <- mean(glyc_NN.D_lum_values)
+  glyc_NN.D_se_lum[i] <- sd(glyc_NN.D_lum_values) / sqrt(length(glyc_NN.D_lum_values))
+  # Calculate concentration from mean luminescence
+  glyc_NN.D_mean_conc[i] <- (glyc_NN.D_mean_lum[i] - glyc_intercept) / glyc_slope
+}
+
+glyc_NN.D_data <- data.frame(
+  glyc_NN.D_dilution_factor = glyc_NN.D_dilution,
+  glyc_NN.D_mean_luminescence = glyc_NN.D_mean_lum,
+  glyc_NN.D_se = glyc_NN.D_se_lum,
+  glyc_NN.D_conc =  glyc_NN.D_mean_conc,
+  label = paste0("NN.Ddf.", glyc_NN.D_dilution)
+)
+glyc_NN.D_mean_lum
+glyc_NN.D_mean_conc
+```
+
+```{r add NN.E glycogen to standard curve, include=TRUE}
+# Create sample data frame for NN.E
+# Calculate glycogen concentration from luminescence using the standard curve equation
+# Rearranging y = mx + b to solve for x: x = (y - b) / m
+
+# Calculate mean and SE for each dilution factor across replicates
+glyc_NN.E_mean_lum <- numeric(length(glyc_NN.E_dilution))
+glyc_NN.E_se_lum <- numeric(length(glyc_NN.E_dilution))
+glyc_NN.E_mean_conc <- numeric(length(glyc_NN.E_dilution))
+
+for (i in 1:length(glyc_NN.E_dilution)) {
+  df_val <- glyc_NN.E_dilution[i]
+  # Get luminescence values for this dilution factor from both rows
+  glyc_NN.E_lum_values <- c(glyc_NN.E_luminescence[glyc_NN.E_dilution == df_val])
+  glyc_NN.E_mean_lum[i] <- mean(glyc_NN.E_lum_values)
+  glyc_NN.E_se_lum[i] <- sd(glyc_NN.E_lum_values) / sqrt(length(glyc_NN.E_lum_values))
+  # Calculate concentration from mean luminescence
+  glyc_NN.E_mean_conc[i] <- (glyc_NN.E_mean_lum[i] - glyc_intercept) / glyc_slope
+}
+
+glyc_NN.E_data <- data.frame(
+  glyc_NN.E_dilution_factor = glyc_NN.E_dilution,
+  glyc_NN.E_mean_luminescence = glyc_NN.E_mean_lum,
+  glyc_NN.E_se = glyc_NN.E_se_lum,
+  glyc_NN.E_conc =  glyc_NN.E_mean_conc,
+  label = paste0("NN.Edf.", glyc_NN.E_dilution)
+)
+glyc_NN.E_mean_lum
+glyc_NN.E_mean_conc
+```
+
+```{r add NN.F glycogen to standard curve, include=TRUE}
+# Create sample data frame for NN.F
+# Calculate glycogen concentration from luminescence using the standard curve equation
+# Rearranging y = mx + b to solve for x: x = (y - b) / m
+
+# Calculate mean and SE for each dilution factor across replicates
+glyc_NN.F_mean_lum <- numeric(length(glyc_NN.F_dilution))
+glyc_NN.F_se_lum <- numeric(length(glyc_NN.F_dilution))
+glyc_NN.F_mean_conc <- numeric(length(glyc_NN.F_dilution))
+
+for (i in 1:length(glyc_NN.F_dilution)) {
+  df_val <- glyc_NN.F_dilution[i]
+  # Get luminescence values for this dilution factor from both rows
+  glyc_NN.F_lum_values <- c(glyc_NN.F_luminescence[glyc_NN.F_dilution == df_val])
+  glyc_NN.F_mean_lum[i] <- mean(glyc_NN.F_lum_values)
+  glyc_NN.F_se_lum[i] <- sd(glyc_NN.F_lum_values) / sqrt(length(glyc_NN.F_lum_values))
+  # Calculate concentration from mean luminescence
+  glyc_NN.F_mean_conc[i] <- (glyc_NN.F_mean_lum[i] - glyc_intercept) / glyc_slope
+}
+
+glyc_NN.F_data <- data.frame(
+  glyc_NN.F_dilution_factor = glyc_NN.F_dilution,
+  glyc_NN.F_mean_luminescence = glyc_NN.F_mean_lum,
+  glyc_NN.F_se = glyc_NN.F_se_lum,
+  glyc_NN.F_conc =  glyc_NN.F_mean_conc,
+  label = paste0("NN.Fdf.", glyc_NN.F_dilution)
+)
+glyc_NN.F_mean_lum
+glyc_NN.F_mean_conc
+```
+
+## Plot glycogen standard curve, sample points
+
+```{r plot glycogen standard curve with samples, include=TRUE}
+# Create the plot
+glyc_plot <- ggplot(glycogen_summary_data, aes(x = glyc_concentration, y = glyc_mean_luminescence)) +
+  geom_smooth(aes(linetype = "Std Curve Best Fit Line"), method = "lm", se = FALSE, 
+              color = "coral", linewidth = 1) +
+  geom_errorbar(aes(ymin = glyc_mean_luminescence - glyc_se, ymax = glyc_mean_luminescence + glyc_se),
+                width = 0.1, linewidth = 1, color = "darkblue") +
+  geom_point(aes(color = "Standard Curve", shape = "Standard Curve"), size = 4) +
+  
+   geom_errorbar(data = glyc_N0.A_data, aes(x = glyc_N0.A_conc, y = glyc_N0.A_mean_luminescence,
+                ymin = glyc_N0.A_mean_luminescence - glyc_N0.A_se, ymax = glyc_N0.A_mean_luminescence + glyc_N0.A_se,
+                color = label), width = 0.1, linewidth = 1) +
+  geom_point(data = glyc_N0.A_data, aes(x = glyc_N0.A_conc, y = glyc_N0.A_mean_luminescence,
+             color = label, shape = label), size = 4) +
+
+    geom_errorbar(data = glyc_N0.B_data, aes(x = glyc_N0.B_conc, y = glyc_N0.B_mean_luminescence,
+                ymin = glyc_N0.B_mean_luminescence - glyc_N0.B_se, ymax = glyc_N0.B_mean_luminescence + glyc_N0.B_se,
+                color = label), width = 0.1, linewidth = 1) +
+  geom_point(data = glyc_N0.B_data, aes(x = glyc_N0.B_conc, y = glyc_N0.B_mean_luminescence,
+             color = label, shape = label), size = 4) +
+
+    geom_errorbar(data = glyc_N0.C_data, aes(x = glyc_N0.C_conc, y = glyc_N0.C_mean_luminescence,
+                ymin = glyc_N0.C_mean_luminescence - glyc_N0.C_se, ymax = glyc_N0.C_mean_luminescence + glyc_N0.C_se,
+                color = label), width = 0.1, linewidth = 1) +
+  geom_point(data = glyc_N0.C_data, aes(x = glyc_N0.C_conc, y = glyc_N0.C_mean_luminescence,
+             color = label, shape = label), size = 4) +
+  
+  geom_errorbar(data = glyc_H0.A_data, aes(x = glyc_H0.A_conc, y = glyc_H0.A_mean_luminescence,
+                ymin = glyc_H0.A_mean_luminescence - glyc_H0.A_se, ymax = glyc_H0.A_mean_luminescence + glyc_H0.A_se,
+                color = label), width = 0.1, linewidth = 1) +
+  geom_point(data = glyc_H0.A_data, aes(x = glyc_H0.A_conc, y = glyc_H0.A_mean_luminescence,
+             color = label, shape = label), size = 4) +
+  
+  geom_errorbar(data = glyc_H0.B_data, aes(x = glyc_H0.B_conc, y = glyc_H0.B_mean_luminescence,
+                ymin = glyc_H0.B_mean_luminescence - glyc_H0.B_se, ymax = glyc_H0.B_mean_luminescence + glyc_H0.B_se,
+                color = label), width = 0.1, linewidth = 1) +
+  geom_point(data = glyc_H0.B_data, aes(x = glyc_H0.B_conc, y = glyc_H0.B_mean_luminescence,
+             color = label, shape = label), size = 4) +
+  
+  geom_errorbar(data = glyc_H0.C_data, aes(x = glyc_H0.C_conc, y = glyc_H0.C_mean_luminescence,
+                ymin = glyc_H0.C_mean_luminescence - glyc_H0.C_se, ymax = glyc_H0.C_mean_luminescence + glyc_H0.C_se,
+                color = label), width = 0.1, linewidth = 1) +
+  geom_point(data = glyc_H0.C_data, aes(x = glyc_H0.C_conc, y = glyc_H0.C_mean_luminescence,
+             color = label, shape = label), size = 4) +
+  
+  geom_errorbar(data = glyc_HH.A_data, aes(x = glyc_HH.A_conc, y = glyc_HH.A_mean_luminescence,
+                ymin = glyc_HH.A_mean_luminescence - glyc_HH.A_se, ymax = glyc_HH.A_mean_luminescence + glyc_HH.A_se,
+                color = label), width = 0.1, linewidth = 1) +
+  geom_point(data = glyc_HH.A_data, aes(x = glyc_HH.A_conc, y = glyc_HH.A_mean_luminescence,
+             color = label, shape = label), size = 4) +
+  
+    geom_errorbar(data = glyc_HH.B_data, aes(x = glyc_HH.B_conc, y = glyc_HH.B_mean_luminescence,
+                ymin = glyc_HH.B_mean_luminescence - glyc_HH.B_se, ymax = glyc_HH.B_mean_luminescence + glyc_HH.B_se,
+                color = label), width = 0.1, linewidth = 1) +
+  geom_point(data = glyc_HH.B_data, aes(x = glyc_HH.B_conc, y = glyc_HH.B_mean_luminescence,
+             color = label, shape = label), size = 4) +
+
+    geom_errorbar(data = glyc_HH.E_data, aes(x = glyc_HH.E_conc, y = glyc_HH.E_mean_luminescence,
+                ymin = glyc_HH.E_mean_luminescence - glyc_HH.E_se, ymax = glyc_HH.E_mean_luminescence + glyc_HH.E_se,
+                color = label), width = 0.1, linewidth = 1) +
+  geom_point(data = glyc_HH.E_data, aes(x = glyc_HH.E_conc, y = glyc_HH.E_mean_luminescence,
+             color = label, shape = label), size = 4) +
+  
+    geom_errorbar(data = glyc_HH.F_data, aes(x = glyc_HH.F_conc, y = glyc_HH.F_mean_luminescence,
+                ymin = glyc_HH.F_mean_luminescence - glyc_HH.F_se, ymax = glyc_HH.F_mean_luminescence + glyc_HH.F_se,
+                color = label), width = 0.1, linewidth = 1) +
+  geom_point(data = glyc_HH.F_data, aes(x = glyc_HH.F_conc, y = glyc_HH.F_mean_luminescence,
+             color = label, shape = label), size = 4) +
+
+    geom_errorbar(data = glyc_NH.A_data, aes(x = glyc_NH.A_conc, y = glyc_NH.A_mean_luminescence,
+                ymin = glyc_NH.A_mean_luminescence - glyc_NH.A_se, ymax = glyc_NH.A_mean_luminescence + glyc_NH.A_se,
+                color = label), width = 0.1, linewidth = 1) +
+  geom_point(data = glyc_NH.A_data, aes(x = glyc_NH.A_conc, y = glyc_NH.A_mean_luminescence,
+             color = label, shape = label), size = 4) +
+
+    geom_errorbar(data = glyc_NH.C_data, aes(x = glyc_NH.C_conc, y = glyc_NH.C_mean_luminescence,
+                ymin = glyc_NH.C_mean_luminescence - glyc_NH.C_se, ymax = glyc_NH.C_mean_luminescence + glyc_NH.C_se,
+                color = label), width = 0.1, linewidth = 1) +
+  geom_point(data = glyc_NH.C_data, aes(x = glyc_NH.C_conc, y = glyc_NH.C_mean_luminescence,
+             color = label, shape = label), size = 4) +
+  
+    geom_errorbar(data = glyc_NH.D_data, aes(x = glyc_NH.D_conc, y = glyc_NH.D_mean_luminescence,
+                ymin = glyc_NH.D_mean_luminescence - glyc_NH.D_se, ymax = glyc_NH.D_mean_luminescence + glyc_NH.D_se,
+                color = label), width = 0.1, linewidth = 1) +
+  geom_point(data = glyc_NH.D_data, aes(x = glyc_NH.D_conc, y = glyc_NH.D_mean_luminescence,
+             color = label, shape = label), size = 4) +
+  
+  geom_errorbar(data = glyc_NH.F_data, aes(x = glyc_NH.F_conc, y = glyc_NH.F_mean_luminescence,
+                ymin = glyc_NH.F_mean_luminescence - glyc_NH.F_se, ymax = glyc_NH.F_mean_luminescence + glyc_NH.F_se,
+                color = label), width = 0.1, linewidth = 1) +
+  geom_point(data = glyc_NH.F_data, aes(x = glyc_NH.F_conc, y = glyc_NH.F_mean_luminescence,
+             color = label, shape = label), size = 4) +
+  
+  geom_errorbar(data = glyc_HN.A_data, aes(x = glyc_HN.A_conc, y = glyc_HN.A_mean_luminescence,
+                ymin = glyc_HN.A_mean_luminescence - glyc_HN.A_se, ymax = glyc_HN.A_mean_luminescence + glyc_HN.A_se,
+                color = label), width = 0.1, linewidth = 1) +
+  geom_point(data = glyc_HN.A_data, aes(x = glyc_HN.A_conc, y = glyc_HN.A_mean_luminescence,
+             color = label, shape = label), size = 4) +
+  
+  geom_errorbar(data = glyc_HN.B_data, aes(x = glyc_HN.B_conc, y = glyc_HN.B_mean_luminescence,
+                ymin = glyc_HN.B_mean_luminescence - glyc_HN.B_se, ymax = glyc_HN.B_mean_luminescence + glyc_HN.B_se,
+                color = label), width = 0.1, linewidth = 1) +
+  geom_point(data = glyc_HN.B_data, aes(x = glyc_HN.B_conc, y = glyc_HN.B_mean_luminescence,
+             color = label, shape = label), size = 4) +
+  
+  geom_errorbar(data = glyc_HN.C_data, aes(x = glyc_HN.C_conc, y = glyc_HN.C_mean_luminescence,
+                ymin = glyc_HN.C_mean_luminescence - glyc_HN.C_se, ymax = glyc_HN.C_mean_luminescence + glyc_HN.C_se,
+                color = label), width = 0.1, linewidth = 1) +
+  geom_point(data = glyc_HN.C_data, aes(x = glyc_HN.C_conc, y = glyc_HN.C_mean_luminescence,
+             color = label, shape = label), size = 4) +
+  
+    geom_errorbar(data = glyc_HN.D_data, aes(x = glyc_HN.D_conc, y = glyc_HN.D_mean_luminescence,
+                ymin = glyc_HN.D_mean_luminescence - glyc_HN.D_se, ymax = glyc_HN.D_mean_luminescence + glyc_HN.D_se,
+                color = label), width = 0.1, linewidth = 1) +
+  geom_point(data = glyc_HN.D_data, aes(x = glyc_HN.D_conc, y = glyc_HN.D_mean_luminescence,
+             color = label, shape = label), size = 4) +
+
+    geom_errorbar(data = glyc_NN.A_data, aes(x = glyc_NN.A_conc, y = glyc_NN.A_mean_luminescence,
+                ymin = glyc_NN.A_mean_luminescence - glyc_NN.A_se, ymax = glyc_NN.A_mean_luminescence + glyc_NN.A_se,
+                color = label), width = 0.1, linewidth = 1) +
+  geom_point(data = glyc_NN.A_data, aes(x = glyc_NN.A_conc, y = glyc_NN.A_mean_luminescence,
+             color = label, shape = label), size = 4) +
+  
+    geom_errorbar(data = glyc_NN.B_data, aes(x = glyc_NN.B_conc, y = glyc_NN.B_mean_luminescence,
+                ymin = glyc_NN.B_mean_luminescence - glyc_NN.B_se, ymax = glyc_NN.B_mean_luminescence + glyc_NN.B_se,
+                color = label), width = 0.1, linewidth = 1) +
+  geom_point(data = glyc_NN.B_data, aes(x = glyc_NN.B_conc, y = glyc_NN.B_mean_luminescence,
+             color = label, shape = label), size = 4) +
+
+    geom_errorbar(data = glyc_NN.D_data, aes(x = glyc_NN.D_conc, y = glyc_NN.D_mean_luminescence,
+                ymin = glyc_NN.D_mean_luminescence - glyc_NN.D_se, ymax = glyc_NN.D_mean_luminescence + glyc_NN.D_se,
+                color = label), width = 0.1, linewidth = 1) +
+  geom_point(data = glyc_NN.D_data, aes(x = glyc_NN.D_conc, y = glyc_NN.D_mean_luminescence,
+             color = label, shape = label), size = 4) +
+  
+      geom_errorbar(data = glyc_NN.E_data, aes(x = glyc_NN.E_conc, y = glyc_NN.E_mean_luminescence,
+                ymin = glyc_NN.E_mean_luminescence - glyc_NN.E_se, ymax = glyc_NN.E_mean_luminescence + glyc_NN.E_se,
+                color = label), width = 0.1, linewidth = 1) +
+  geom_point(data = glyc_NN.E_data, aes(x = glyc_NN.E_conc, y = glyc_NN.E_mean_luminescence,
+             color = label, shape = label), size = 4) +
+  
+    geom_errorbar(data = glyc_NN.F_data, aes(x = glyc_NN.F_conc, y = glyc_NN.F_mean_luminescence,
+                ymin = glyc_NN.F_mean_luminescence - glyc_NN.F_se, ymax = glyc_NN.F_mean_luminescence + glyc_NN.F_se,
+                color = label), width = 0.1, linewidth = 1) +
+  geom_point(data = glyc_NN.F_data, aes(x = glyc_NN.F_conc, y = glyc_NN.F_mean_luminescence,
+             color = label, shape = label), size = 4) +
+
+  scale_color_manual(name = "",
+                     values = c("Standard Curve" = "steelblue",
+                               "N0.Adf.20" = "darkorange",
+                                "N0.Bdf.20" = "darkgreen",
+                                "N0.Cdf.20" = "purple",
+                                "H0.Adf.20" = "brown",
+                                "H0.Bdf.20" = "green3",
+                                "H0.Cdf.20" = "firebrick1",
+                                "HH.Adf.20" = "cyan",
+                                "HH.Bdf.20" = "yellow3",
+                                "HH.Edf.20" = "thistle3",
+                                "HH.Fdf.20" = "azure4",
+                                "NH.Adf.20" = "bisque4",
+                                "NH.Cdf.20" = "chartreuse",
+                                "NH.Ddf.20" = "chocolate4",
+                                "NH.Fdf.20" = "darkslategray",
+                                "HN.Adf.20" = "deeppink2",
+                                "HN.Bdf.20" = "goldenrod3",
+                                "HN.Cdf.20" = "hotpink3",
+                                "HN.Ddf.20" = "mediumpurple2",
+                                "NN.Adf.20" = "yellow",
+                                "NN.Bdf.20" = "gray1",
+                                "NN.Ddf.20" = "darkcyan",
+                                "NN.Edf.20" = "darkorange",
+                                "NN.Fdf.20" = "darkgreen"
+                                )) +
+  scale_shape_manual(name = "",
+                     values = c("Standard Curve" = 16,
+                                "N0.Adf.20" = 16,
+                                "N0.Bdf.20" = 17,
+                                "N0.Cdf.20" = 15,
+                                "H0.Adf.20" = 18,
+                                "H0.Bdf.20" = 8,
+                                "H0.Cdf.20" = 4,
+                                "HH.Adf.20" = 5,
+                                "HH.Bdf.20" = 0,
+                                "HH.Edf.20" = 2,
+                                "HH.Fdf.20" = 19,
+                                "NH.Adf.20" = 20,
+                                "NH.Cdf.20" = 17,
+                                "NH.Ddf.20" = 15,
+                                "NH.Fdf.20" = 18,
+                                "HN.Adf.20" = 8,
+                                "HN.Bdf.20" = 4,
+                                "HN.Cdf.20" = 0,
+                                "HN.Ddf.20" = 2,
+                                "NN.Adf.20" = 19,
+                                "NN.Bdf.20" = 20,
+                                "NN.Ddf.20" = 5, 
+                                "NN.Edf.20" = 0, 
+                                "NN.Fdf.20" = 2 
+                                                              )) +
+  scale_linetype_manual(name = "",
+                        values = c("Std Curve Best Fit Line" = "dashed")) +
+  annotate("label", x = max(glycogen_summary_data$glyc_concentration) * 0.75, 
+           y = max(glycogen_summary_data$glyc_mean_luminescence) * 0.15,
+           label = sprintf("y = %.2fx + %.2f\nR² = %.4f", glyc_slope, glyc_intercept, glyc_r_squared),
+           size = 3.5, fontface = "bold", fill = "white", 
+           color = "coral", label.padding = unit(0.3, "lines")) +
+  labs(
+    title = "glycogen Standard Curve",
+    x = "glycogen Concentration (µg/µL)",
+    y = "Luminescence",
+    caption = "Error bars represent standard error of the mean (SEM)"
+  ) +
+  scale_x_continuous(breaks = glyc_concentrations) +
+  theme_bw() +
+  theme(
+    plot.title = element_text(size = 14, face = "bold"),
+    axis.title = element_text(size = 12, face = "bold"),
+    panel.grid.minor = element_line(linetype = "dashed", color = "grey70")
+  )
+
+# Display the plot
+glyc_plot
+glyc_N0.A_data
+glyc_N0.B_data
+glyc_N0.C_data
+
+glyc_H0.A_data
+glyc_H0.B_data
+glyc_H0.C_data
+
+glyc_HH.A_data
+glyc_HH.B_data
+glyc_HH.E_data
+glyc_HH.F_data
+
+glyc_NH.A_data
+glyc_NH.C_data
+glyc_NH.D_data
+glyc_NH.F_data
+
+glyc_HN.A_data
+glyc_HN.B_data
+glyc_HN.C_data
+glyc_HN.D_data
+
+glyc_NN.A_data
+glyc_NN.B_data
+glyc_NN.D_data
+glyc_NN.E_data
+glyc_NN.F_data
+
+# Print summary statistics
+cat("glycogen Standard Curve Summary:\n")
+cat(rep("=", 50), "\n", sep = "")
+for (i in 1:nrow(glycogen_summary_data)) {
+  cat(sprintf("Concentration: %g µg/µL\n", glycogen_summary_data$glyc_concentration[i]))
+  cat(sprintf("  Mean Luminescence: %.2f\n",glycogen_summary_data$glyc_mean_luminescence[i]))
+  cat(sprintf("  Standard Error: %.2f\n", glycogen_summary_data$glyc_se[i]))
+  cat(sprintf("  CV%%: %.2f%%\n\n", glycogen_summary_data$glyc_cv[i]))
+}
+```
+
+## Sample glycogen table
+
+``` {r define tissue weights, include = TRUE}
+#define tissue weights
+glyc_N0.A_weight <- as.numeric(sample_weights[2,2])
+glyc_N0.B_weight <- as.numeric(sample_weights[3,2])
+glyc_N0.C_weight <- as.numeric(sample_weights[4,2])
+
+glyc_H0.A_weight <- as.numeric(sample_weights[5,2])
+glyc_H0.B_weight <- as.numeric(sample_weights[6,2])
+glyc_H0.C_weight <- as.numeric(sample_weights[7,2])
+
+glyc_HH.A_weight <- as.numeric(sample_weights[8,2])
+glyc_HH.B_weight <- as.numeric(sample_weights[9,2])
+glyc_HH.E_weight <- as.numeric(sample_weights[10,2])
+glyc_HH.F_weight <- as.numeric(sample_weights[11,2])
+
+glyc_NH.A_weight <- as.numeric(sample_weights[12,2])
+glyc_NH.C_weight <- as.numeric(sample_weights[13,2])
+glyc_NH.D_weight <- as.numeric(sample_weights[14,2])
+glyc_NH.F_weight <- as.numeric(sample_weights[15,2])
+
+glyc_HN.A_weight <- as.numeric(sample_weights[16,2])
+glyc_HN.B_weight <- as.numeric(sample_weights[17,2])
+glyc_HN.C_weight <- as.numeric(sample_weights[18,2])
+glyc_HN.D_weight <- as.numeric(sample_weights[19,2])
+
+glyc_NN.A_weight <- as.numeric(sample_weights[20,2])
+glyc_NN.B_weight <- as.numeric(sample_weights[21,2])
+glyc_NN.D_weight <- as.numeric(sample_weights[22,2])
+glyc_NN.E_weight <- as.numeric(sample_weights[23,2])
+glyc_NN.F_weight <- as.numeric(sample_weights[24,2])
+```
+
+```{r, normalize calculated glycogen to sample weight, include = TRUE}
+#normalize calculated glycogen to sample weight
+#plate1
+glyc_N0.A_mean_conc_normalized <- glyc_N0.A_mean_conc/glyc_N0.A_weight
+glyc_N.0B_mean_conc_normalized <- glyc_N0.B_mean_conc/glyc_N0.B_weight
+glyc_N0.C_mean_conc_normalized <- glyc_N0.C_mean_conc/glyc_N0.C_weight
+glyc_H0.A_mean_conc_normalized <- glyc_H0.A_mean_conc/glyc_H0.A_weight
+glyc_H0.B_mean_conc_normalized <- glyc_H0.B_mean_conc/glyc_H0.B_weight
+glyc_H0.C_mean_conc_normalized <- glyc_H0.C_mean_conc/glyc_H0.C_weight
+glyc_HH.A_mean_conc_normalized <- glyc_HH.A_mean_conc/glyc_HH.A_weight
+glyc_HH.B_mean_conc_normalized <- glyc_HH.B_mean_conc/glyc_HH.B_weight
+glyc_HH.E_mean_conc_normalized <- glyc_HH.E_mean_conc/glyc_HH.E_weight
+glyc_HH.F_mean_conc_normalized <- glyc_HH.F_mean_conc/glyc_HH.F_weight
+glyc_NH.A_mean_conc_normalized <- glyc_NH.A_mean_conc/glyc_NH.A_weight
+glyc_NH.C_mean_conc_normalized <- glyc_NH.C_mean_conc/glyc_NH.C_weight
+glyc_NH.D_mean_conc_normalized <- glyc_NH.D_mean_conc/glyc_NH.D_weight
+glyc_NH.F_mean_conc_normalized <- glyc_NH.F_mean_conc/glyc_NH.F_weight
+glyc_HN.A_mean_conc_normalized <- glyc_HN.A_mean_conc/glyc_HN.A_weight
+glyc_HN.B_mean_conc_normalized <- glyc_HN.B_mean_conc/glyc_HN.B_weight
+glyc_HN.C_mean_conc_normalized <- glyc_HN.C_mean_conc/glyc_HN.C_weight
+glyc_HN.D_mean_conc_normalized <- glyc_HN.D_mean_conc/glyc_HN.D_weight
+glyc_NN.A_mean_conc_normalized <- glyc_NN.A_mean_conc/glyc_NN.A_weight
+glyc_NN.B_mean_conc_normalized <- glyc_NN.B_mean_conc/glyc_NN.B_weight
+glyc_NN.D_mean_conc_normalized <- glyc_NN.D_mean_conc/glyc_NN.D_weight
+glyc_NN.E_mean_conc_normalized <- glyc_NN.E_mean_conc/glyc_NN.E_weight
+glyc_NN.F_mean_conc_normalized <- glyc_NN.F_mean_conc/glyc_NN.F_weight
+```
+
+Note: To normalize glycogen levels by dilution factor and tissue weight, the calculated glycogen is multiplied by (dilution factor/weight). This is reported as "Normalized glycogen (ug/uL/mg)"
+```{r, sample glycogen table, include = TRUE}
+#sample glycogen table
+tab_glyc <- matrix(c(glyc_N0.A_mean_lum, glyc_N0.A_mean_conc, glyc_N0.A_dilution, glyc_N0.A_weight, glyc_N0.A_mean_conc*(glyc_N0.A_dilution/glyc_N0.A_weight), glyc_N0.B_mean_lum, glyc_N0.B_mean_conc, glyc_N0.B_dilution, glyc_N0.B_weight, glyc_N0.B_mean_conc*(glyc_N0.B_dilution/glyc_N0.B_weight), 
+glyc_N0.C_mean_lum, glyc_N0.C_mean_conc, glyc_N0.C_dilution, glyc_N0.C_weight, glyc_N0.C_mean_conc*(glyc_N0.C_dilution/glyc_N0.C_weight), 
+
+glyc_H0.A_mean_lum, glyc_H0.A_mean_conc, glyc_H0.A_dilution, glyc_H0.A_weight, glyc_H0.A_mean_conc*(glyc_H0.A_dilution/glyc_H0.A_weight), 
+glyc_H0.B_mean_lum, glyc_H0.B_mean_conc, glyc_H0.B_dilution, glyc_H0.B_weight, glyc_H0.B_mean_conc*(glyc_H0.B_dilution/glyc_H0.B_weight), 
+glyc_H0.C_mean_lum, glyc_H0.C_mean_conc, glyc_H0.C_dilution, glyc_H0.C_weight, glyc_H0.C_mean_conc*(glyc_H0.C_dilution/glyc_H0.C_weight), 
+
+glyc_HH.A_mean_lum, glyc_HH.A_mean_conc, glyc_HH.A_dilution, glyc_HH.A_weight, glyc_HH.A_mean_conc*(glyc_HH.A_dilution/glyc_HH.A_weight), 
+glyc_HH.B_mean_lum, glyc_HH.B_mean_conc, glyc_HH.B_dilution, glyc_HH.B_weight, glyc_HH.B_mean_conc*(glyc_HH.B_dilution/glyc_HH.B_weight), 
+glyc_HH.E_mean_lum, glyc_HH.E_mean_conc, glyc_HH.E_dilution, glyc_HH.E_weight, glyc_HH.E_mean_conc*(glyc_HH.E_dilution/glyc_HH.E_weight), 
+glyc_HH.F_mean_lum, glyc_HH.F_mean_conc, glyc_HH.F_dilution, glyc_HH.F_weight, glyc_HH.F_mean_conc*(glyc_HH.F_dilution/glyc_HH.F_weight), 
+
+glyc_NH.A_mean_lum, glyc_NH.A_mean_conc, glyc_NH.A_dilution, glyc_NH.A_weight, glyc_NH.A_mean_conc*(glyc_NH.A_dilution/glyc_NH.A_weight), glyc_NH.C_mean_lum, glyc_NH.C_mean_conc, glyc_NH.C_dilution, glyc_NH.C_weight, glyc_NH.C_mean_conc*(glyc_NH.C_dilution/glyc_NH.C_weight), 
+glyc_NH.D_mean_lum, glyc_NH.D_mean_conc, glyc_NH.D_dilution, glyc_NH.D_weight, glyc_NH.D_mean_conc*(glyc_NH.D_dilution/glyc_NH.D_weight), 
+glyc_NH.F_mean_lum, glyc_NH.F_mean_conc, glyc_NH.F_dilution, glyc_NH.F_weight, glyc_NH.F_mean_conc*(glyc_NH.F_dilution/glyc_NH.F_weight), 
+
+glyc_HN.A_mean_lum, glyc_HN.A_mean_conc, glyc_HN.A_dilution, glyc_HN.A_weight, glyc_HN.A_mean_conc*(glyc_HN.A_dilution/glyc_HN.A_weight), 
+glyc_HN.B_mean_lum, glyc_HN.B_mean_conc, glyc_HN.B_dilution, glyc_HN.B_weight, glyc_HN.B_mean_conc*(glyc_HN.B_dilution/glyc_HN.B_weight), 
+glyc_HN.C_mean_lum, glyc_HN.C_mean_conc, glyc_HN.C_dilution, glyc_HN.C_weight, glyc_HN.C_mean_conc*(glyc_HN.C_dilution/glyc_HN.C_weight), 
+glyc_HN.D_mean_lum, glyc_HN.D_mean_conc, glyc_HN.D_dilution, glyc_HN.D_weight, glyc_HN.D_mean_conc*(glyc_HN.D_dilution/glyc_HN.D_weight), 
+
+glyc_NN.A_mean_lum, glyc_NN.A_mean_conc, glyc_NN.A_dilution, glyc_NN.A_weight, glyc_NN.A_mean_conc*(glyc_NN.A_dilution/glyc_NN.A_weight), 
+glyc_NN.B_mean_lum, glyc_NN.B_mean_conc, glyc_NN.B_dilution, glyc_NN.B_weight, glyc_NN.B_mean_conc*(glyc_NN.B_dilution/glyc_NN.B_weight), 
+glyc_NN.D_mean_lum, glyc_NN.D_mean_conc, glyc_NN.D_dilution, glyc_NN.D_weight, glyc_NN.D_mean_conc*(glyc_NN.D_dilution/glyc_NN.D_weight), glyc_NN.E_mean_lum, glyc_NN.E_mean_conc, glyc_NN.E_dilution, glyc_NN.E_weight, glyc_NN.E_mean_conc*(glyc_NN.E_dilution/glyc_NN.E_weight), 
+glyc_NN.F_mean_lum, glyc_NN.F_mean_conc, glyc_NN.F_dilution, glyc_NN.F_weight, glyc_NN.F_mean_conc*(glyc_NN.F_dilution/glyc_NN.F_weight)
+
+), ncol=5, byrow=TRUE)
+              
+colnames(tab_glyc) <- c('Luminescence','Calculated Glycogen (ug/uL)','Dilution factor', 'Weight (mg)','Normalized glycogen (ug/uL/mg)')
+rownames(tab_glyc) <- c('N0.A','N0.B','N0.C','H0.A','H0.B','H0.C','HH.A','HH.B','HH.E','HH.F','NH.A','NH.C','NH.D','NH.F','HN.A','HN.B','HN.C','HN.D','NN.A','NN.B','NN.D','NN.E','NN.F')
+tab_glyc <- as.table(tab_glyc)
+tab_glyc
+```
+
