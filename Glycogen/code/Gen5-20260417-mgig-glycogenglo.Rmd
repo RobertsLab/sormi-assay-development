@@ -252,7 +252,7 @@ glyc_intercept <- coef(lm_model)[1]
 
 ### Calculate sample glycogen levels
 
-```{r add 0.0A glycogen to standard curve, include=TRUE}
+```{r add 0.0A* glycogen to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glycogen concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -283,7 +283,7 @@ glyc_0.0A_mean_lum
 glyc_0.0A_mean_conc
 ```
 
-```{r add 0.0B glycogen to standard curve, include=TRUE}
+```{r add 0.0B* glycogen to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glycogen concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -314,7 +314,7 @@ glyc_0.0B_mean_lum
 glyc_0.0B_mean_conc
 ```
 
-```{r add 0.0C glycogen to standard curve, include=TRUE}
+```{r add 0.0C* glycogen to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glycogen concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -345,7 +345,7 @@ glyc_0.0C_mean_lum
 glyc_0.0C_mean_conc
 ```
 
-```{r add 0.0D glycogen to standard curve, include=TRUE}
+```{r add 0.0D* glycogen to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glycogen concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -376,7 +376,7 @@ glyc_0.0D_mean_lum
 glyc_0.0D_mean_conc
 ```
 
-```{r add 0.0E glycogen to standard curve, include=TRUE}
+```{r add 0.0E* glycogen to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glycogen concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -407,7 +407,7 @@ glyc_0.0E_mean_lum
 glyc_0.0E_mean_conc
 ```
 
-```{r add 0.0F glycogen to standard curve, include=TRUE}
+```{r add 0.0F* glycogen to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glycogen concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -438,7 +438,7 @@ glyc_0.0F_mean_lum
 glyc_0.0F_mean_conc
 ```
 
-```{r add 0.0G glycogen to standard curve, include=TRUE}
+```{r add 0.0G* glycogen to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glycogen concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -469,7 +469,7 @@ glyc_0.0G_mean_lum
 glyc_0.0G_mean_conc
 ```
 
-```{r add 0.0H glycogen to standard curve, include=TRUE}
+```{r add 0.0H* glycogen to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glycogen concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -500,7 +500,7 @@ glyc_0.0H_mean_lum
 glyc_0.0H_mean_conc
 ```
 
-```{r add 0.0I glycogen to standard curve, include=TRUE}
+```{r add 0.0I* glycogen to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glycogen concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -531,7 +531,7 @@ glyc_0.0I_mean_lum
 glyc_0.0I_mean_conc
 ```
 
-```{r add 0.0J glycogen to standard curve, include=TRUE}
+```{r add 0.0J* glycogen to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glycogen concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -562,7 +562,7 @@ glyc_0.0J_mean_lum
 glyc_0.0J_mean_conc
 ```
 
-```{r add 48.0A glycogen to standard curve, include=TRUE}
+```{r add 48.0A* glycogen to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glycogen concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -593,7 +593,7 @@ glyc_48.0A_mean_lum
 glyc_48.0A_mean_conc
 ```
 
-```{r add 48.0B glycogen to standard curve, include=TRUE}
+```{r add 48.0B* glycogen to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glycogen concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -624,7 +624,7 @@ glyc_48.0B_mean_lum
 glyc_48.0B_mean_conc
 ```
 
-```{r add 48.0C glycogen to standard curve, include=TRUE}
+```{r add 48.0C* glycogen to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glycogen concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -655,7 +655,7 @@ glyc_48.0C_mean_lum
 glyc_48.0C_mean_conc
 ```
 
-```{r add 48.0D glycogen to standard curve, include=TRUE}
+```{r add 48.0D* glycogen to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glycogen concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -686,7 +686,7 @@ glyc_48.0D_mean_lum
 glyc_48.0D_mean_conc
 ```
 
-```{r add 48.0E glycogen to standard curve, include=TRUE}
+```{r add 48.0E* glycogen to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glycogen concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -717,7 +717,7 @@ glyc_48.0E_mean_lum
 glyc_48.0E_mean_conc
 ```
 
-```{r add 48.0F glycogen to standard curve, include=TRUE}
+```{r add 48.0F* glycogen to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glycogen concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -747,7 +747,7 @@ glyc_48.0F_data <- data.frame(
 glyc_48.0F_mean_lum
 glyc_48.0F_mean_conc
 ```
-```{r add 48.0G glycogen to standard curve, include=TRUE}
+```{r add 48.0G* glycogen to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glycogen concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -778,7 +778,7 @@ glyc_48.0G_mean_lum
 glyc_48.0G_mean_conc
 ```
 
-```{r add 48.0H glycogen to standard curve, include=TRUE}
+```{r add 48.0H* glycogen to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glycogen concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -809,7 +809,7 @@ glyc_48.0H_mean_lum
 glyc_48.0H_mean_conc
 ```
 
-```{r add 48.0I glycogen to standard curve, include=TRUE}
+```{r add 48.0I* glycogen to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glycogen concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -840,7 +840,7 @@ glyc_48.0I_mean_lum
 glyc_48.0I_mean_conc
 ```
 
-```{r add 48.0J glycogen to standard curve, include=TRUE}
+```{r add 48.0J* glycogen to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glycogen concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -871,7 +871,7 @@ glyc_48.0J_mean_lum
 glyc_48.0J_mean_conc
 ```
 
-```{r add 48.2A glycogen to standard curve, include=TRUE}
+```{r add 48.2A* glycogen to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glycogen concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -902,7 +902,7 @@ glyc_48.2A_mean_lum
 glyc_48.2A_mean_conc
 ```
 
-```{r add 48.2B glycogen to standard curve, include=TRUE}
+```{r add 48.2B* glycogen to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glycogen concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -933,7 +933,7 @@ glyc_48.2B_mean_lum
 glyc_48.2B_mean_conc
 ```
 
-```{r add 48.2C glycogen to standard curve, include=TRUE}
+```{r add 48.2C* glycogen to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glycogen concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -964,7 +964,7 @@ glyc_48.2C_mean_lum
 glyc_48.2C_mean_conc
 ```
 
-```{r add 48.2D glycogen to standard curve, include=TRUE}
+```{r add 48.2D* glycogen to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glycogen concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -995,7 +995,7 @@ glyc_48.2D_mean_lum
 glyc_48.2D_mean_conc
 ```
 
-```{r add 48.2E glycogen to standard curve, include=TRUE}
+```{r add 48.2E* glycogen to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glycogen concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -1026,7 +1026,7 @@ glyc_48.2E_mean_lum
 glyc_48.2E_mean_conc
 ```
 
-```{r add 48.2F glycogen to standard curve, include=TRUE}
+```{r add 48.2F* glycogen to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glycogen concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -1057,7 +1057,7 @@ glyc_48.2F_mean_lum
 glyc_48.2F_mean_conc
 ```
 
-```{r add 48.2G glycogen to standard curve, include=TRUE}
+```{r add 48.2G* glycogen to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glycogen concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -1088,7 +1088,7 @@ glyc_48.2G_mean_lum
 glyc_48.2G_mean_conc
 ```
 
-```{r add 48.2H glycogen to standard curve, include=TRUE}
+```{r add 48.2H* glycogen to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glycogen concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -1119,7 +1119,7 @@ glyc_48.2H_mean_lum
 glyc_48.2H_mean_conc
 ```
 
-```{r add 48.2I glycogen to standard curve, include=TRUE}
+```{r add 48.2I* glycogen to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glycogen concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -1150,7 +1150,7 @@ glyc_48.2I_mean_lum
 glyc_48.2I_mean_conc
 ```
 
-```{r add 48.2J glycogen to standard curve, include=TRUE}
+```{r add 48.2J* glycogen to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glycogen concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -1181,7 +1181,7 @@ glyc_48.2J_mean_lum
 glyc_48.2J_mean_conc
 ```
 
-```{r add 48.7A glycogen to standard curve, include=TRUE}
+```{r add 48.7A* glycogen to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glycogen concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -1212,7 +1212,7 @@ glyc_48.7A_mean_lum
 glyc_48.7A_mean_conc
 ```
 
-```{r add 48.7B glycogen to standard curve, include=TRUE}
+```{r add 48.7B* glycogen to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glycogen concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -1243,7 +1243,7 @@ glyc_48.7B_mean_lum
 glyc_48.7B_mean_conc
 ```
 
-```{r add 48.7C glycogen to standard curve, include=TRUE}
+```{r add 48.7C* glycogen to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glycogen concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -1274,7 +1274,7 @@ glyc_48.7C_mean_lum
 glyc_48.7C_mean_conc
 ```
 
-```{r add 48.7D glycogen to standard curve, include=TRUE}
+```{r add 48.7D* glycogen to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glycogen concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -1305,7 +1305,7 @@ glyc_48.7D_mean_lum
 glyc_48.7D_mean_conc
 ```
 
-```{r add 48.7E glycogen to standard curve, include=TRUE}
+```{r add 48.7E* glycogen to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glycogen concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -1336,7 +1336,7 @@ glyc_48.7E_mean_lum
 glyc_48.7E_mean_conc
 ```
 
-```{r add 48.7F glycogen to standard curve, include=TRUE}
+```{r add 48.7F* glycogen to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glycogen concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -1367,7 +1367,7 @@ glyc_48.7F_mean_lum
 glyc_48.7F_mean_conc
 ```
 
-```{r add 48.7G glycogen to standard curve, include=TRUE}
+```{r add 48.7G* glycogen to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glycogen concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -1398,7 +1398,7 @@ glyc_48.7G_mean_lum
 glyc_48.7G_mean_conc
 ```
 
-```{r add 48.7H glycogen to standard curve, include=TRUE}
+```{r add 48.7H* glycogen to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glycogen concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -1429,7 +1429,7 @@ glyc_48.7H_mean_lum
 glyc_48.7H_mean_conc
 ```
 
-```{r add 48.7I glycogen to standard curve, include=TRUE}
+```{r add 48.7I* glycogen to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glycogen concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -1460,7 +1460,7 @@ glyc_48.7I_mean_lum
 glyc_48.7I_mean_conc
 ```
 
-```{r add 48.7J glycogen to standard curve, include=TRUE}
+```{r add 48.7J* glycogen to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glycogen concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -2001,7 +2001,7 @@ tab_glyc <- matrix(c(glyc_0.0A_dilution, glyc_0.0A_mean_lum, glyc_0.0A_mean_conc
                 glyc_48.7J_dilution, glyc_48.7J_mean_lum, glyc_48.7J_mean_conc,(glyc_48.7J_dilution*glyc_48.7J_mean_conc), (glyc_48.7J_dilution*glyc_48.7J_mean_conc_normalized)), ncol=5, byrow=TRUE)
               
 colnames(tab_glyc) <- c('Dilution factor','Luminescence','Calculated Glycogen (ug/uL)','Total glycogen (ug/uL)','Normalized glycogen (ug/uL/mg)')
-rownames(tab_glyc) <- c('0.0A','0.0B','0.0C','0.0D','0.0E','0.0F','0.0G','0.0H','0.0I','0.0J','48.0A','48.0B','48.0C','48.0D','48.0E','48.0F','48.0G','48.0H','48.0I','48.0J','48.2A','48.2B','48.2C','48.2D','48.2E','48.2F','48.2G','48.2H','48.2I','48.2J','48.7A','48.7B','48.7C','48.7D','48.7E','48.7F','48.7G','48.7H','48.7I','48.7J')
+rownames(tab_glyc) <- c('0.0A*','0.0B*','0.0C*','0.0D*','0.0E*','0.0F*','0.0G*','0.0H*','0.0I*','0.0J*','48.0A*','48.0B*','48.0C*','48.0D*','48.0E*','48.0F*','48.0G*','48.0H*','48.0I*', '48.0J*','48.2A*','48.2B*','48.2C*','48.2D*','48.2E*','48.2F*','48.2G*','48.2H*','48.2I*','48.2J*','48.7A*','48.7B*','48.7C*','48.7D*','48.7E*','48.7F*','48.7G*','48.7H*','48.7I*','48.7J*')
 tab_glyc <- as.table(tab_glyc)
 tab_glyc
 ```
@@ -2194,7 +2194,7 @@ glu_intercept
 ```
 
 ### Calculate sample glucose levels
-```{r add 0.0A glucose to standard curve, include=TRUE}
+```{r add 0.0A* glucose to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glucose concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -2225,7 +2225,7 @@ glu_0.0A_mean_lum
 glu_0.0A_mean_conc
 ```
 
-```{r add 0.0B glucose to standard curve, include=TRUE}
+```{r add 0.0B* glucose to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glucose concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -2256,7 +2256,7 @@ glu_0.0B_mean_lum
 glu_0.0B_mean_conc
 ```
 
-```{r add 0.0C glucose to standard curve, include=TRUE}
+```{r add 0.0C* glucose to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glucose concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -2287,7 +2287,7 @@ glu_0.0C_mean_lum
 glu_0.0C_mean_conc
 ```
 
-```{r add 0.0D glucose to standard curve, include=TRUE}
+```{r add 0.0D* glucose to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glucose concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -2318,7 +2318,7 @@ glu_0.0D_mean_lum
 glu_0.0D_mean_conc
 ```
 
-```{r add 0.0E glucose to standard curve, include=TRUE}
+```{r add 0.0E* glucose to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glucose concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -2349,7 +2349,7 @@ glu_0.0E_mean_lum
 glu_0.0E_mean_conc
 ```
 
-```{r add 0.0F glucose to standard curve, include=TRUE}
+```{r add 0.0F* glucose to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glucose concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -2380,7 +2380,7 @@ glu_0.0F_mean_lum
 glu_0.0F_mean_conc
 ```
 
-```{r add 0.0G glucose to standard curve, include=TRUE}
+```{r add 0.0G* glucose to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glucose concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -2411,7 +2411,7 @@ glu_0.0G_mean_lum
 glu_0.0G_mean_conc
 ```
 
-```{r add 0.0H glucose to standard curve, include=TRUE}
+```{r add 0.0H* glucose to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glucose concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -2442,7 +2442,7 @@ glu_0.0H_mean_lum
 glu_0.0H_mean_conc
 ```
 
-```{r add 0.0I glucose to standard curve, include=TRUE}
+```{r add 0.0I* glucose to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glucose concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -2473,7 +2473,7 @@ glu_0.0I_mean_lum
 glu_0.0I_mean_conc
 ```
 
-```{r add 0.0J glucose to standard curve, include=TRUE}
+```{r add 0.0J* glucose to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glucose concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -2504,7 +2504,7 @@ glu_0.0J_mean_lum
 glu_0.0J_mean_conc
 ```
 
-```{r add 48.0A glucose to standard curve, include=TRUE}
+```{r add 48.0A* glucose to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glucose concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -2535,7 +2535,7 @@ glu_48.0A_mean_lum
 glu_48.0A_mean_conc
 ```
 
-```{r add 48.0B glucose to standard curve, include=TRUE}
+```{r add 48.0B* glucose to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glucose concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -2566,7 +2566,7 @@ glu_48.0B_mean_lum
 glu_48.0B_mean_conc
 ```
 
-```{r add 48.0C glucose to standard curve, include=TRUE}
+```{r add 48.0C* glucose to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glucose concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -2597,7 +2597,7 @@ glu_48.0C_mean_lum
 glu_48.0C_mean_conc
 ```
 
-```{r add 48.0D glucose to standard curve, include=TRUE}
+```{r add 48.0D* glucose to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glucose concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -2628,7 +2628,7 @@ glu_48.0D_mean_lum
 glu_48.0D_mean_conc
 ```
 
-```{r add 48.0E glucose to standard curve, include=TRUE}
+```{r add 48.0E* glucose to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glucose concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -2659,7 +2659,7 @@ glu_48.0E_mean_lum
 glu_48.0E_mean_conc
 ```
 
-```{r add 48.0F glucose to standard curve, include=TRUE}
+```{r add 48.0F* glucose to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glucose concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -2689,7 +2689,7 @@ glu_48.0F_data <- data.frame(
 glu_48.0F_mean_lum
 glu_48.0F_mean_conc
 ```
-```{r add 48.0G glucose to standard curve, include=TRUE}
+```{r add 48.0G* glucose to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glucose concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -2720,7 +2720,7 @@ glu_48.0G_mean_lum
 glu_48.0G_mean_conc
 ```
 
-```{r add 48.0H glucose to standard curve, include=TRUE}
+```{r add 48.0H* glucose to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glucose concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -2751,7 +2751,7 @@ glu_48.0H_mean_lum
 glu_48.0H_mean_conc
 ```
 
-```{r add 48.0I glucose to standard curve, include=TRUE}
+```{r add 48.0I* glucose to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glucose concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -2782,7 +2782,7 @@ glu_48.0I_mean_lum
 glu_48.0I_mean_conc
 ```
 
-```{r add 48.0J glucose to standard curve, include=TRUE}
+```{r add 48.0J* glucose to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glucose concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -2813,7 +2813,7 @@ glu_48.0J_mean_lum
 glu_48.0J_mean_conc
 ```
 
-```{r add 48.2A glucose to standard curve, include=TRUE}
+```{r add 48.2A* glucose to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glucose concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -2844,7 +2844,7 @@ glu_48.2A_mean_lum
 glu_48.2A_mean_conc
 ```
 
-```{r add 48.2B glucose to standard curve, include=TRUE}
+```{r add 48.2B* glucose to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glucose concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -2875,7 +2875,7 @@ glu_48.2B_mean_lum
 glu_48.2B_mean_conc
 ```
 
-```{r add 48.2C glucose to standard curve, include=TRUE}
+```{r add 48.2C* glucose to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glucose concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -2906,7 +2906,7 @@ glu_48.2C_mean_lum
 glu_48.2C_mean_conc
 ```
 
-```{r add 48.2D glucose to standard curve, include=TRUE}
+```{r add 48.2D* glucose to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glucose concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -2937,7 +2937,7 @@ glu_48.2D_mean_lum
 glu_48.2D_mean_conc
 ```
 
-```{r add 48.2E glucose to standard curve, include=TRUE}
+```{r add 48.2E* glucose to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glucose concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -2968,7 +2968,7 @@ glu_48.2E_mean_lum
 glu_48.2E_mean_conc
 ```
 
-```{r add 48.2F glucose to standard curve, include=TRUE}
+```{r add 48.2F* glucose to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glucose concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -2999,7 +2999,7 @@ glu_48.2F_mean_lum
 glu_48.2F_mean_conc
 ```
 
-```{r add 48.2G glucose to standard curve, include=TRUE}
+```{r add 48.2G* glucose to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glucose concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -3030,7 +3030,7 @@ glu_48.2G_mean_lum
 glu_48.2G_mean_conc
 ```
 
-```{r add 48.2H glucose to standard curve, include=TRUE}
+```{r add 48.2H* glucose to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glucose concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -3061,7 +3061,7 @@ glu_48.2H_mean_lum
 glu_48.2H_mean_conc
 ```
 
-```{r add 48.2I glucose to standard curve, include=TRUE}
+```{r add 48.2I* glucose to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glucose concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -3092,7 +3092,7 @@ glu_48.2I_mean_lum
 glu_48.2I_mean_conc
 ```
 
-```{r add 48.2J glucose to standard curve, include=TRUE}
+```{r add 48.2J* glucose to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glucose concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -3123,7 +3123,7 @@ glu_48.2J_mean_lum
 glu_48.2J_mean_conc
 ```
 
-```{r add 48.7A glucose to standard curve, include=TRUE}
+```{r add 48.7A* glucose to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glucose concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -3154,7 +3154,7 @@ glu_48.7A_mean_lum
 glu_48.7A_mean_conc
 ```
 
-```{r add 48.7B glucose to standard curve, include=TRUE}
+```{r add 48.7B* glucose to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glucose concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -3185,7 +3185,7 @@ glu_48.7B_mean_lum
 glu_48.7B_mean_conc
 ```
 
-```{r add 48.7C glucose to standard curve, include=TRUE}
+```{r add 48.7C* glucose to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glucose concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -3216,7 +3216,7 @@ glu_48.7C_mean_lum
 glu_48.7C_mean_conc
 ```
 
-```{r add 48.7D glucose to standard curve, include=TRUE}
+```{r add 48.7D* glucose to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glucose concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -3247,7 +3247,7 @@ glu_48.7D_mean_lum
 glu_48.7D_mean_conc
 ```
 
-```{r add 48.7E glucose to standard curve, include=TRUE}
+```{r add 48.7E* glucose to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glucose concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -3278,7 +3278,7 @@ glu_48.7E_mean_lum
 glu_48.7E_mean_conc
 ```
 
-```{r add 48.7F glucose to standard curve, include=TRUE}
+```{r add 48.7F* glucose to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glucose concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -3309,7 +3309,7 @@ glu_48.7F_mean_lum
 glu_48.7F_mean_conc
 ```
 
-```{r add 48.7G glucose to standard curve, include=TRUE}
+```{r add 48.7G* glucose to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glucose concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -3340,7 +3340,7 @@ glu_48.7G_mean_lum
 glu_48.7G_mean_conc
 ```
 
-```{r add 48.7H glucose to standard curve, include=TRUE}
+```{r add 48.7H* glucose to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glucose concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -3371,7 +3371,7 @@ glu_48.7H_mean_lum
 glu_48.7H_mean_conc
 ```
 
-```{r add 48.7I glucose to standard curve, include=TRUE}
+```{r add 48.7I* glucose to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glucose concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -3402,7 +3402,7 @@ glu_48.7I_mean_lum
 glu_48.7I_mean_conc
 ```
 
-```{r add 48.7J glucose to standard curve, include=TRUE}
+```{r add 48.7J* glucose to standard curve, include=TRUE}
 # Create sample data frame
 # Calculate glucose concentration from luminescence using the standard curve equation
 # Rearranging y = mx + b to solve for x: x = (y - b) / m
@@ -3730,7 +3730,7 @@ glu_plot <- ggplot(glucose_summary_data, aes(x = glu_concentration, y = glu_mean
                                 )) +
   scale_shape_manual(name = "",
                      values = c("Standard Curve" = 16,
-                                "0.0Adf.20" = 16,
+                                 "0.0Adf.20" = 16,
                                 "0.0Bdf.20" = 17,
                                 "0.0Cdf.20" = 15,
                                 "0.0Ddf.20" = 18,
@@ -3943,7 +3943,7 @@ tab_glu <- matrix(c(glu_0.0A_dilution, glu_0.0A_mean_lum, glu_0.0A_mean_conc,(gl
                 glu_48.7J_dilution, glu_48.7J_mean_lum, glu_48.7J_mean_conc,(glu_48.7J_dilution*glu_48.7J_mean_conc), (glu_48.7J_dilution*glu_48.7J_mean_conc_normalized)), ncol=5, byrow=TRUE)
               
 colnames(tab_glu) <- c('Dilution factor','Luminescence','Calculated glucose (ug/uL)','Total glucose (ug/uL)','Normalized glucose (ug/uL/mg)')
-rownames(tab_glu) <- c('0.0A','0.0B','0.0C','0.0D','0.0E','0.0F','0.0G','0.0H','0.0I','0.0J','48.0A','48.0B','48.0C','48.0D','48.0E','48.0F','48.0G','48.0H','48.0I','48.0J','48.2A','48.2B','48.2C','48.2D','48.2E','48.2F','48.2G','48.2H','48.2I','48.2J','48.7A','48.7B','48.7C','48.7D','48.7E','48.7F','48.7G','48.7H','48.7I','48.7J')
+rownames(tab_glu) <- c('0.0A*','0.0B*','0.0C*','0.0D*','0.0E*','0.0F*','0.0G*','0.0H*','0.0I*','0.0J*','48.0A*','48.0B*','48.0C*','48.0D*','48.0E*','48.0F*','48.0G*','48.0H*','48.0I*', '48.0J*','48.2A*','48.2B*','48.2C*','48.2D*','48.2E*','48.2F*','48.2G*','48.2H*','48.2I*','48.2J*','48.7A*','48.7B*','48.7C*','48.7D*','48.7E*','48.7F*','48.7G*','48.7H*','48.7I*','48.7J*')
 tab_glu <- as.table(tab_glu)
 tab_glu
 ```
@@ -3996,7 +3996,7 @@ tab_summary <- matrix(c(as.numeric(sample_weights[2,2]), glyc_0.0A_dilution, gly
                 ), ncol=6, byrow=TRUE)
 
 colnames(tab_summary) <- c('Weight (mg)', 'df', 'Glycogen (ug/uL)', 'Glucose (uM)', 'Glycogen-Glucose (ug/uL)', '(Glycogen-Glucose)*df/weight (ug/uL/mg)')
-rownames(tab_summary) <- c('0.0A','0.0B','0.0C','0.0D','0.0E','0.0F','0.0G','0.0H','0.0I','0.0J','48.0A','48.0B','48.0C','48.0D','48.0E','48.0F','48.0G','48.0H','48.0I', '48.0J','48.2A','48.2B','48.2C','48.2D','48.2E','48.2F','48.2G','48.2H','48.2I','48.2J','48.7A','48.7B','48.7C','48.7D','48.7E','48.7F','48.7G','48.7H','48.7I','48.7J')
+rownames(tab_summary) <- c('0.0A*','0.0B*','0.0C*','0.0D*','0.0E*','0.0F*','0.0G*','0.0H*','0.0I*','0.0J*','48.0A*','48.0B*','48.0C*','48.0D*','48.0E*','48.0F*','48.0G*','48.0H*','48.0I*', '48.0J*','48.2A*','48.2B*','48.2C*','48.2D*','48.2E*','48.2F*','48.2G*','48.2H*','48.2I*','48.2J*','48.7A*','48.7B*','48.7C*','48.7D*','48.7E*','48.7F*','48.7G*','48.7H*','48.7I*','48.7J*')
 tab_summary <- as.table(tab_summary)
 tab_summary
 ```
