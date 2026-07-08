@@ -1,4 +1,4 @@
-`sormi-assay-development/heat-survivorship/data/20260706-35C09ppt-USDA-families`
+`sormi-assay-development/heat-survivorship/data/20260707-35C09ppt-USDA-families`
 
 
 Oysters leftover from June 24 sampling were placed in can in tank room annex 
@@ -17,3 +17,5 @@ Limited mortality
 Heat turned back on at Noon.
 
 Heat still on at 8am July 8.
+
+Turned heater off at 9:30am July 8.
