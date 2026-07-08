@@ -16,4 +16,4 @@ No dead - add new tap water to tripours and left in cold room 9:30.
 
 water temperature 22C
 
-Placed in Annex at 14:00 temperature: 
+Placed in Annex at 14:00 temperature: 14C when moved over. 
