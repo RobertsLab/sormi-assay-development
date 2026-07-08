@@ -12,4 +12,8 @@ FORGOT family 2 in cold room overnight.
 
 Moved to annex at 8:00 July 8.
 
-No dead - add new tap water to tripours and left in could room 9:30.
+No dead - add new tap water to tripours and left in cold room 9:30.
+
+water temperature 22C
+
+Placed in Annex at 14:00 temperature: 
