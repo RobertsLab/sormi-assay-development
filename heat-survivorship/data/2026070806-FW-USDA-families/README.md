@@ -7,3 +7,7 @@ Oyster started in cold room.
 
 
 at 2pm on July 7 the tripours were filled with FW (from tap) and moved to annex (Room Temperature)
+
+FORGOT family 2 in cold room overnight.
+
+Moved to annex at 8:00 July 8.

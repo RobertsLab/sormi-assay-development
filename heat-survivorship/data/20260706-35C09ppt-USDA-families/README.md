@@ -16,4 +16,4 @@ Limited mortality
 
 Heat turned back on at Noon.
 
-
+Heat still on at 8am July 8.

@@ -7,3 +7,6 @@ Oysters were brought back from Manchester on July 2.
 
 
 at 11am July 7 mortality was recorded with dead measured.
+
+
+July 8:00 tank smelled of death. removed oysters and sitting in tank room for assessment.
