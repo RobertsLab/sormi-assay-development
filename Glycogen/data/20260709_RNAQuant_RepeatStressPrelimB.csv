@@ -1,0 +1,11 @@
+SampleID,Run ID,Assay Name,Test Name,Test Date,Qubit® tube conc.,Units,Original sample conc.,Units,Sample Volume (µL),Dilution Factor,Std 1 RFU,Std 2 RFU,Std 3 RFU,Excitation,Emission,Green RFU,Far Red RFU
+NN.F,2026-07-09_171451,RNA High sensitivity,Sample_#260709-171836,7/9/2026 17:18,109,ng/mL,21.8,ng/µL,1,200,55.41,596.78,,Red,Far Red,,186.59
+NN.E,2026-07-09_171451,RNA High sensitivity,Sample_#260709-171828,7/9/2026 17:18,102,ng/mL,20.4,ng/µL,1,200,55.41,596.78,,Red,Far Red,,178.13
+HN.D,2026-07-09_171451,RNA High sensitivity,Sample_#260709-171817,7/9/2026 17:18,149,ng/mL,29.8,ng/µL,1,200,55.41,596.78,,Red,Far Red,,236.51
+HN.C,2026-07-09_171451,RNA High sensitivity,Sample_#260709-171806,7/9/2026 17:18,74.6,ng/mL,14.9,ng/µL,1,200,55.41,596.78,,Red,Far Red,,144.34
+NH.F,2026-07-09_171451,RNA High sensitivity,Sample_#260709-171751,7/9/2026 17:17,92.1,ng/mL,18.4,ng/µL,1,200,55.41,596.78,,Red,Far Red,,166.19
+NH.D,2026-07-09_171451,RNA High sensitivity,Sample_#260709-171737,7/9/2026 17:17,116,ng/mL,23.2,ng/µL,1,200,55.41,596.78,,Red,Far Red,,195.19
+HH.E,2026-07-09_171451,RNA High sensitivity,Sample_#260709-171723,7/9/2026 17:17,119,ng/mL,23.8,ng/µL,1,200,55.41,596.78,,Red,Far Red,,199.22
+HH.B,2026-07-09_171451,RNA High sensitivity,Sample_#260709-171707,7/9/2026 17:17,118,ng/mL,23.6,ng/µL,1,200,55.41,596.78,,Red,Far Red,,198.26
+N0.A,2026-07-09_171451,RNA High sensitivity,Sample_#260709-171654,7/9/2026 17:16,130,ng/mL,26,ng/µL,1,200,55.41,596.78,,Red,Far Red,,213.4
+H0.A,2026-07-09_171451,RNA High sensitivity,Sample_#260709-171641,7/9/2026 17:16,87.8,ng/mL,17.6,ng/µL,1,200,55.41,596.78,,Red,Far Red,,160.8
