@@ -23,3 +23,7 @@ Turned heater off at 9:30am July 8.
 Morts recorded on sheet
 
 Heater remained off overnight, pump turned back on at 2pm
+
+Oyster at 11C July 10-12
+
+Final mortality assessment July 14
