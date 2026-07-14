@@ -4,6 +4,8 @@
 
 Twenty adult oysters from each of four different USDA families (1, 5, 7, & 9) were subjected to acute heat stress at 36<sup>o</sup>C for four hours in an upright incubator. Oysters were photographed for measurement and then submerged in ~70mL of freshly prepared resazuring solution in plastic drink cups. Resazurin fluorescence was measured by extracting 200uL from each cup and placing in a 96-well plate, then measuring fluorescence in a Synergy HTX plate reader (Agilent).
 
+To speed up sampling and reduce the amount of time cups were out of the incubator, sampling was periodcially divided between two people and two plates (i.e. half the samples collected into plate B, the other half into plate C).
+
 
 > [!NOTE]
 > Based on our experience with resazurin fluorescence stability and the sheer number of samples being handled,
