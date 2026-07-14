@@ -11,11 +11,7 @@ format:
 editor: visual
 ---
 
-BACKGROUND - Re-run of the 20260609 36 °C *Magallana gigas* USDA-family heat-stress
-survivorship experiment through the reusable Kaplan-Meier template
-(`code/01-mgig-heat-survivorship-20260604.qmd`), so all dates are analyzed with
-an identical pipeline (KM curves via `ggsurvfit`, global log-rank test, and a
-Cox Proportional Hazards model with hazard ratios).
+BACKGROUND - Re-run of the 20260609 36 °C *Magallana gigas* USDA-family heat-stress survivorship experiment through the reusable Kaplan-Meier template (`code/01-mgig-heat-survivorship-20260604.qmd`), so all dates are analyzed with an identical pipeline (KM curves via `ggsurvfit`, global log-rank test, and a Cox Proportional Hazards model with hazard ratios).
 
 Original (un-templated) analysis: `code/00.00-mgig-heat-survivorship-20260609.Rmd`.
 

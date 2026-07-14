@@ -23,7 +23,7 @@ Google Drive remains useful for collaborative planning documents, native Google 
 ### REPOSITORY STRUCTURE
 
 | Path | What is included |
-|------------------------------------|------------------------------------|
+|----|----|
 | [`Glycogen/`](Glycogen/) | Development and analysis files for the Promega Glycogen-Glo assay. Includes R Markdown analyses, raw luminescence exports, Gen5 plate-reader experiment files, sample/tissue-weight CSVs, reference PDFs, and generated plots. |
 | [`Resazurin/`](Resazurin/) | Resazurin metabolic-rate assay experiments. Includes experiment-specific plate-reader exports (`plate-<label>-T<hour>.txt`), `layout.csv` metadata files, ImageJ measurements/images, R Markdown analyses, summary CSV outputs, figures, an example layout template, and the Huffmyer et al. preprint. |
 | [`heat-survivorship/`](heat-survivorship/) | Heat survivorship experiment data and analyses. Includes survivorship CSVs, family/image metadata, R Markdown analysis files, and Kaplan-Meier plot outputs. |
@@ -40,7 +40,7 @@ Google Drive remains useful for collaborative planning documents, native Google 
 The linked [Google Drive folder](https://drive.google.com/drive/folders/1aNnGCrB0ZZ6RrqaYGUDaaSHQTRL5pYW1) is broader and more planning-oriented than this repo.
 
 | Drive item | Repo status |
-|------------------------------------|------------------------------------|
+|----|----|
 | `Sampling Plan May 2026`, `SORMI Summary`, and `Engagement Outreach Tracking` | Drive-only planning/admin documents. Summaries or finalized methods should be copied into repo READMEs when they become part of the durable record. |
 | [`Assay List`](https://docs.google.com/spreadsheets/d/1GBMtLY4aFRvle37hthge4n-eMNNRA2LS01NZbu8G8Gs/edit) Google Sheet | Canonical editable assay list. The repo no longer keeps a separate `Assay List.xlsx` copy. |
 | `Glycogen` Drive folder | Contains protocol/reference PDFs that are also represented in [`Glycogen/`](Glycogen/). The repo additionally contains raw data, code, and outputs. |
@@ -64,4 +64,3 @@ The linked [Google Drive folder](https://drive.google.com/drive/folders/1aNnGCrB
 - Raw instrument exports and layout files are kept with each assay's `data/` directory so analyses can be rerun from source data.
 - Resazurin experiment folders are designed to be parsed automatically when they contain plate-reader files named like `plate-<label>-T<hour>.txt` and a matching `layout.csv`.
 - Glycogen Gen5 experiment and raw luminescence files follow date/species/experiment naming conventions documented in the Glycogen subdirectory READMEs.
-
