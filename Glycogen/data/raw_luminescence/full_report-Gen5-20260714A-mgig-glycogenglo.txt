@@ -1,0 +1,66 @@
+
+
+Software Version	3.16.10
+
+
+
+Experiment File Path:	C:\Users\robertslab\Documents\HAA_GlycGlo\Gen5-20260714A-mgig-glycogenglo.xpt
+Protocol File Path:	C:\Users\Public\Documents\Protocols\luminesence-96wells-1.0s-glycogen_glo.prt
+
+
+
+Plate Number	Plate 1
+Date	7/14/2026
+Time	3:48:31 PM
+Reader Type:	Synergy HTX
+Reader Serial Number:	25030704
+Reading Type	Reader
+
+Procedure Details
+
+Plate Type	Costar 96 flat bottom
+Eject plate on completion	
+Read	Luminescence Endpoint
+	Full Plate
+	Integration Time: 0:01.00 (MM:SS.ss)
+	Filter Set 1
+	    Emission: Hole
+	    Optics: Top,  Gain: 135
+	Read Speed: Normal,  Delay: 100 msec
+	Extended Dynamic Range
+	Read Height: 1 mm
+
+Layout
+	1	2	3	4	5	6	7	8	9	10	11	12
+A	SPL1	SPL1	SPL1	SPL6	SPL6	SPL6	SPL11	SPL11	SPL11	SPL19	SPL19	SPL19	Well ID
+	24H0.A-glyc-18.0-df.20	24H0.A-glyc-18.0-df.20	24H0.A-glyc-18.0-df.20	24N0.C-glyc-16.7-df.20	24N0.C-glyc-16.7-df.20	24N0.C-glyc-16.7-df.20	24HH.A-glyc-13.4-df.20	24HH.A-glyc-13.4-df.20	24HH.A-glyc-13.4-df.20	24NH.D-glyc-20.8-df.20	24NH.D-glyc-20.8-df.20	24NH.D-glyc-20.8-df.20	Name
+B	SPL2	SPL2	SPL2	SPL7	SPL7	SPL7	SPL12	SPL12	SPL12	SPL20	SPL20	SPL20	Well ID
+	24H0.B-glyc-15.1-df.20	24H0.B-glyc-15.1-df.20	24H0.B-glyc-15.1-df.20	48H0.A-glyc-11.5-df.20	48H0.A-glyc-11.5-df.20	48H0.A-glyc-11.5-df.20	24HH.B-glyc-18.6-df.20	24HH.B-glyc-18.6-df.20	24HH.B-glyc-18.6-df.20	24NH.E-glyc-8.3-df.20	24NH.E-glyc-8.3-df.20	24NH.E-glyc-8.3-df.20	Name
+C	SPL3	SPL3	SPL3	SPL8	SPL8	SPL8	SPL13	SPL13	SPL13	SPL21	SPL21	SPL21	Well ID
+	24H0.C-glyc-16.1-df.20	24H0.C-glyc-16.1-df.20	24H0.C-glyc-16.1-df.20	48N0.A-glyc-16.1-df.20	48N0.A-glyc-16.1-df.20	48N0.A-glyc-16.1-df.20	24HH.C-glyc-18.4-df.20	24HH.C-glyc-18.4-df.20	24HH.C-glyc-18.4-df.20	24HN.A-glyc-10.2-df.20	24HN.A-glyc-10.2-df.20	24HN.A-glyc-10.2-df.20	Name
+D	SPL4	SPL4	SPL4	SPL9	SPL9	SPL9	SPL14	SPL14	SPL14	SPL22	SPL22	SPL22	Well ID
+	24N0.A-glyc-15.3-df.20	24N0.A-glyc-15.3-df.20	24N0.A-glyc-15.3-df.20	48N0.B-glyc-10.5-df.20	48N0.B-glyc-10.5-df.20	48N0.B-glyc-10.5-df.20	24HH.D-glyc-15.1-df.20	24HH.D-glyc-15.1-df.20	24HH.D-glyc-15.1-df.20	24HN.B-glyc-13.1-df.20	24HN.B-glyc-13.1-df.20	24HN.B-glyc-13.1-df.20	Name
+E	SPL5	SPL5	SPL5	SPL10	SPL10	SPL10	SPL15	SPL15	SPL15	SPL23	SPL23	SPL23	Well ID
+	24N0.B-glyc-10.0-df.20	24N0.B-glyc-10.0-df.20	24N0.B-glyc-10.0-df.20	48N0.C-glyc-13.6-df.20	48N0.C-glyc-13.6-df.20	48N0.C-glyc-13.6-df.20	24HH.E-glyc-19.2-df.20	24HH.E-glyc-19.2-df.20	24HH.E-glyc-19.2-df.20	24HN.C-glyc-11.9-df.20	24HN.C-glyc-11.9-df.20	24HN.C-glyc-11.9-df.20	Name
+F	SPL27	SPL28	SPL29	SPL30	SPL31		SPL16	SPL16	SPL16	SPL24	SPL24	SPL24	Well ID
+	STD-glyc-20	STD-glyc-2	STD-glyc-0.2	STD-glyc-0.02	STD-glyc-0		24NH.A-glyc-12.6-df.20	24NH.A-glyc-12.6-df.20	24NH.A-glyc-12.6-df.20	24HN.D-glyc-12.8-df.20	24HN.D-glyc-12.8-df.20	24HN.D-glyc-12.8-df.20	Name
+G	SPL27	SPL28	SPL29	SPL30	SPL31		SPL17	SPL17	SPL17	SPL25	SPL25	SPL25	Well ID
+	STD-glyc-20	STD-glyc-2	STD-glyc-0.2	STD-glyc-0.02	STD-glyc-0		24NH.B-glyc-18.0-df.20	24NH.B-glyc-18.0-df.20	24NH.B-glyc-18.0-df.20	24HN.E-glyc-7.1-df.20	24HN.E-glyc-7.1-df.20	24HN.E-glyc-7.1-df.20	Name
+H	SPL27	SPL28	SPL29	SPL30	SPL31		SPL18	SPL18	SPL18	SPL26	SPL26	SPL26	Well ID
+	STD-glyc-20	STD-glyc-2	STD-glyc-0.2	STD-glyc-0.02	STD-glyc-0		24NH.C-glyc-6.5-df.20	24NH.C-glyc-6.5-df.20	24NH.C-glyc-6.5-df.20	24NN.A-glyc-9.7-df.20	24NN.A-glyc-9.7-df.20	24NN.A-glyc-9.7-df.20	Name
+
+
+
+Actual Temperature:	21.5
+
+Results
+	1	2	3	4	5	6	7	8	9	10	11	12
+A	771	764	811	4187	2903	2258	777	793	1487	1488	1266	1177	Lum
+B	1040	917	959	484	454	459	738	765	971	451	458	437	Lum
+C	1467	1407	1343	1838	1779	1733	947	989	888	753	729	774	Lum
+D	2672	2216	2246	1043	962	1020	710	723	747	665	640	794	Lum
+E	1240	2039	1986	1244	1329	1316	1074	1084	1056	1685	1795	1751	Lum
+F	26786	2406	1280	479	384		564	579	562	2244	1027	949	Lum
+G	28031	2526	1066	602	408		3282	1993	1943	1017	1004	1023	Lum
+H	28004	2395	1157	458	465		468	555	438	1895	1881	2275	Lum
+

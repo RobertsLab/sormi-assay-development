@@ -1,0 +1,66 @@
+
+
+Software Version	3.16.10
+
+
+
+Experiment File Path:	C:\Users\robertslab\Documents\HAA_GlycGlo\Gen5-20260714B-mgig-glycogenglo.xpt
+Protocol File Path:	C:\Users\Public\Documents\Protocols\luminesence-96wells-1.0s-glycogen_glo.prt
+
+
+
+Plate Number	Plate 1
+Date	7/14/2026
+Time	4:01:42 PM
+Reader Type:	Synergy HTX
+Reader Serial Number:	25030704
+Reading Type	Reader
+
+Procedure Details
+
+Plate Type	Costar 96 flat bottom
+Eject plate on completion	
+Read	Luminescence Endpoint
+	Full Plate
+	Integration Time: 0:01.00 (MM:SS.ss)
+	Filter Set 1
+	    Emission: Hole
+	    Optics: Top,  Gain: 135
+	Read Speed: Normal,  Delay: 100 msec
+	Extended Dynamic Range
+	Read Height: 1 mm
+
+Layout
+	1	2	3	4	5	6	7	8	9	10	11	12
+A	SPL1	SPL1	SPL1	SPL9	SPL9	SPL9							Well ID
+	24NN.B-glyc-8.9-df.20	24NN.B-glyc-8.9-df.20	24NN.B-glyc-8.9-df.20	48NN.B-glyc-7.3-df.20	48NN.B-glyc-7.3-df.20	48NN.B-glyc-7.3-df.20							Name
+B	SPL2	SPL2	SPL2	SPL10	SPL10	SPL10							Well ID
+	24NN.C-glyc-12.0-df.20	24NN.C-glyc-12.0-df.20	24NN.C-glyc-12.0-df.20	48NN.C-glyc-12.1-df.20	48NN.C-glyc-12.1-df.20	48NN.C-glyc-12.1-df.20							Name
+C	SPL3	SPL3	SPL3	SPL11	SPL11	SPL11							Well ID
+	24NN.D-glyc-18.8-df.20	24NN.D-glyc-18.8-df.20	24NN.D-glyc-18.8-df.20	48NN.D-glyc-10.5-df.20	48NN.D-glyc-10.5-df.20	48NN.D-glyc-10.5-df.20							Name
+D	SPL4	SPL4	SPL4	SPL12	SPL12	SPL12							Well ID
+	24NN.E-glyc-12.3-df.20	24NN.E-glyc-12.3-df.20	24NN.E-glyc-12.3-df.20	48NN.E-glyc-14.6-df.20	48NN.E-glyc-14.6-df.20	48NN.E-glyc-14.6-df.20							Name
+E	SPL5	SPL5	SPL5										Well ID
+	48NH.A-glyc-13.2-df.20	48NH.A-glyc-13.2-df.20	48NH.A-glyc-13.2-df.20										Name
+F	SPL6	SPL6	SPL6										Well ID
+	48NH.B-glyc-11.6-df.20	48NH.B-glyc-11.6-df.20	48NH.B-glyc-11.6-df.20										Name
+G	SPL7	SPL7	SPL7										Well ID
+	48HN.A-glyc-7.8-df.20	48HN.A-glyc-7.8-df.20	48HN.A-glyc-7.8-df.20										Name
+H	SPL8	SPL8	SPL8										Well ID
+	48NN.A-glyc-15.6-df.20	48NN.A-glyc-15.6-df.20	48NN.A-glyc-15.6-df.20										Name
+
+
+
+Actual Temperature:	21.8
+
+Results
+	1	2	3	4	5	6	7	8	9	10	11	12
+A	1019	976	948	1374	1588	1221							Lum
+B	2192	2146	2107	1288	1589	1307							Lum
+C	2362	2122	1999	2394	2272	2695							Lum
+D	2648	1464	1192	2235	1640	1342							Lum
+E	943	927	908										Lum
+F	498	519	494										Lum
+G	1329	1239	1210										Lum
+H	2044	1746	1763										Lum
+
