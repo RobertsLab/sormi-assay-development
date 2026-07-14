@@ -10,6 +10,20 @@ Twenty adult oysters from each of four different USDA families (1, 5, 7, & 9) we
 > resazurin fluorescence was _not_ measured immediately. Plates were measured when time was available, however,
 > no plates sat for longer than 30 minutes at room temperature.
 
+Resazurin temperatures were measured with an infrared thermometer over the course of the experiment:
+
+| Timepoint (hrs) | Temp_range (C) |
+|-----------------|----------------|
+| 0               | 18             |
+| 0.5             | 23-29          |
+| 1               | 27-29          |
+| 1.5             | 29-31          |
+| 2               | 30-32          |
+| 2.5             | 31.5-32.5      |
+| 3               | 31.5-32.5      |
+| 3.5             | 31-32.5        |
+| 4               | 31.5-33        |
+
 ---
 
 ## FILES
