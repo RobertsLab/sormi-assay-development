@@ -1194,10 +1194,23 @@ add_sig_brackets <- function(p, pairs_df, group_levels, y_vals) {
   y_range <- diff(range(y_vals, na.rm = TRUE))
   step    <- y_range * 0.12
 
+  # emmeans prefixes factor levels with the variable name (e.g. "family7");
+  # resolve back to the bare level used on the x-axis.
+  resolve_level <- function(x, lvls) {
+    x <- trimws(x)
+    if (x %in% lvls) return(x)
+    lvls_sorted <- lvls[order(nchar(as.character(lvls)), decreasing = TRUE)]
+    for (lvl in lvls_sorted) {
+      lvl_str <- as.character(lvl)
+      if (endsWith(x, lvl_str) && nchar(x) > nchar(lvl_str)) return(lvl_str)
+    }
+    NA_character_
+  }
+
   for (i in seq_len(nrow(sig_pairs))) {
     parts <- str_split(as.character(sig_pairs$contrast[i]), " - ", 2)[[1]]
-    g1 <- trimws(parts[1])
-    g2 <- trimws(parts[2])
+    g1 <- resolve_level(parts[1], group_levels)
+    g2 <- resolve_level(parts[2], group_levels)
     x1 <- match(g1, group_levels)
     x2 <- match(g2, group_levels)
     if (is.na(x1) || is.na(x2)) next
