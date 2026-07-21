@@ -1,0 +1,229 @@
+---
+title: "Kaplan-Meier Survivorship Analysis — 20260706 (35 °C, 9 ppt)"
+author: "Steven Roberts"
+date: today
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    code-fold: false
+    embed-resources: true
+editor: visual
+---
+
+BACKGROUND - Kaplan-Meier survivorship analysis of the 20260706 35 °C / 9 ppt
+brackish-water *Magallana gigas* USDA-family experiment, run through the reusable
+Kaplan-Meier pipeline (`code/06-mgig-heat-survivorship-20260706.qmd`), so results
+are directly comparable to the earlier heat-stress dates.
+
+Oysters left over from the June 24 sampling (9 USDA families: 1, 2, 3, 5, 6, 7,
+8, 9, 10) were placed in a tank in the annex at 35 °C and 9 ppt salinity on
+2026-07-06 at noon. The heater was cycled on and off over the following days
+(off 07-06 15:00, back on 07-07 12:00, off 07-08 09:30; oysters held ~11 °C
+07-10 to 07-12), with mortality scored at 20, 43, 66, 91, and 167 hours
+post-immersion (final assessment 2026-07-14). See
+`data/20260706-35C09ppt-USDA-families/README.md` for the full timeline.
+
+The downstream KM / log-rank / Cox sections are kept IDENTICAL to the 06 pipeline
+so results are directly comparable across experiments. ONLY the data read +
+reshape reflects this date's input file.
+
+```{=html}
+<!--
+================================================================================
+INPUT FORMAT FOR THIS DATE (WIDE, mortality-coded)
+================================================================================
+survivorship.csv is WIDE: one row per individual, with columns
+
+    ID, Family, 20, 43, 66, 91, 167
+
+where 20/43/66/91/167 are the timepoint hours and each cell is a MORTALITY flag:
+
+    1 = dead   -> status 1 (event)
+    0 = alive  -> status 0
+
+The flags are monotone non-decreasing across time (once dead, stays dead), so an
+individual's death TIME is the first timepoint at which the flag == 1; an
+individual that is never flagged dead is right-censored at the last timepoint.
+================================================================================
+-->
+```
+
+## Set up
+
+```{r setup, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(ggplot2)
+library(survival)
+library(ggsurvfit)
+library(gtsummary)
+library(cardx)
+library(cowplot)
+```
+
+```{r config}
+# >>> EDIT: analysis configuration ---------------------------------------------
+
+# Path to the WIDE-format mortality csv for this experiment
+data_path  <- "../data/20260706-35C09ppt-USDA-families/survivorship.csv"
+
+# Output directory for saved figures
+out_dir    <- "../outputs/08-mgig-heat-survivorship-20260706-35C09ppt/"
+
+# Grouping / factor column(s) to compare survival across.
+group_vars <- c("Family")
+
+# Individual ID column produced in the reshape below.
+id_var     <- "uid"
+# ------------------------------------------------------------------------------
+```
+
+## Read in data
+
+```{r read-data, message=FALSE}
+raw <- readr::read_csv(data_path, show_col_types = FALSE)
+glimpse(raw)
+```
+
+## Reshape to one (time, status) row per individual
+
+```{r reshape}
+# Timepoint columns are the numeric-named columns (hours). Everything else
+# (ID, Family) is metadata.
+time_cols <- names(raw)[grepl("^[0-9]+$", names(raw))]
+stopifnot(length(time_cols) > 0)
+
+long <- raw %>%
+  # keep only rows that actually have a family assignment (drop blank/footer rows)
+  filter(!is.na(Family), trimws(as.character(Family)) != "") %>%
+  # one wide row == one individual; give each a guaranteed-unique key so that a
+  # missing ID does not silently drop a real (e.g. all-survived) oyster.
+  mutate(
+    row_uid = paste0("row", row_number()),
+    uid     = ifelse(is.na(ID) | trimws(as.character(ID)) == "",
+                     row_uid, as.character(ID)),
+    Family  = as.character(Family)
+  ) %>%
+  pivot_longer(
+    cols      = all_of(time_cols),
+    names_to  = "timepoint_hrs",
+    values_to = "dead_raw"
+  ) %>%
+  mutate(
+    timepoint_hrs = as.numeric(timepoint_hrs),
+    # 1 = dead (event), 0 = alive; be tolerant of stray whitespace / text
+    dead = case_when(
+      toupper(trimws(as.character(dead_raw))) %in% c("1","TRUE","T","DEAD","YES","Y") ~ TRUE,
+      toupper(trimws(as.character(dead_raw))) %in% c("0","FALSE","F","ALIVE","NO","N") ~ FALSE,
+      TRUE ~ NA
+    )
+  )
+
+# Collapse to ONE (time, status) row per individual:
+#   - if it ever died (dead == TRUE), keep the FIRST death time (event)
+#   - otherwise keep the LAST observed time point (right-censored)
+data <- long %>%
+  filter(!is.na(uid), !is.na(timepoint_hrs), !is.na(dead)) %>%
+  group_by(uid) %>%
+  summarise(
+    Family = first(Family[!is.na(Family)]),
+    status = as.integer(any(dead)),
+    time   = if (any(dead)) min(timepoint_hrs[dead]) else max(timepoint_hrs),
+    .groups = "drop"
+  ) %>%
+  mutate(
+    Family = factor(Family, levels = unique(Family[order(readr::parse_number(Family), Family)]))
+  )
+
+cat("n individuals:", nrow(data), " | events (deaths):", sum(data$status), "\n")
+cat("families:", paste(levels(data$Family), collapse = ", "), "\n")
+head(data)
+```
+
+## Generate Kaplan-Meier survival curves
+
+```{r km-fit}
+km_formula <- as.formula(
+  paste("Surv(time, status) ~", paste(group_vars, collapse = " + "))
+)
+
+s1 <- survival::survfit(km_formula, data = data)
+print(s1)
+summary(s1)
+```
+
+```{r km-plot-combined, warning=FALSE}
+ggsurvfit::survfit2(km_formula, data = data) %>%
+  ggsurvfit::ggsurvfit() +
+  labs(x = "Time (hours)", y = "Survival probability") +
+  ylim(0, 1)
+```
+
+## Global log-rank test (family comparison)
+
+```{r log-rank}
+logrank <- survival::survdiff(km_formula, data = data)
+print(logrank)
+p_val <- 1 - pchisq(logrank$chisq, df = length(logrank$n) - 1)
+cat("Log-rank chi-square:", round(logrank$chisq, 4),
+    "| df:", length(logrank$n) - 1,
+    "| p-value:", signif(p_val, 4), "\n")
+```
+
+## Cox Proportional Hazards model
+
+```{r cox-model}
+cox_formula <- as.formula(
+  paste("Surv(time, status) ~", paste(group_vars, collapse = " * "))
+)
+cox_fit <- survival::coxph(cox_formula, data = data)
+cox_fit
+cox_fit %>% tbl_regression(exp = TRUE)
+```
+
+## Publication plot
+
+```{r theme}
+my_theme <- theme_classic() +
+  theme(
+    axis.title.y = element_text(size = 14, color = "black"),
+    axis.text.y  = element_text(size = 12, color = "black"),
+    axis.text.x  = element_text(size = 12, color = "black"),
+    axis.title.x = element_text(size = 14, color = "black")
+  )
+```
+
+```{r plot-by-family, warning=FALSE}
+g1 <- group_vars[1]
+f1 <- as.formula(paste("Surv(time, status) ~", g1))
+n_groups1     <- nlevels(factor(data[[g1]]))
+group_colors1 <- scales::hue_pal()(n_groups1)
+
+plot1 <- ggsurvfit::survfit2(f1, data = data) %>%
+  ggsurvfit::ggsurvfit() +
+  labs(x = "Time (hours)", y = "Survival probability", title = "") +
+  ylim(0, 1) +
+  my_theme +
+  scale_colour_manual(values = group_colors1) +
+  theme(legend.position = "right")
+
+plot1
+```
+
+```{r save-plots}
+dir.create(out_dir, showWarnings = FALSE, recursive = TRUE)
+ggsave(file.path(out_dir, "survival_by_family.png"), plot1, width = 7, height = 5, dpi = 300)
+```
+
+## Take homes
+
+```{r take-homes}
+med <- summary(survival::survfit(Surv(time, status) ~ 1, data = data))$table["median"]
+cat("Experiment: 20260706, 35 C, 9 ppt\n")
+cat("Individuals:", nrow(data), "| Deaths:", sum(data$status),
+    sprintf("(%.0f%%)\n", 100 * mean(data$status)))
+cat("Overall median survival (hrs):", ifelse(is.na(med), "not reached (>50% survived)", med), "\n")
+cat("Family log-rank p-value:", signif(p_val, 4),
+    ifelse(p_val < 0.05, "-> families differ significantly\n",
+                         "-> no significant family difference\n"))
+```

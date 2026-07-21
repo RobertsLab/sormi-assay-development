@@ -1,0 +1,373 @@
+---
+title: "Cross-Experiment Survivorship Summary & Family Ranking"
+author: "Steven Roberts"
+date: today
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    code-fold: true
+    embed-resources: true
+    df-print: paged
+editor: visual
+---
+
+BACKGROUND - This document pools EVERY *Magallana gigas* USDA-family
+survivorship experiment run to date into a single analysis, harmonising the two
+different raw data layouts used across dates, and then ranks families by as many
+survival phenotypes as the data support.
+
+Experiments included (see each `data/<date>-.../README.md` for full protocols):
+
+| exp_id | date | stressor | raw format |
+|---|---|---|---|
+| 20260427-33C | 2026-04-27 | 33 °C | long (`alive.measurement`) |
+| 20260511-33C | 2026-05-11 | 33 °C | long (`alive.measurement`) |
+| 20260604-36C | 2026-06-04 | 36 °C | wide (mortality 0/1) |
+| 20260609-36C | 2026-06-09 | 36 °C | long (`alive.measurement`) |
+| 20260706-35C | 2026-07-06 | 35 °C | wide (mortality 0/1) |
+| 20260706-35C09ppt | 2026-07-06 | 35 °C + 9 ppt | wide (mortality 0/1) |
+| 20260707-FW | 2026-07-07 | freshwater → 36 °C | wide (mortality 0/1) |
+
+The 20260714-H2O2FW experiment has a protocol README but no scored
+`survivorship.csv` yet, so it is not included.
+
+**Note on the 9 / 9b label ambiguity:** the 20260511 and 20260609 experiments
+each contain both a `9` and a `9b` family and are missing family `2`. One of the
+two 9-labels in those experiments is really family 2 and the other is really
+family 9, but the correct assignment was lost. Because any guess would be a 50/50
+that corrupts *both* family 2 and family 9, all `9`/`9b` individuals are
+**excluded** from those two experiments (family 9 is retained wherever it appears
+unambiguously; family `9b` drops out entirely).
+
+```{=html}
+<!--
+================================================================================
+HOW FAMILIES ARE COMPARED ACROSS EXPERIMENTS
+================================================================================
+Experiments differ in severity (33 vs 35 vs 36 C, salinity, duration), so raw
+survival is NOT directly comparable across dates. To compare families fairly we
+score each family WITHIN each experiment and then aggregate:
+
+  surv_prop      = fraction of the family alive at the LAST timepoint
+  rel_surv_time  = mean restricted lifetime / experiment duration (0-1)
+                   (= RMST normalised to the observation window; because every
+                    individual is observed at every timepoint until it dies or
+                    the experiment ends, this equals the restricted mean
+                    survival time exactly.)
+
+Both are 0-1, higher = better. Within each experiment each family's two metrics
+are converted to a PERCENTILE (0-100) relative to the other families in that same
+experiment, which removes the experiment-severity effect. A family's composite
+score is the mean of those percentiles across all experiments it appears in.
+================================================================================
+-->
+```
+
+## Set up
+
+```{r setup, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(survival)
+library(ggsurvfit)
+library(knitr)
+
+out_dir <- "../outputs/09-mgig-survivorship-cross-experiment-summary/"
+dir.create(out_dir, showWarnings = FALSE, recursive = TRUE)
+```
+
+## Experiment registry
+
+```{r registry}
+experiments <- tibble::tribble(
+  ~exp_id,               ~date,        ~stressor,             ~format, ~path,
+  "20260427-33C",        "2026-04-27", "33 C",                "long",  "../data/20260427-33C-USDA-families/survivorship.csv",
+  "20260511-33C",        "2026-05-11", "33 C",                "long",  "../data/20260511-33C-USDA-families/survivorship.csv",
+  "20260604-36C",        "2026-06-04", "36 C",                "wide",  "../data/20260604-36C-USDA-families/survivorship.csv",
+  "20260609-36C",        "2026-06-09", "36 C",                "long",  "../data/20260609-36C-USDA-families/survivorship.csv",
+  "20260706-35C",        "2026-07-06", "35 C",                "wide",  "../data/20260706-35C-USDA-families/survivorship.csv",
+  "20260706-35C09ppt",   "2026-07-06", "35 C / 9 ppt",        "wide",  "../data/20260706-35C09ppt-USDA-families/survivorship.csv",
+  "20260707-FW",         "2026-07-07", "Freshwater -> 36 C",  "wide",  "../data/20260707-FW-USDA-families/survivorship.csv"
+)
+knitr::kable(experiments |> dplyr::select(-path))
+```
+
+## Harmonise all experiments to one (family, individual, time, status) table
+
+```{r readers}
+# Normalise family labels: strip a leading "f" and zero-padding so "f01","01","1"
+# all become "1"; non-numeric labels such as "9b" are kept verbatim (lower-cased).
+norm_family <- function(x) {
+  x <- tolower(trimws(as.character(x)))
+  x <- sub("^f", "", x)          # f01 -> 01, f2 -> 2, 9b unchanged
+  x <- ifelse(grepl("^[0-9]+$", x), as.character(as.integer(x)), x)  # 01 -> 1
+  x
+}
+
+# ---- LONG format: alive.measurement TRUE = alive, one row per indiv x timepoint
+read_long <- function(path) {
+  df <- readr::read_csv(path, show_col_types = FALSE, name_repair = "minimal")
+  names(df) <- trimws(names(df))
+  if ("is_blank" %in% names(df)) {
+    df <- df %>% filter(is.na(is_blank) | tolower(as.character(is_blank)) != "true")
+  }
+  df %>%
+    transmute(
+      uid        = as.character(individual_id),
+      family_raw = as.character(familly_id.group),
+      time       = as.numeric(timepoint_hrs),
+      dead       = !as.logical(alive.measurement)
+    ) %>%
+    filter(!is.na(uid), !is.na(time), !is.na(dead))
+}
+
+# ---- WIDE format: numeric-named timepoint columns, cell 1 = dead
+read_wide <- function(path) {
+  df <- readr::read_csv(path, show_col_types = FALSE, name_repair = "minimal")
+  names(df) <- trimws(gsub("﻿", "", names(df)))          # drop BOM/whitespace
+  time_cols <- names(df)[grepl("^[0-9]+$", names(df))]
+  fam_col   <- names(df)[grepl("^family$", names(df), ignore.case = TRUE)][1]
+  df %>%
+    mutate(uid = paste0("row", row_number())) %>%             # one row = one indiv
+    rename(family_raw = !!fam_col) %>%
+    filter(!is.na(family_raw), trimws(as.character(family_raw)) != "") %>%
+    pivot_longer(all_of(time_cols), names_to = "time", values_to = "dead_raw") %>%
+    transmute(
+      uid        = as.character(uid),
+      family_raw = as.character(family_raw),
+      time = as.numeric(time),
+      dead = toupper(trimws(as.character(dead_raw))) %in% c("1","TRUE","T","DEAD","YES","Y")
+    ) %>%
+    filter(!is.na(time))
+}
+
+read_exp <- function(fmt, path) if (fmt == "long") read_long(path) else read_wide(path)
+```
+
+```{r build-individual-table}
+# Collapse each individual to ONE (time, status) row within its experiment:
+#   status = 1 if ever dead (event); time = first death time, else last timepoint.
+indiv0 <- experiments %>%
+  mutate(raw = purrr::map2(format, path, read_exp)) %>%
+  select(exp_id, date, stressor, raw) %>%
+  unnest(raw) %>%
+  mutate(family = norm_family(family_raw)) %>%
+  group_by(exp_id, date, stressor, family, uid) %>%
+  summarise(
+    status = as.integer(any(dead, na.rm = TRUE)),
+    time   = if (any(dead, na.rm = TRUE)) min(time[dead], na.rm = TRUE) else max(time, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+# ---- Resolve the 9 / 9b mislabelling -----------------------------------------
+# In experiments where BOTH "9" and "9b" were run, family 2 is ABSENT: one of the
+# two 9-labels is really family 2 and the other is really family 9, but which is
+# which was lost at labelling. Rather than guess (a 50/50 that would corrupt BOTH
+# family 2 and family 9), we EXCLUDE every "9" and "9b" individual from those
+# experiments. In experiments where only "9" appears it is unambiguous family 9
+# and is kept; family "9b" therefore drops out of the analysis entirely.
+amb_exps <- indiv0 %>%
+  group_by(exp_id) %>%
+  summarise(both = all(c("9", "9b") %in% family), .groups = "drop") %>%
+  filter(both) %>% pull(exp_id)
+
+n_dropped <- indiv0 %>%
+  filter(exp_id %in% amb_exps, family %in% c("9", "9b")) %>% nrow()
+
+indiv <- indiv0 %>%
+  filter(!(exp_id %in% amb_exps & family %in% c("9", "9b"))) %>%
+  group_by(exp_id) %>%
+  mutate(tau = max(time)) %>%          # experiment observation window (hrs)
+  ungroup()
+
+cat("Experiments with unresolved 9/9b labels (9 & 9b excluded there):",
+    ifelse(length(amb_exps) == 0, "none", paste(amb_exps, collapse = ", ")), "\n")
+cat("Individuals dropped due to 9/9b ambiguity:", n_dropped, "\n")
+cat("Total individuals pooled:", nrow(indiv),
+    "| experiments:", dplyr::n_distinct(indiv$exp_id),
+    "| families:", dplyr::n_distinct(indiv$family), "\n")
+cat("Family labels seen:", paste(sort(unique(indiv$family)), collapse = ", "), "\n")
+```
+
+## Per-experiment performance summary
+
+```{r exp-summary}
+exp_summary <- indiv %>%
+  group_by(exp_id, date, stressor) %>%
+  group_modify(function(d, key) {
+    fit_all <- survival::survfit(Surv(time, status) ~ 1, data = d)
+    med <- summary(fit_all)$table["median"]
+    # family log-rank (only if >1 family with events possible)
+    p_lr <- NA_real_
+    if (dplyr::n_distinct(d$family) > 1) {
+      lr <- survival::survdiff(Surv(time, status) ~ family, data = d)
+      p_lr <- 1 - pchisq(lr$chisq, df = length(lr$n) - 1)
+    }
+    tibble(
+      n            = nrow(d),
+      n_families   = dplyr::n_distinct(d$family),
+      deaths       = sum(d$status),
+      mortality_pct = round(100 * mean(d$status), 1),
+      tau_hrs      = max(d$time),
+      median_surv_hrs = ifelse(is.na(med), NA, unname(med)),
+      logrank_p    = signif(p_lr, 3)
+    )
+  }) %>%
+  ungroup() %>%
+  arrange(date)
+
+knitr::kable(exp_summary, caption = "Per-experiment survivorship summary")
+readr::write_csv(exp_summary, file.path(out_dir, "experiment_summary.csv"))
+```
+
+```{r km-overall-by-exp, warning=FALSE, fig.width=8, fig.height=5}
+# Overall KM curve per experiment on a common (normalised) time axis so severity
+# is directly comparable regardless of experiment duration.
+indiv_norm <- indiv %>% mutate(time_frac = time / tau)
+
+km_overall <- survival::survfit(Surv(time_frac, status) ~ exp_id, data = indiv_norm)
+p_overall <- ggsurvfit::survfit2(Surv(time_frac, status) ~ stressor, data = indiv_norm) %>%
+  ggsurvfit::ggsurvfit(linewidth = 1) +
+  labs(x = "Fraction of experiment duration", y = "Survival probability",
+       title = "Overall survival by experiment (time normalised to each experiment's duration)") +
+  ylim(0, 1) +
+  theme_classic() +
+  theme(legend.position = "right")
+p_overall
+ggsave(file.path(out_dir, "km_overall_by_experiment.png"), p_overall, width = 8, height = 5, dpi = 300)
+```
+
+## Family phenotypes within each experiment
+
+```{r family-metrics}
+# Two phenotypes per family x experiment (both 0-1, higher = better):
+#   surv_prop     = fraction alive at end
+#   rel_surv_time = mean restricted lifetime / tau  (= normalised RMST)
+fam_exp <- indiv %>%
+  group_by(exp_id, date, stressor, family, tau) %>%
+  summarise(
+    n             = dplyr::n(),
+    deaths        = sum(status),
+    surv_prop     = mean(status == 0),
+    rel_surv_time = mean(ifelse(status == 1, time, tau)) / dplyr::first(tau),
+    .groups = "drop"
+  ) %>%
+  # within-experiment percentile (0-100) for each phenotype; ties share mean rank
+  group_by(exp_id) %>%
+  mutate(
+    pct_surv = 100 * (rank(surv_prop,     ties.method = "average") - 0.5) / dplyr::n(),
+    pct_rst  = 100 * (rank(rel_surv_time, ties.method = "average") - 0.5) / dplyr::n()
+  ) %>%
+  ungroup()
+
+readr::write_csv(fam_exp, file.path(out_dir, "family_by_experiment.csv"))
+```
+
+```{r family-surv-heatmap, fig.width=9, fig.height=5}
+hm <- fam_exp %>%
+  mutate(
+    family = factor(family, levels = unique(family[order(readr::parse_number(family), family)])),
+    exp_lab = paste0(stressor, "\n", date)
+  )
+p_hm <- ggplot(hm, aes(x = exp_lab, y = family, fill = surv_prop)) +
+  geom_tile(color = "white") +
+  geom_text(aes(label = sprintf("%.0f%%", 100 * surv_prop)), size = 3) +
+  scale_fill_viridis_c(name = "Survival", limits = c(0, 1), labels = scales::percent) +
+  labs(x = NULL, y = "Family",
+       title = "Final survival proportion by family and experiment") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(size = 8))
+p_hm
+ggsave(file.path(out_dir, "family_survival_heatmap.png"), p_hm, width = 9, height = 5, dpi = 300)
+```
+
+## Family ranking across all experiments
+
+```{r family-ranking}
+family_rank <- fam_exp %>%
+  group_by(family) %>%
+  summarise(
+    n_experiments   = dplyr::n(),
+    total_n         = sum(n),
+    total_deaths    = sum(deaths),
+    overall_mort_pct = round(100 * sum(deaths) / sum(n), 1),
+    mean_surv_prop  = round(mean(surv_prop), 3),
+    mean_rel_surv   = round(mean(rel_surv_time), 3),
+    composite_score = round(mean((pct_surv + pct_rst) / 2), 1),  # 0-100, higher = better
+    .groups = "drop"
+  ) %>%
+  arrange(desc(composite_score)) %>%
+  mutate(rank = dplyr::row_number()) %>%
+  select(rank, family, n_experiments, total_n, overall_mort_pct,
+         mean_surv_prop, mean_rel_surv, composite_score)
+
+knitr::kable(family_rank,
+             caption = "Family ranking (composite = mean within-experiment percentile across survival phenotypes; higher = hardier)")
+readr::write_csv(family_rank, file.path(out_dir, "family_ranking.csv"))
+```
+
+```{r family-rank-plot, fig.width=8, fig.height=5}
+p_rank <- family_rank %>%
+  mutate(family = forcats::fct_reorder(family, composite_score)) %>%
+  ggplot(aes(x = composite_score, y = family, fill = composite_score)) +
+  geom_col() +
+  geom_text(aes(label = paste0("n=", n_experiments, " exp")), hjust = -0.1, size = 3) +
+  scale_fill_viridis_c(guide = "none") +
+  xlim(0, 105) +
+  labs(x = "Composite survival score (0-100, higher = hardier)", y = "Family",
+       title = "Family survival ranking across all experiments") +
+  theme_classic()
+p_rank
+ggsave(file.path(out_dir, "family_ranking.png"), p_rank, width = 8, height = 5, dpi = 300)
+```
+
+## Consistency check: within-experiment survival percentile by family
+
+```{r consistency, fig.width=9, fig.height=5}
+p_cons <- fam_exp %>%
+  mutate(family = factor(family, levels = family_rank$family)) %>%
+  ggplot(aes(x = family, y = pct_surv)) +
+  geom_boxplot(outlier.shape = NA, fill = "grey90") +
+  geom_jitter(aes(color = stressor), width = 0.15, height = 0, size = 2) +
+  labs(x = "Family (ordered by composite rank)", y = "Within-experiment survival percentile",
+       title = "Ranking consistency across experiments",
+       color = "Experiment") +
+  theme_classic()
+p_cons
+ggsave(file.path(out_dir, "family_consistency.png"), p_cons, width = 9, height = 5, dpi = 300)
+```
+
+## Take homes
+
+```{r take-homes}
+best  <- family_rank %>% slice_head(n = 3)
+worst <- family_rank %>% slice_tail(n = 3)
+
+cat("Experiments pooled:", nrow(exp_summary), "\n")
+cat("Total individuals:", sum(exp_summary$n),
+    "| overall deaths:", sum(exp_summary$deaths), "\n\n")
+
+cat("Most heat/stress tolerant families (top composite score):\n")
+for (i in seq_len(nrow(best))) {
+  cat(sprintf("  %d. Family %s  (score %.1f, mean survival %.0f%%, %d experiments)\n",
+              best$rank[i], best$family[i], best$composite_score[i],
+              100 * best$mean_surv_prop[i], best$n_experiments[i]))
+}
+cat("\nLeast tolerant families (bottom composite score):\n")
+for (i in seq_len(nrow(worst))) {
+  cat(sprintf("  %d. Family %s  (score %.1f, mean survival %.0f%%, %d experiments)\n",
+              worst$rank[i], worst$family[i], worst$composite_score[i],
+              100 * worst$mean_surv_prop[i], worst$n_experiments[i]))
+}
+```
+
+<!--
+Interpretation notes:
+- composite_score ranks families on within-experiment percentile so it is not
+  distorted by how mild/severe any single experiment was.
+- Families appearing in fewer experiments (n_experiments column) have less robust
+  scores; weight accordingly.
+- The 9/9b label ambiguity on 0511 & 0609 is handled by exclusion (see note at
+  top), so families 2 and 9 are scored only from experiments where their identity
+  is certain, and "9b" does not appear in the ranking.
+-->
