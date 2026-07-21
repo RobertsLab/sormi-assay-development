@@ -25,3 +25,5 @@ July 13
 Mortality assessed - none
 
 16:00 DI water added and placed at 36C overnight
+
+at 36  Mortality assesses on July 14 and July 15.
