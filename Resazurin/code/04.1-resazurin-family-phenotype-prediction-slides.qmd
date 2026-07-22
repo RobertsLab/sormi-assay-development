@@ -1,6 +1,6 @@
 ---
-title: "Predicting Family Survival Phenotype from Resazurin Curves"
-subtitle: "Linking metabolic curve features to cross-experiment survivorship"
+title: "Can a Quick Metabolism Test Predict Which Oyster Families Survive?"
+subtitle: "Using a simple dye assay to forecast heat-stress hardiness"
 author: "Steven Roberts"
 date: today
 format:
@@ -12,108 +12,99 @@ format:
     fig-align: center
 ---
 
-## The question
+## The problem
 
-**Can a non-lethal resazurin run predict how hardy a USDA *Magallana gigas*
-family is?**
+Oyster growers and breeders want to know **which family lines survive heat and
+stress** — so they can farm the tough ones.
 
-- Survival ranking normally requires **killing hundreds of animals** in heat /
-  stress challenges.
-- Resazurin measures live metabolism cheaply and repeatedly.
-- Both datasets use the **same 9 families** — so we can test the link.
+- Finding out the usual way means **heat-stressing hundreds of oysters until
+  many die**.
+- That's slow, expensive, and kills the animals.
+- **Is there a faster, non-lethal shortcut?**
 
-## Two datasets, same families
+## A possible shortcut: a metabolism test
 
-::: {.incremental}
-- **Phenotype** — cross-experiment survivorship summary (doc 09): a
-  `composite_score` per family (0–100, higher = hardier), pooled over 7 heat /
-  salinity experiments.
-- **Predictors** — resazurin curve features (notebook 03.5): ~20 shape,
-  capacity, and depression traits per individual (AUC, vmax, metabolic scope,
-  depression index, time-to-decline…).
-:::
+**Resazurin** is a blue dye that turns pink as living cells burn energy.
+
+- Put oysters in the dye, watch the color change over a few hours.
+- The speed and shape of that change = a readout of the animal's
+  **metabolism** — how hard its cells are working.
+- No animals are harmed.
 
 ::: {.fragment}
-Families 1, 2, 3, 5, 6, 7, 8, 9, 10 · `9b` excluded (label ambiguity).
+**Question:** does an oyster family's metabolism pattern reveal how well it will
+survive stress?
 :::
 
-## Approach
+## What we compared
 
-1. Aggregate resazurin traits to **family means** — pooled and within stress
-   **contexts** (seawater heat, freshwater, freshwater+heat).
-2. **Screen** every feature vs. survival phenotype (Spearman rank correlation).
-3. **Leave-one-family-out cross-validation** — the honest test at small n.
-4. Combine top traits into one **resazurin index** and cross-validate it.
+We had two independent sets of results on the **same 9 oyster families**:
 
-## Caveat up front
-
-::: {.callout-warning}
-**n ≈ 9 families.** This is a *screening / ranking* tool, not an oracle.
+::: {.incremental}
+- **Survival record** — how each family fared across 7 heat and salinity
+  experiments, boiled down to a single **hardiness score** (higher = tougher).
+- **Metabolism fingerprint** — ~20 features describing each family's dye-color
+  curve: how high its metabolism peaks, how fast it rises, how much it drops
+  off under stress.
 :::
 
-- Different animals — same families (a genetic/cohort prediction).
-- Single families can swing a correlation → we lean on cross-validation.
-- Family 9 identity uncertain in some runs; `9b` dropped; family 4 absent.
+## How we tested it
 
-## Screening result — the signal inverts intuition
+1. Summarize each family's metabolism curve into simple numbers.
+2. Check which metabolism features line up with the hardiness score.
+3. **The honest test:** hide one family, predict its hardiness from the other
+   eight, then reveal the truth — and repeat for every family.
 
-![](../outputs/04-resazurin-family-phenotype-prediction/figures/feature_phenotype_correlation_ranking.png){height="480"}
+::: {.fragment}
+::: {.callout-note}
+Only 9 families, so this is a promising **screening tool**, not a crystal ball.
+:::
+:::
 
-Under **heat challenge**, metabolic *capacity* traits correlate **negatively**
-with survival.
+## The surprise: tough families "stay calm"
 
-## Hardy families restrain metabolism under heat
+The clearest pattern was the **opposite** of what you might guess.
 
-Under a matching heat challenge (`sw_heat`):
+- Families whose metabolism **spikes the most** when heated tend to **survive
+  the least**.
+- The **hardy** families keep their metabolism **restrained** under heat —
+  they don't overreact.
 
-| Feature | Spearman rho | p |
-|---|---|---|
-| `auc_total` | **−0.87** | 0.005 |
-| `vmax` | **−0.87** | 0.005 |
-| `metabolic_scope` | −0.83 | 0.008 |
-| `final_value` | −0.83 | 0.008 |
+## Tough families also crash later
 
-Families that ramp metabolism **up** most when heated survive **least** — a
-coherent block of ~6 features, not a lucky hit.
+![](../outputs/04-resazurin-family-phenotype-prediction/figures/best_single_predictor_scatter.png){height="430"}
 
-## Best single predictor — timing of decline
+The single best clue: hardy families take **longer** before their metabolism
+takes its sharpest downturn. Each dot is a family.
 
-![](../outputs/04-resazurin-family-phenotype-prediction/figures/best_single_predictor_scatter.png){height="440"}
-
-`time_to_min_slope`: hardy families **delay** their steepest metabolic crash
-(raw rho = 0.90, LOFO-CV rho = 0.81).
-
-## A simple index generalizes out-of-sample
+## Putting the clues together
 
 ![](../outputs/04-resazurin-family-phenotype-prediction/figures/resazurin_index_scatter.png){height="430"}
 
-Z-scored, sign-aligned top traits → one index. **LOFO-CV Spearman rho = 0.79**,
-correctly placing family 5 (hardiest) and 7 (most fragile) at the extremes.
+Combining the top metabolism clues into one score **predicts the survival
+ranking well** — the toughest family (5) and the most fragile (7) land at
+opposite ends.
 
-## What a "survivor-like" curve looks like
+## What a "survivor" looks like on the test
 
-- **Lower metabolic capacity** under heat (less AUC, lower vmax, smaller scope).
-- **Delayed decline** — later `time_to_min_slope`.
-- Signal is strongest when resazurin is run **under stress**, not at rest.
+::: {.incremental}
+- **Restrained** metabolism under heat — not a big spike.
+- A **slower, later** decline instead of an early crash.
+- The signal is strongest when the test is run **during heat stress**, not at
+  rest.
+:::
 
-→ Measure metabolism under a challenge that mirrors the survival stressor.
+## Bottom line
 
-## Take-homes & next steps
+- A **cheap, non-lethal dye test** can flag which oyster families are likely
+  **tough vs. fragile** — before any survival trial.
+- Counterintuitively, **calm-and-steady** metabolism beats a big energy burst.
+- Best used to **shortlist** promising families for confirmation, not to
+  replace survival testing.
 
-**Take-homes**
+## What's next
 
-- Resazurin under heat stress predicts the family survival *ranking*
-  (CV rho ≈ 0.8).
-- The predictive direction is metabolic **restraint**, not vigor.
-
-**Next steps**
-
-- Re-run as doc 09 grows — CV power rises fast with more families.
-- Resolve the 9 / 9b label to score family 9.
-- Link same animals through resazurin → survival for individual-level prediction.
-
-## References
-
-- Analysis: `Resazurin/code/04-resazurin-family-phenotype-prediction.Rmd`
-- Curve features: `Resazurin/code/03.5-resazurin-curve-features-all-experiments.Rmd`
-- Phenotype: `heat-survivorship/code/09-mgig-survivorship-cross-experiment-summary.qmd`
+- Test **more families** — the prediction gets sharper as the roster grows.
+- Follow the **same animals** through both the dye test and survival to sharpen
+  predictions down to the individual oyster.
+- Fold results into breeding decisions for **heat-resilient stock**.
