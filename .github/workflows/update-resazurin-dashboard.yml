@@ -55,6 +55,14 @@ jobs:
           if [ -f index.html ]; then cp index.html docs/index.html; fi
           if [ -f CNAME ]; then cp CNAME docs/CNAME; fi
 
+      - name: Publish standalone slide decks
+        run: |
+          slides="Resazurin/code/04.1-resazurin-family-phenotype-prediction-slides.html"
+          if [ -f "$slides" ]; then
+            mkdir -p "docs/$(dirname "$slides")"
+            cp "$slides" "docs/$slides"
+          fi
+
       - name: Setup Pages
         if: github.ref == 'refs/heads/main'
         uses: actions/configure-pages@v5
