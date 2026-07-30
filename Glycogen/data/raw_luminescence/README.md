@@ -15,7 +15,7 @@ Where `<data_type>` should be one of the following:
 
 - `full_report*`: Tab-delimited files containing all information regarding the luminescence readings.
 
-- `layout*`: Comma-separated files containing the plate layout sample information. Sample info should be in the format of `<sample>-<assay_type>-<tissue_weight>`. Standards should be labeled as `STD-<assay_type>-<concentration>`.
+- `layout*`: Comma-separated files containing the plate layout sample information. Sample info should be in the format of `<sample>-<assay_type>-<tissue_weight>-df.<dilution_factor>`. Standards should be labeled as `STD-<assay_type>-<concentration>`. Example: `A2-gluc-50-df.2`
 
 - `raw_lum*`: Comma-separated files containing _only_ the raw luminescence readings from the plate reader. See the corresponding plate layout file for sample information.
 
