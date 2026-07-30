@@ -1,0 +1,66 @@
+
+
+Software Version	3.16.10
+
+
+
+Experiment File Path:	C:\Users\Public\Documents\20260730-mgig-fams1_9-glycogen_glo\Experiment2.xpt
+Protocol File Path:	C:\Users\Public\Documents\Protocols\luminesence-96wells-1.0s-glycogen_glo.prt
+
+
+
+Plate Number	Plate 1
+Date	7/30/2026
+Time	4:33:46 PM
+Reader Type:	Synergy HTX
+Reader Serial Number:	25030704
+Reading Type	Reader
+
+Procedure Details
+
+Plate Type	Costar 96 flat bottom
+Eject plate on completion	
+Read	Luminescence Endpoint
+	Full Plate
+	Integration Time: 0:01.00 (MM:SS.ss)
+	Filter Set 1
+	    Emission: Hole
+	    Optics: Top,  Gain: 135
+	Read Speed: Normal,  Delay: 100 msec
+	Extended Dynamic Range
+	Read Height: 1 mm
+
+Layout
+	1	2	3	4	5	6	7	8	9	10	11	12
+A	SPL1	SPL1	SPL1	SPL2	SPL2	SPL2	SPL3	SPL3	SPL3	SPL4	SPL4	SPL4	Well ID
+	STD-glyc-20	STD-glyc-20	STD-glyc-20	STD-glyc-2	STD-glyc-2	STD-glyc-2	STD-glyc-0.2	STD-glyc-0.2	STD-glyc-0.2	STD-glyc-0.02	STD-glyc-0.02	STD-glyc-0.02	Name
+B	SPL5	SPL5	SPL5										Well ID
+	STD-glyc-0	STD-glyc-0	STD-glyc-0										Name
+C	SPL6	SPL6	SPL6										Well ID
+	NEG-glyc	NEG-glyc	NEG-glyc										Name
+D													Well ID
+													Name
+E													Well ID
+													Name
+F													Well ID
+													Name
+G													Well ID
+													Name
+H													Well ID
+													Name
+
+
+
+Actual Temperature:	26.3
+
+Results
+	1	2	3	4	5	6	7	8	9	10	11	12
+A	53166	68390	63329	6947	6432	6156	1437	1415	1377	1144	1153	963	Lum
+B	924	909	897										Lum
+C	932	840	967										Lum
+D													Lum
+E													Lum
+F													Lum
+G													Lum
+H													Lum
+
