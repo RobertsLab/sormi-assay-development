@@ -1,17 +1,17 @@
 
 
-Software Version	3.16.10
+Software Version	3.17.17
 
 
 
-Experiment File Path:	C:\Users\Public\Documents\20260730-mgig-fams1_9-glycogen_glo\Experiment1.xpt
+Experiment File Path:	C:\Users\Samb\Desktop\Gen5-20260730-mgig-fams1_9-plate-01.xpt
 Protocol File Path:	C:\Users\Public\Documents\Protocols\luminesence-96wells-1.0s-glycogen_glo.prt
 
 
 
 Plate Number	Plate 1
 Date	7/30/2026
-Time	4:28:53 PM
+Time	16:28:53
 Reader Type:	Synergy HTX
 Reader Serial Number:	25030704
 Reading Type	Reader
@@ -33,21 +33,21 @@ Read	Luminescence Endpoint
 Layout
 	1	2	3	4	5	6	7	8	9	10	11	12
 A	SPL1	SPL1	SPL1	SPL2	SPL2	SPL2	SPL3	SPL3	SPL3	SPL4	SPL4	SPL4	Well ID
-	1_01_ambient-glyc-7.0-df.25	1_01_ambient-glyc-7.0-df.25	1_01_ambient-glyc-7.0-df.25	1_05_ambient-glyc-7.9-df.25	1_05_ambient-glyc-7.9-df.25	1_05_ambient-glyc-7.9-df.25	1_01_36C-glyc-9.6-df.25	1_01_36C-glyc-9.6-df.25	1_01_36C-glyc-9.6-df.25	1_05_36C-glyc-25.7-df.25	1_05_36C-glyc-25.7-df.25	1_05_36C-glyc-25.7-df.25	Name
+	1_01_ambient-glyc-7.0-df.25,1_01_ambient-glyc-7.0-df.25,1_01_ambient-glyc-7.0-df.25,1_05_ambient-glyc-7.9-df.25,1_05_ambient-glyc-7.9-df.25,1_05_ambient-glyc-7.9-df.25,1_01_36C-glyc-9.6-df.25,1_01_36C-glyc-9.6-df.25,1_01_36C-glyc-9.6-df.25,1_05_36C-glyc-25.7-df.25,1_05_36C-glyc-25.7-df.25,1_05_36C-glyc-25.7-df.25	1_01_ambient-glyc-7.0-df.25,1_01_ambient-glyc-7.0-df.25,1_01_ambient-glyc-7.0-df.25,1_05_ambient-glyc-7.9-df.25,1_05_ambient-glyc-7.9-df.25,1_05_ambient-glyc-7.9-df.25,1_01_36C-glyc-9.6-df.25,1_01_36C-glyc-9.6-df.25,1_01_36C-glyc-9.6-df.25,1_05_36C-glyc-25.7-df.25,1_05_36C-glyc-25.7-df.25,1_05_36C-glyc-25.7-df.25	1_01_ambient-glyc-7.0-df.25,1_01_ambient-glyc-7.0-df.25,1_01_ambient-glyc-7.0-df.25,1_05_ambient-glyc-7.9-df.25,1_05_ambient-glyc-7.9-df.25,1_05_ambient-glyc-7.9-df.25,1_01_36C-glyc-9.6-df.25,1_01_36C-glyc-9.6-df.25,1_01_36C-glyc-9.6-df.25,1_05_36C-glyc-25.7-df.25,1_05_36C-glyc-25.7-df.25,1_05_36C-glyc-25.7-df.25	1_02_ambient-glyc-4.7-df.25	1_02_ambient-glyc-4.7-df.25	1_02_ambient-glyc-4.7-df.25	1_03_ambient-glyc-2.5-df.25	1_03_ambient-glyc-2.5-df.25	1_03_ambient-glyc-2.5-df.25	1_04_ambient-glyc-10.7-df.25	1_04_ambient-glyc-10.7-df.25	1_04_ambient-glyc-10.7-df.25	Name
 B	SPL5	SPL5	SPL5	SPL6	SPL6	SPL6	SPL7	SPL7	SPL7	SPL8	SPL8	SPL8	Well ID
-	9_01_ambient-glyc-7.3-df.25	9_01_ambient-glyc-7.3-df.25	9_01_ambient-glyc-7.3-df.25	9_05_ambient-glyc-18.6-df.25	9_05_ambient-glyc-18.6-df.25	9_05_ambient-glyc-18.6-df.25	9_01_36C-glyc-7.7-df.25	9_01_36C-glyc-7.7-df.25	9_01_36C-glyc-7.7-df.25	9_05_36C-glyc-9.2-df.25	9_05_36C-glyc-9.2-df.25	9_05_36C-glyc-9.2-df.25	Name
+	1_05_ambient-glyc-7.9-df.25	1_05_ambient-glyc-7.9-df.25	1_05_ambient-glyc-7.9-df.25	1_06_ambient-glyc-11.0-df.25	1_06_ambient-glyc-11.0-df.25	1_06_ambient-glyc-11.0-df.25	1_07_ambient-glyc-6.1-df.25	1_07_ambient-glyc-6.1-df.25	1_07_ambient-glyc-6.1-df.25	1_08_ambient-glyc-24.8-df.25	1_08_ambient-glyc-24.8-df.25	1_08_ambient-glyc-24.8-df.25	Name
 C	SPL9	SPL9	SPL9	SPL10	SPL10	SPL10	SPL11	SPL11	SPL11	SPL12	SPL12	SPL12	Well ID
-	1_02_ambient-glyc-4.7-df.25	1_02_ambient-glyc-4.7-df.25	1_02_ambient-glyc-4.7-df.25	1_06_ambient-glyc-11.0-df.25	1_06_ambient-glyc-11.0-df.25	1_06_ambient-glyc-11.0-df.25	1_02-36C-glyc-9.2-df.25	1_02-36C-glyc-9.2-df.25	1_02-36C-glyc-9.2-df.25	1_06_36C-glyc-13.0-df.25	1_06_36C-glyc-13.0-df.25	1_06_36C-glyc-13.0-df.25	Name
+	1_01_36C-glyc-9.6-df.25	1_01_36C-glyc-9.6-df.25	1_01_36C-glyc-9.6-df.25	1_02_36C-glyc-9.2-df.25	1_02_36C-glyc-9.2-df.25	1_02_36C-glyc-9.2-df.25	1_03_36C-glyc-3.1-df.25	1_03_36C-glyc-3.1-df.25	1_03_36C-glyc-3.1-df.25	1_04_36C-glyc-12.4-df.25	1_04_36C-glyc-12.4-df.25	1_04_36C-glyc-12.4-df.25	Name
 D	SPL13	SPL13	SPL13	SPL14	SPL14	SPL14	SPL15	SPL15	SPL15	SPL16	SPL16	SPL16	Well ID
-	9_02_ambient-glyc-4.4-df.25	9_02_ambient-glyc-4.4-df.25	9_02_ambient-glyc-4.4-df.25	9_06_ambient-glyc-2.8-df.25	9_06_ambient-glyc-2.8-df.25	9_06_ambient-glyc-2.8-df.25	9_02_36C-glyc-15.7-df.25	9_02_36C-glyc-15.7-df.25	9_02_36C-glyc-15.7-df.25	9_06_36C-glyc-4.3-df.25	9_06_36C-glyc-4.3-df.25	9_06_36C-glyc-4.3-df.25	Name
+	1_05_36C-glyc-25.7-df.25	1_05_36C-glyc-25.7-df.25	1_05_36C-glyc-25.7-df.25	1_06_36C-glyc-13.0-df.25	1_06_36C-glyc-13.0-df.25	1_06_36C-glyc-13.0-df.25	1_07_36C-glyc-6.1-df.25	1_07_36C-glyc-6.1-df.25	1_07_36C-glyc-6.1-df.25	1_08_36C-glyc-8.8-df.25	1_08_36C-glyc-8.8-df.25	1_08_36C-glyc-8.8-df.25	Name
 E	SPL17	SPL17	SPL17	SPL18	SPL18	SPL18	SPL19	SPL19	SPL19	SPL20	SPL20	SPL20	Well ID
-	1_03_ambient-glyc-2.5-df.25	1_03_ambient-glyc-2.5-df.25	1_03_ambient-glyc-2.5-df.25	1_07_ambient-glyc-6.1-df.25	1_07_ambient-glyc-6.1-df.25	1_07_ambient-glyc-6.1-df.25	1_03_36C-glyc-3.1-df.25	1_03_36C-glyc-3.1-df.25	1_03_36C-glyc-3.1-df.25	1_07_36C-glyc-6.1-df.25	1_07_36C-glyc-6.1-df.25	1_07_36C-glyc-6.1-df.25	Name
+	9_01_ambient-glyc-7.3-df.25	9_01_ambient-glyc-7.3-df.25	9_01_ambient-glyc-7.3-df.25	9_02_ambient-glyc-4.4-df.25	9_02_ambient-glyc-4.4-df.25	9_02_ambient-glyc-4.4-df.25	9_03_ambient-glyc-4.3-df.25	9_03_ambient-glyc-4.3-df.25	9_03_ambient-glyc-4.3-df.25	9_04_ambient-glyc-1.8-df.25	9_04_ambient-glyc-1.8-df.25	9_04_ambient-glyc-1.8-df.25	Name
 F	SPL21	SPL21	SPL21	SPL22	SPL22	SPL22	SPL23	SPL23	SPL23	SPL24	SPL24	SPL24	Well ID
-	9_03_ambient-glyc-4.3-df.25	9_03_ambient-glyc-4.3-df.25	9_03_ambient-glyc-4.3-df.25	9_07_ambient-glyc-5.8-df.25	9_07_ambient-glyc-5.8-df.25	9_07_ambient-glyc-5.8-df.25	9_03_36C-glyc-10.4-df.25	9_03_36C-glyc-10.4-df.25	9_03_36C-glyc-10.4-df.25	9-07-36C-glyc-2.4-df.25	9-07-36C-glyc-2.4-df.25	9-07-36C-glyc-2.4-df.25	Name
+	9_05_ambient-glyc-9.2-df.25	9_05_ambient-glyc-9.2-df.25	9_05_ambient-glyc-9.2-df.25	9_06_ambient-glyc-4.3-df.25	9_06_ambient-glyc-4.3-df.25	9_06_ambient-glyc-4.3-df.25	9_07_ambient-glyc-2.4-df.25	9_07_ambient-glyc-2.4-df.25	9_07_ambient-glyc-2.4-df.25	9_08_ambient-glyc-7.4-df.25	9_08_ambient-glyc-7.4-df.25	9_08_ambient-glyc-7.4-df.25	Name
 G	SPL25	SPL25	SPL25	SPL26	SPL26	SPL26	SPL27	SPL27	SPL27	SPL28	SPL28	SPL28	Well ID
-	1_04_ambient-glyc-10.7-df.25	1_04_ambient-glyc-10.7-df.25	1_04_ambient-glyc-10.7-df.25	1_08_ambient-glyc-24.1-df.25	1_08_ambient-glyc-24.1-df.25	1_08_ambient-glyc-24.1-df.25	1_04_36C-glyc-12.4-df.25	1_04_36C-glyc-12.4-df.25	1_04_36C-glyc-12.4-df.25	1_08_36C-glyc-8.8-df.25	1_08_36C-glyc-8.8-df.25	1_08_36C-glyc-8.8-df.25	Name
+	9_01_36C-glyc-7.7-df.25	9_01_36C-glyc-7.7-df.25	9_01_36C-glyc-7.7-df.25	9_02_36C-glyc-15.7-df.25	9_02_36C-glyc-15.7-df.25	9_02_36C-glyc-15.7-df.25	9_03_36C-glyc-10.4-df.25	9_03_36C-glyc-10.4-df.25	9_03_36C-glyc-10.4-df.25	9_04_36C-glyc-11.3-df.25	9_04_36C-glyc-11.3-df.25	9_04_36C-glyc-11.3-df.25	Name
 H	SPL29	SPL29	SPL29	SPL30	SPL30	SPL30	SPL31	SPL31	SPL31	SPL32	SPL32	SPL32	Well ID
-	9_04_ambient-glyc-1.8-df.25	9_04_ambient-glyc-1.8-df.25	9_04_ambient-glyc-1.8-df.25	9_08_ambient-glyc-7.4-df.25	9_08_ambient-glyc-7.4-df.25	9_08_ambient-glyc-7.4-df.25	9_04_36C-glyc-11.3-df.25	9_04_36C-glyc-11.3-df.25	9_04_36C-glyc-11.3-df.25	9-08-36C-glyc-4.9-df.25	9-08-36C-glyc-4.9-df.25	9-08-36C-glyc-4.9-df.25	Name
+	9_05_36C-glyc-9.2-df.25	9_05_36C-glyc-9.2-df.25	9_05_36C-glyc-9.2-df.25	9_06_36C-glyc-4.3-df.25	9_06_36C-glyc-4.3-df.25	9_06_36C-glyc-4.3-df.25	9_07_36C-glyc-2.4-df.25	9_07_36C-glyc-2.4-df.25	9_07_36C-glyc-2.4-df.25	9_08_36C-glyc-4.9-df.25	9_08_36C-glyc-4.9-df.25	9_08_36C-glyc-4.9-df.25	Name
 
 
 
