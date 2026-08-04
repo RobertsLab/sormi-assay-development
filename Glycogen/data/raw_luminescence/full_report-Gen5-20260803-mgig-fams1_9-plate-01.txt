@@ -1,17 +1,17 @@
 
 
-Software Version	3.16.10
+Software Version	3.17.17
 
 
 
-Experiment File Path:	C:\Users\Public\Documents\Experiments\20260803\Gen5-20260803-mgig-fams1_9-plate-01.xpt
+Experiment File Path:	C:\Users\Samb\Desktop\Gen5-20260803-mgig-fams1_9-plate-01.xpt
 Protocol File Path:	C:\Users\Public\Documents\Protocols\luminesence-96wells-1.0s-glycogen_glo.prt
 
 
 
 Plate Number	Plate 1
 Date	8/3/2026
-Time	2:40:37 PM
+Time	14:40:37
 Reader Type:	Synergy HTX
 Reader Serial Number:	25030704
 Reading Type	Reader
@@ -33,13 +33,21 @@ Read	Luminescence Endpoint
 Layout
 	1	2	3	4	5	6	7	8	9	10	11	12
 A	SPL1	SPL1	SPL1	SPL2	SPL2	SPL2	SPL3	SPL3	SPL3	SPL4	SPL4	SPL4	Well ID
+	9_05-ambient-glyc-9.2-df.200	9_05-ambient-glyc-9.2-df.200	9_05-ambient-glyc-9.2-df.200	1_06_ambient-glyc-11.0-df.200	1_06_ambient-glyc-11.0-df.200	1_06_ambient-glyc-11.0-df.200	1_08_ambient-glyc-24.8-df.200	1_08_ambient-glyc-24.8-df.200	1_08_ambient-glyc-24.8-df.200	1_04_36C-glyc-12.4-df.200	1_04_36C-glyc-12.4-df.200	1_04_36C-glyc-12.4-df.200	Name
 B	SPL5	SPL5	SPL5	SPL6	SPL6	SPL6	SPL7	SPL7	SPL7	SPL8	SPL8	SPL8	Well ID
+	1_05_36C-25.7-df.200	1_05_36C-25.7-df.200	1_05_36C-25.7-df.200										Name
 C	SPL9	SPL9	SPL9	SPL10	SPL10	SPL10	SPL11	SPL11	SPL11	SPL12	SPL12	SPL12	Well ID
+	STD-glyc-20	STD-glyc-20	STD-glyc-20	STD-glyc-10	STD-glyc-10	STD-glyc-10	STD-glyc-2	STD-glyc-2	STD-glyc-2	STD-glyc-0.2	STD-glyc-0.2	STD-glyc-0.2	Name
 D	SPL13	SPL13	SPL13	SPL14	SPL14	SPL14	SPL15	SPL15	SPL15	SPL16	SPL16	SPL16	Well ID
+	STD-glyc-0.02	STD-glyc-0.02	STD-glyc-0.02	STD-glyc-0	STD-glyc-0	STD-glyc-0							Name
 E	SPL17	SPL17	SPL17	SPL18	SPL18	SPL18	SPL19	SPL19	SPL19	SPL20	SPL20	SPL20	Well ID
+	NEG-glyc	NEG-glyc	NEG-glyc										Name
 F	SPL21	SPL21	SPL21	SPL22	SPL22	SPL22	SPL23	SPL23	SPL23	SPL24	SPL24	SPL24	Well ID
+													Name
 G	SPL25	SPL25	SPL25	SPL26	SPL26	SPL26	SPL27	SPL27	SPL27	SPL28	SPL28	SPL28	Well ID
+													Name
 H	SPL29	SPL29	SPL29	SPL30	SPL30	SPL30	SPL31	SPL31	SPL31	SPL32	SPL32	SPL32	Well ID
+													Name
 
 
 
