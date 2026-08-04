@@ -35,7 +35,7 @@ Layout
 A	SPL1	SPL1	SPL1	SPL2	SPL2	SPL2	SPL3	SPL3	SPL3	SPL4	SPL4	SPL4	Well ID
 	9_05-ambient-glyc-9.2-df.200	9_05-ambient-glyc-9.2-df.200	9_05-ambient-glyc-9.2-df.200	1_06_ambient-glyc-11.0-df.200	1_06_ambient-glyc-11.0-df.200	1_06_ambient-glyc-11.0-df.200	1_08_ambient-glyc-24.8-df.200	1_08_ambient-glyc-24.8-df.200	1_08_ambient-glyc-24.8-df.200	1_04_36C-glyc-12.4-df.200	1_04_36C-glyc-12.4-df.200	1_04_36C-glyc-12.4-df.200	Name
 B	SPL5	SPL5	SPL5	SPL6	SPL6	SPL6	SPL7	SPL7	SPL7	SPL8	SPL8	SPL8	Well ID
-	1_05_36C-25.7-df.200	1_05_36C-25.7-df.200	1_05_36C-25.7-df.200										Name
+	1_05_36C-glyc-25.7-df.200	1_05_36C-glyc-25.7-df.200	1_05_36C-glyc-25.7-df.200										Name
 C	SPL9	SPL9	SPL9	SPL10	SPL10	SPL10	SPL11	SPL11	SPL11	SPL12	SPL12	SPL12	Well ID
 	STD-glyc-20	STD-glyc-20	STD-glyc-20	STD-glyc-10	STD-glyc-10	STD-glyc-10	STD-glyc-2	STD-glyc-2	STD-glyc-2	STD-glyc-0.2	STD-glyc-0.2	STD-glyc-0.2	Name
 D	SPL13	SPL13	SPL13	SPL14	SPL14	SPL14	SPL15	SPL15	SPL15	SPL16	SPL16	SPL16	Well ID
