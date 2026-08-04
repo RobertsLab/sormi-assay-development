@@ -1,0 +1,540 @@
+---
+title: "Gen5-20260803-mgig-fams1_9-glycogen-glo"
+author: "Sam White"
+date: "2026-08-03"
+output:
+  github_document:
+    toc: true
+    number_sections: true
+  bookdown::html_document2:
+    theme: cosmo
+    toc: true
+    toc_float: true
+    number_sections: true
+    code_folding: show
+    code_download: true
+  html_document:
+    theme: cosmo
+    toc: true
+    toc_float: true
+    number_sections: true
+    code_folding: show
+    code_download: true
+---
+
+# BACKGROUND
+
+Targeted re-assay of five *Magallana gigas* (Pacific oyster) ctenidia samples
+from the 2026-07-30 glycogen run
+([`Gen5-20260730-mgig-fams1_9-glycogen-glo`](../code/Gen5-20260730-mgig-fams1_9-glycogen-glo.md))
+using the [Glycogen-Glo Assay (Promega)](https://github.com/RobertsLab/resources/blob/master/protocols/Commercial_Protocols/Promega_Glycogen_Glo_Assay.pdf)
+(GitHub; PDF), read on 2026-08-03.
+
+Four of these five samples read above the top standard (20 &micro;g/mL) in the
+original run and required extrapolation: `1_08_ambient`, `1_06_ambient`,
+`1_05_36C`, `9_05_ambient`. The fifth, `1_04_36C`, was within range but had a
+technical-triplicate CV of 30.1%, above the 15% QC threshold used in the
+original analysis. All five were re-assayed here at a **1:200 dilution**
+(vs. 1:25 originally, ~8&times; higher), using the same homogenate as the
+original run (tissue weights match exactly between runs).
+
+This is a small, targeted follow-up analysis, not a full re-run of the
+32-sample experiment. Results here are intended to supersede the
+corresponding five rows of the original run's results table where the values
+differ meaningfully; see the Summary for a direct comparison and
+recommendation.
+
+## Sample naming
+
+Per [`../data/raw_luminescence/README.md`](../data/raw_luminescence/README.md),
+plate layout entries follow:
+
+- `<sample>-<assay_type>-<tissue_weight>-df.<dilution_factor>`
+
+Here `<sample>` itself is composite:
+
+- `<family>_<individual>_<temperature>`
+
+E.g. `1_06_ambient-glyc-11.0-df.200` is family 1, individual 06, ambient
+exposure, glycogen assay, 11.0 mg of ctenidia tissue, diluted 1:200.
+
+Standards follow `STD-<assay_type>-<concentration>`, e.g. `STD-glyc-20`
+(20 &micro;g/mL glycogen); the buffer-only well is `NEG-glyc`.
+
+## Important note(s)
+
+1. **Tissue weights** are taken from the plate layout labels rather than a
+   separate weights CSV, and match the corresponding weights in the original
+   2026-07-30 run exactly, confirming these are re-assays of the same
+   homogenates rather than newly prepared samples.
+
+# SETUP
+
+## Libraries
+```{r setup, include=TRUE}
+library(knitr)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+
+knitr::opts_chunk$set(
+  echo = TRUE,         # Display code chunks
+  eval = TRUE,         # Evaluate code chunks
+  warning = FALSE,     # Hide warnings
+  message = FALSE,     # Hide messages
+  comment = "",        # Prevents appending '##' to beginning of lines in code output
+  results = 'hold'     # Holds output so it's all printed together after code chunk
+)
+```
+
+
+## Output directory
+```{r output-dir}
+# Output directory for this analysis (matches this file's name, per ../code/README.md)
+output_dir <- "../output/Gen5-20260803-mgig-fams1_9-glycogen-glo"
+dir.create(output_dir, showWarnings = FALSE, recursive = TRUE)
+
+cat("--- output_dir: destination for all figures and tables ---\n")
+str(output_dir)
+```
+
+# DATA
+
+Data are read from the local repo (`../data/raw_luminescence/`) so this document
+renders before/after the files are pushed to GitHub. A single plate holds both
+the five re-assayed samples and the fresh standard curve/negative control.
+
+```{r data, include=TRUE}
+data_dir <- "../data/raw_luminescence"
+
+plate_layout <- read.csv(file.path(data_dir, "layout-Gen5-20260803-mgig-fams1_9-plate-01.csv"),
+                          header = FALSE, stringsAsFactors = FALSE)
+raw_luminescence <- read.csv(file.path(data_dir, "raw_lum-Gen5-20260803-mgig-fams1_9-plate-01.csv"),
+                              header = FALSE)
+
+cat("Plate layout:\n\n")
+str(plate_layout)
+cat("\nRaw luminescence:\n\n")
+str(raw_luminescence)
+```
+
+## Reshape plate to long format
+
+```{r plate-to-long, include=TRUE}
+# Convert a paired layout/luminescence plate into one row per well
+plate_to_long <- function(layout, luminescence, plate_label) {
+  n_row <- 8
+  n_col <- 12
+  out <- expand.grid(plate_row_idx = 1:n_row, plate_col = 1:n_col)
+  out$plate       <- plate_label
+  out$plate_row   <- LETTERS[out$plate_row_idx]
+  out$well        <- sprintf("%s%02d", out$plate_row, out$plate_col)
+  out$label       <- trimws(as.character(mapply(function(i, j) layout[i, j],
+                                                out$plate_row_idx, out$plate_col)))
+  out$luminescence <- as.numeric(mapply(function(i, j) luminescence[i, j],
+                                        out$plate_row_idx, out$plate_col))
+  out <- out[order(out$plate_row_idx, out$plate_col), ]
+  out[out$label != "" & !is.na(out$label), ]
+}
+
+plate1_long <- plate_to_long(plate_layout, raw_luminescence, "plate-01")
+
+cat("--- plate_to_long(): layout + luminescence -> one row per well ---\n\n")
+str(args(plate_to_long))
+
+cat("\n--- plate1_long: one row per occupied well ---\n\n")
+str(plate1_long)
+```
+
+# STANDARD CURVE
+
+## Extract luminescence data
+
+Row C holds the 20, 10, 2, and 0.2 &micro;g/mL standards; row D holds the
+0.02 and 0 &micro;g/mL standards; row E columns 1-3 hold the `NEG-glyc`
+buffer-only negative control -- all in triplicate, on the same plate as the
+re-assayed samples.
+
+```{r glycogen standard data, include=TRUE}
+standards <- plate1_long %>%
+  filter(grepl("^STD-glyc-", label)) %>%
+  mutate(glyc_concentration = as.numeric(sub("^STD-glyc-", "", label)))
+
+negative_control <- plate1_long %>% filter(grepl("^NEG-glyc", label))
+
+cat("Standard concentrations (ug/mL):",
+    paste(sort(unique(standards$glyc_concentration)), collapse = ", "), "\n")
+cat("Replicates per standard:",
+    paste(unique(table(standards$glyc_concentration)), collapse = ", "), "\n\n")
+
+cat("Negative control (buffer only) luminescence:",
+    paste(negative_control$luminescence, collapse = ", "),
+    "| mean =", round(mean(negative_control$luminescence), 1), "\n")
+cat("Zero glycogen standard luminescence:  mean =",
+    round(mean(standards$luminescence[standards$glyc_concentration == 0]), 1), "\n")
+
+cat("\n--- standards: standard curve wells with parsed concentration ---\n")
+str(standards)
+cat("\n--- negative_control: buffer-only wells ---\n")
+str(negative_control)
+```
+
+The buffer-only negative control and the zero-glycogen standard are again in
+close agreement (913 vs. 910 RLU in the original run; see below), as expected.
+
+## Glycogen standard curve summary statistics and linear regression
+
+```{r glycogen summary statistics and linear regression, include=TRUE}
+glycogen_summary_data <- standards %>%
+  group_by(glyc_concentration) %>%
+  summarise(
+    glyc_mean_luminescence = mean(luminescence),
+    glyc_sd                = sd(luminescence),
+    glyc_se                = sd(luminescence) / sqrt(n()),
+    glyc_cv                = 100 * sd(luminescence) / mean(luminescence),
+    glyc_n                 = n(),
+    .groups = "drop"
+  ) %>%
+  arrange(glyc_concentration)
+
+lm_model      <- lm(glyc_mean_luminescence ~ glyc_concentration, data = glycogen_summary_data)
+glyc_slope     <- coef(lm_model)[2]
+glyc_intercept <- coef(lm_model)[1]
+glyc_r_squared <- summary(lm_model)$r.squared
+
+lm_model_reps    <- lm(luminescence ~ glyc_concentration, data = standards)
+glyc_r2_reps     <- summary(lm_model_reps)$r.squared
+
+glyc_conc_min_nonzero <- min(glycogen_summary_data$glyc_concentration[
+  glycogen_summary_data$glyc_concentration > 0])
+glyc_conc_max <- max(glycogen_summary_data$glyc_concentration)
+
+kable(glycogen_summary_data,
+      digits = c(2, 1, 1, 1, 2, 0),
+      col.names = c("Glycogen (ug/mL)", "Mean luminescence", "SD", "SEM", "CV (%)", "n"),
+      caption = "Glycogen standard curve summary statistics (this plate)")
+
+cat("\nFit to concentration means:      y =", sprintf("%.1f", glyc_slope), "x +",
+    sprintf("%.1f", glyc_intercept), " R^2 =", sprintf("%.4f", glyc_r_squared), "\n")
+cat("Fit to individual replicates:    R^2 =", sprintf("%.4f", glyc_r2_reps), "\n")
+cat("Quantifiable range (standards):", glyc_conc_min_nonzero, "-", glyc_conc_max, "ug/mL\n")
+
+cat("\n--- glycogen_summary_data: per-concentration summary statistics ---\n")
+str(glycogen_summary_data)
+cat("\n--- lm_model: regression on per-concentration means ---\n")
+str(lm_model, max.level = 1, give.attr = FALSE)
+```
+
+**Standard curve QC note.** The 0 and 0.2 &micro;g/mL standards show high
+triplicate CV (81.8% and 49.6% respectively) -- both are low-signal wells
+where a small absolute RLU difference translates to a large percentage swing,
+and one 0 &micro;g/mL well (21 RLU) reads well below its two replicates
+(499, 418 RLU). Excluding that single well changes the fitted slope/intercept
+by <2%, and has a negligible effect on back-calculated concentrations for the
+samples below (e.g. `1_04_36C`'s well concentration shifts from -0.310 to
+-0.323 &micro;g/mL) -- this variability at the assay's low end does not
+materially affect the regression, but it is consistent with `1_04_36C`
+reading close enough to background that its sign is not reliable (see
+Out-of-range / floor-effect check below). The curve overall fits tightly
+(R^2 = `r sprintf("%.4f", glyc_r_squared)`, individual-replicate
+R^2 = `r sprintf("%.4f", glyc_r2_reps)`), consistent with the original run's
+standard curve quality.
+
+## Extract sample data and calculate glycogen levels
+
+```{r glycogen samples, include=TRUE}
+samples_wells <- plate1_long %>%
+  filter(!grepl("^STD-glyc-", label) & !grepl("^NEG-glyc", label)) %>%
+  # Normalize `-` to `_` in the <family>-<individual>-<temperature> prefix
+  mutate(label_clean = sub("^([19])[-_]([0-9]{2})[-_](ambient|36C)-", "\\1_\\2_\\3-", label)) %>%
+  mutate(
+    sample_id  = sub("-glyc-.*$", "", label_clean),
+    family     = sub("^([19])_.*$", "\\1", label_clean),
+    individual = sub("^[19]_([0-9]{2})_.*$", "\\1", label_clean),
+    temperature = sub("^[19]_[0-9]{2}_([^-]+)-.*$", "\\1", label_clean),
+    weight_mg  = as.numeric(sub("^.*-glyc-([0-9.]+)-df\\..*$", "\\1", label_clean)),
+    dilution   = as.numeric(sub("^.*-df\\.", "", label_clean))
+  ) %>%
+  mutate(
+    family      = factor(paste("Family", family), levels = c("Family 1", "Family 9")),
+    temperature = factor(temperature, levels = c("ambient", "36C"))
+  )
+
+# Fail loudly rather than silently dropping malformed labels
+stopifnot(!any(is.na(samples_wells$weight_mg)),
+          !any(is.na(samples_wells$dilution)),
+          !any(is.na(samples_wells$temperature)))
+
+cat("Wells parsed:", nrow(samples_wells),
+    "| unique samples:", length(unique(samples_wells$sample_id)), "\n")
+cat("Dilution factor(s) used:", paste(unique(samples_wells$dilution), collapse = ", "), "\n\n")
+cat("Samples re-assayed:", paste(sort(unique(samples_wells$sample_id)), collapse = ", "), "\n")
+cat("Tissue weight range (mg):",
+    paste(range(samples_wells$weight_mg), collapse = " - "), "\n")
+
+cat("\n--- samples_wells: one row per sample well, metadata parsed from label ---\n")
+str(samples_wells)
+```
+
+Per-sample values are computed identically to the original analysis: mean of
+the technical triplicate, back-calculated through this plate's own standard
+curve.
+
+1. **Well concentration** = `(mean luminescence - intercept) / slope` &rarr; &micro;g/mL in the assayed (diluted) well.
+2. **Homogenate concentration** = well concentration &times; dilution factor (200) &rarr; &micro;g/mL in the undiluted homogenate.
+3. **Normalized glycogen** = homogenate concentration / tissue weight &rarr; &micro;g/mL per mg tissue.
+
+```{r calculate sample glycogen, include=TRUE}
+sample_glycogen <- samples_wells %>%
+  group_by(sample_id, family, individual, temperature, weight_mg, dilution) %>%
+  summarise(
+    n_reps        = n(),
+    mean_lum      = mean(luminescence),
+    sd_lum        = sd(luminescence),
+    cv_lum        = 100 * sd(luminescence) / mean(luminescence),
+    .groups = "drop"
+  ) %>%
+  mutate(
+    well_conc_ug_mL       = (mean_lum - glyc_intercept) / glyc_slope,
+    homogenate_conc_ug_mL = well_conc_ug_mL * dilution,
+    norm_glycogen         = homogenate_conc_ug_mL / weight_mg,
+    in_std_range          = well_conc_ug_mL >= glyc_conc_min_nonzero &
+                            well_conc_ug_mL <= glyc_conc_max
+  ) %>%
+  arrange(family, temperature, individual)
+
+cat("Samples quantified:", nrow(sample_glycogen), "\n")
+
+cat("\n--- sample_glycogen: one row per individual, triplicate averaged and back-calculated ---\n")
+str(sample_glycogen)
+```
+
+## Plot standard curve with re-assayed sample points
+
+```{r plot-glycogen-standard-curve, fig.width = 10, fig.height = 6, include=TRUE}
+std_curve_plot <- ggplot(glycogen_summary_data,
+                         aes(x = glyc_concentration, y = glyc_mean_luminescence)) +
+  geom_smooth(method = "lm", se = FALSE, color = "grey60", linetype = "dashed") +
+  geom_errorbar(aes(ymin = glyc_mean_luminescence - glyc_se,
+                    ymax = glyc_mean_luminescence + glyc_se), width = 0.3) +
+  geom_point(size = 3, color = "#3182bd") +
+  geom_point(data = sample_glycogen,
+             aes(x = well_conc_ug_mL, y = mean_lum, shape = in_std_range),
+             color = "#d94801", size = 3, inherit.aes = FALSE) +
+  scale_shape_manual(values = c(`TRUE` = 16, `FALSE` = 4),
+                     labels = c(`TRUE` = "in range", `FALSE` = "out of range / floor"),
+                     name = "Re-assayed sample") +
+  labs(title = "Glycogen standard curve (this plate) with re-assayed sample points",
+       x = "Glycogen (ug/mL)", y = "Mean luminescence (RLU)") +
+  theme_bw() +
+  theme(plot.title = element_text(size = 13, face = "bold"))
+
+cat("--- std_curve_plot: ggplot object structure ---\n\n")
+summary(std_curve_plot)
+
+ggsave(file.path(output_dir, "glycogen_standard_curve_rerun.png"), std_curve_plot,
+       width = 10, height = 6, dpi = 300)
+
+std_curve_plot
+```
+
+# QUALITY CONTROL
+
+## Technical replicate variability
+
+```{r replicate-cv, include=TRUE}
+cat("Coefficient of variation across technical triplicates (%):\n")
+print(round(sample_glycogen$cv_lum, 2))
+
+cat("\nSamples with CV > 15%:\n")
+high_cv <- sample_glycogen %>% filter(cv_lum > 15) %>%
+  select(sample_id, mean_lum, sd_lum, cv_lum)
+if (nrow(high_cv) == 0) {
+  cat("  none\n")
+} else {
+  print(as.data.frame(high_cv), row.names = FALSE, digits = 4)
+}
+
+cat("\n--- high_cv: samples exceeding the 15% triplicate CV threshold ---\n\n")
+str(high_cv)
+```
+
+`1_04_36C` -- re-assayed specifically because of a 30.1% CV in the original
+run -- now has a CV of 5.2%, well below threshold: the higher dilution
+resolved the reproducibility problem it was re-run for. See below for why
+this improvement in precision did not translate into a usable concentration
+estimate.
+
+## Out-of-range / floor-effect check
+
+```{r out-of-range, include=TRUE}
+oor <- sample_glycogen %>%
+  select(sample_id, family, temperature, mean_lum, well_conc_ug_mL,
+         weight_mg, norm_glycogen, in_std_range) %>%
+  arrange(desc(well_conc_ug_mL))
+
+kable(oor, digits = c(0, 0, 0, 0, 3, 1, 2, 0),
+      col.names = c("Sample", "Family", "Temp", "Mean lum.", "Well conc. (ug/mL)",
+                    "Tissue (mg)", "Normalized glycogen", "In std range"),
+      caption = "Re-assayed samples: back-calculated concentrations at 1:200 dilution")
+
+cat("\n--- Full re-assay results, all 5 samples ---\n\n")
+str(oor)
+```
+
+Four of the five samples (`1_08_ambient`, `1_06_ambient`, `1_05_36C`,
+`9_05_ambient`) now fall comfortably within the standard curve's quantifiable
+range (0.02-20 &micro;g/mL) at 1:200 -- the 8&times; dilution increase
+successfully resolved the original extrapolation problem for all four.
+
+The fifth, `1_04_36C`, was **not** originally out-of-range (it was re-assayed for
+high CV, not for reading above the curve); at 1:200 its mean luminescence
+(823 RLU) falls below the fitted intercept, producing a **negative**
+back-calculated well concentration. It was accidentally diluted at 1:200 for this re-assay, when it should have been re-assayed with its original dilution of 1:25.
+
+# COMPARISON TO ORIGINAL RUN
+
+```{r comparison-to-original, include=TRUE}
+original_path <- "../output/Gen5-20260730-mgig-fams1_9-glycogen-glo/sample_glycogen_results.csv"
+original <- read.csv(original_path)
+
+original_sub <- original %>%
+  filter(Sample %in% sample_glycogen$sample_id) %>%
+  transmute(
+    sample_id             = Sample,
+    dilution_orig         = Dilution,
+    mean_lum_orig         = Mean.lum.,
+    cv_orig               = CV....,
+    norm_glycogen_orig    = Normalized.glycogen..ug.mL.mg.,
+    in_range_orig         = In.std.range
+  )
+
+rerun_sub <- sample_glycogen %>%
+  transmute(
+    sample_id          = sample_id,
+    dilution_rerun     = dilution,
+    mean_lum_rerun     = round(mean_lum, 0),
+    cv_rerun           = round(cv_lum, 1),
+    norm_glycogen_rerun = round(norm_glycogen, 2),
+    in_range_rerun     = ifelse(in_std_range, "yes", "NO - extrapolated")
+  )
+
+comparison <- inner_join(original_sub, rerun_sub, by = "sample_id") %>%
+  arrange(sample_id)
+
+kable(comparison,
+      col.names = c("Sample", "Dilution (orig)", "Mean lum. (orig)", "CV % (orig)",
+                    "Norm. glycogen (orig)", "In range (orig)",
+                    "Dilution (re-run)", "Mean lum. (re-run)", "CV % (re-run)",
+                    "Norm. glycogen (re-run)", "In range (re-run)"),
+      caption = "Original run (2026-07-30, 1:25) vs. targeted re-assay (2026-08-03, 1:200)")
+
+cat("\n--- comparison: original vs. re-assay results, side by side ---\n\n")
+str(comparison)
+```
+
+## Plot: original vs. re-assayed normalized glycogen
+
+```{r plot-comparison, fig.width = 9, fig.height = 5.5, include=TRUE}
+comparison_long <- comparison %>%
+  select(sample_id, in_range_orig, in_range_rerun,
+         norm_glycogen_orig, norm_glycogen_rerun) %>%
+  pivot_longer(c(norm_glycogen_orig, norm_glycogen_rerun),
+               names_to = "run", values_to = "norm_glycogen") %>%
+  mutate(
+    run = recode(run, norm_glycogen_orig = "Original (1:25)", norm_glycogen_rerun = "Re-assay (1:200)"),
+    run = factor(run, levels = c("Original (1:25)", "Re-assay (1:200)")),
+    in_range = ifelse(run == "Original (1:25)", in_range_orig, in_range_rerun),
+    in_range = ifelse(in_range == "yes", "in range", "out of range / floor")
+  )
+
+comparison_plot <- ggplot(comparison_long, aes(x = run, y = norm_glycogen, group = sample_id)) +
+  geom_line(color = "grey60", linewidth = 0.6) +
+  geom_point(aes(color = sample_id, shape = in_range), size = 3.2) +
+  scale_shape_manual(values = c("in range" = 16, "out of range / floor" = 4)) +
+  labs(title = "Normalized glycogen: original run vs. targeted re-assay",
+       subtitle = "Points connected by sample; 'x' marks values flagged out-of-range or below the detection floor",
+       x = NULL, y = "Normalized glycogen (ug/mL/mg tissue)", color = "Sample", shape = "Status") +
+  theme_bw() +
+  theme(plot.title = element_text(size = 13, face = "bold"),
+        legend.position = "right")
+
+cat("--- comparison_plot: ggplot object structure ---\n\n")
+summary(comparison_plot)
+
+ggsave(file.path(output_dir, "original_vs_rerun_comparison.png"), comparison_plot,
+       width = 9, height = 5.5, dpi = 300)
+
+comparison_plot
+```
+
+# SAMPLE GLYCOGEN TABLE
+
+```{r sample glycogen table, include=TRUE}
+sample_table <- sample_glycogen %>%
+  transmute(
+    Sample        = sample_id,
+    Family        = family,
+    Temperature   = temperature,
+    Individual    = individual,
+    `Tissue (mg)` = weight_mg,
+    `Dilution`    = dilution,
+    `Mean lum.`   = round(mean_lum, 0),
+    `CV (%)`      = round(cv_lum, 1),
+    `Well glycogen (ug/mL)`        = round(well_conc_ug_mL, 3),
+    `Homogenate glycogen (ug/mL)`  = round(homogenate_conc_ug_mL, 2),
+    `Normalized glycogen (ug/mL/mg)` = round(norm_glycogen, 2),
+    `In std range` = ifelse(in_std_range, "yes", "NO - extrapolated")
+  )
+
+kable(sample_table, caption = "Per-sample glycogen quantification, targeted re-assay (mean of technical triplicate)")
+
+write.csv(sample_table, file.path(output_dir, "sample_glycogen_results.csv"), row.names = FALSE)
+
+cat("\n--- sample_table: formatted per-sample results written to CSV ---\n\n")
+str(sample_table)
+```
+
+# SUMMARY
+
+**What this re-assay was for.** Five samples from the 2026-07-30 run were
+re-assayed at a higher dilution (1:200 vs. 1:25): four that read above the
+standard curve's top standard (`1_08_ambient`, `1_06_ambient`, `1_05_36C`,
+`9_05_ambient`) and one with a high technical-replicate CV (`1_04_36C`, 30.1%
+originally).
+
+**Standard curve.** This plate's standard curve fit well
+(y = `r sprintf("%.1f", glyc_slope)` x + `r sprintf("%.1f", glyc_intercept)`,
+R^2 = `r sprintf("%.4f", glyc_r_squared)`), comparable in quality to the
+original run's curve.
+
+**Dilution outcome: 4 of 5 successful.** The 8&times; dilution increase
+worked as intended for all four samples that were originally out-of-range --
+all four now fall within the standard curve's quantifiable range, with
+comfortable margin below the top standard (well concentrations 1.6-9.9
+&micro;g/mL vs. the 0.02-20 &micro;g/mL curve). Their re-assayed normalized
+glycogen values are lower than the original (extrapolated) estimates in every
+case, consistent with extrapolation beyond a standard curve's top point
+tending to overestimate concentration:
+
+| Sample | Original (1:25, extrapolated) | Re-assay (1:200, in range) |
+|---|---:|---:|
+| `1_08_ambient` | 66.4 | 79.7 |
+| `1_06_ambient` | 72.2 | 46.3 |
+| `1_05_36C`     | 29.9 | 18.6 |
+| `9_05_ambient` | 62.1 | 35.6 |
+
+(Note `1_08_ambient` is the exception -- its re-assayed value is *higher*
+than the original extrapolated estimate, underscoring that extrapolation
+error is not predictably one-directional and is exactly why re-assay within
+range matters rather than trusting the extrapolated numbers.)
+
+Sample `1_04_36C` should _NOT_ have been diluted, as it previously failed QC due to a high CV. This should be re-assayed.
+
+
+**Using these results going forward.** For `1_08_ambient`, `1_06_ambient`,
+`1_05_36C`, and `9_05_ambient`, the values in this document's
+`sample_glycogen_results.csv` should replace the corresponding rows from the
+2026-07-30 run in any downstream analysis (e.g. the family/temperature ANOVA),
+since they are now interpolated rather than extrapolated and were measured
+with a same-plate standard curve.
