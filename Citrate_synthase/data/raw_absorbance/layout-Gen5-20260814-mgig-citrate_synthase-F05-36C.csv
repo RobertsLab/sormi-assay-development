@@ -1,0 +1,18 @@
+,1,2,3,4,5,6,7,8,9,10,11,12
+A,SPL1,SPL1,SPL1,SPL2,SPL2,SPL2,SPL3,SPL3,SPL3,SPL4,SPL4,SPL4,Well ID
+,F05_01_36C-citrate_synthase-12.8-df.0,F05_01_36C-citrate_synthase-12.8-df.0,F05_01_36C-citrate_synthase-12.8-df.0,F05_02_36C-citrate_synthase-6.2-df.0,F05_02_36C-citrate_synthase-6.2-df.0,F05_02_36C-citrate_synthase-6.2-df.0,F05_03_36C-citrate_synthase-10.3-df.0,F05_03_36C-citrate_synthase-10.3-df.0,F05_03_36C-citrate_synthase-10.3-df.0,F05_04_36C-citrate_synthase-12.8-df.0,F05_04_36C-citrate_synthase-12.8-df.0,F05_04_36C-citrate_synthase-12.8-df.0,Name
+B,SPL5,SPL5,SPL5,SPL6,SPL6,SPL6,SPL7,SPL7,SPL7,SPL8,SPL8,SPL8,Well ID
+,F05_05_36C-citrate_synthase-22.7-df.0,F05_05_36C-citrate_synthase-22.7-df.0,F05_05_36C-citrate_synthase-22.7-df.0,F05_06_36C-citrate_synthase-18.4-df.0,F05_06_36C-citrate_synthase-18.4-df.0,F05_06_36C-citrate_synthase-18.4-df.0,F05_07_36C-citrate_synthase-11.3-df.0,F05_07_36C-citrate_synthase-11.3-df.0,F05_07_36C-citrate_synthase-11.3-df.0,F05_08_36C-citrate_synthase-13.8-df.0,F05_08_36C-citrate_synthase-13.8-df.0,F05_08_36C-citrate_synthase-13.8-df.0,Name
+C,SPL9,SPL9,SPL9,SPL10,SPL10,SPL10,SPL11,SPL11,SPL11,SPL12,SPL12,SPL12,Well ID
+,F05_01_36C_BG-citrate_synthase-12.8-df.0,F05_01_36C_BG-citrate_synthase-12.8-df.0,F05_01_36C_BG-citrate_synthase-12.8-df.0,F05_02_36C_BG-citrate_synthase-6.2-df.0,F05_02_36C_BG-citrate_synthase-6.2-df.0,F05_02_36C_BG-citrate_synthase-6.2-df.0,F05_03_36C_BG-citrate_synthase-10.3-df.0,F05_03_36C_BG-citrate_synthase-10.3-df.0,F05_03_36C_BG-citrate_synthase-10.3-df.0,F05_04_36C_BG-citrate_synthase-12.8-df.0,F05_04_36C_BG-citrate_synthase-12.8-df.0,F05_04_36C_BG-citrate_synthase-12.8-df.0,Name
+D,SPL13,SPL13,SPL13,SPL14,SPL14,SPL14,SPL15,SPL15,SPL15,SPL16,SPL16,SPL16,Well ID
+,F05_05_36C_BG-citrate_synthase-22.7-df.0,F05_05_36C_BG-citrate_synthase-22.7-df.0,F05_05_36C_BG-citrate_synthase-22.7-df.0,F05_06_36C_BG-citrate_synthase-18.4-df.0,F05_06_36C_BG-citrate_synthase-18.4-df.0,F05_06_36C_BG-citrate_synthase-18.4-df.0,F05_07_36C_BG-citrate_synthase-11.3-df.0,F05_07_36C_BG-citrate_synthase-11.3-df.0,F05_07_36C_BG-citrate_synthase-11.3-df.0,F05_08_36C_BG-citrate_synthase-13.8-df.0,F05_08_36C_BG-citrate_synthase-13.8-df.0,F05_08_36C_BG-citrate_synthase-13.8-df.0,Name
+E,SPL17,SPL17,SPL17,SPL18,SPL18,SPL18,SPL19,SPL19,SPL19,SPL20,SPL20,SPL20,Well ID
+,STD-citrate_synthase-0,STD-citrate_synthase-0,STD-citrate_synthase-0,STD-citrate_synthase-8,STD-citrate_synthase-8,STD-citrate_synthase-8,STD-citrate_synthase-16,STD-citrate_synthase-16,STD-citrate_synthase-16,STD-citrate_synthase-24,STD-citrate_synthase-24,STD-citrate_synthase-24,Name
+F,SPL21,SPL21,SPL21,SPL22,SPL22,SPL22,SPL23,SPL23,SPL23,,,,Well ID
+,STD-citrate_synthase-32,STD-citrate_synthase-32,STD-citrate_synthase-32,STD-citrate_synthase-40,STD-citrate_synthase-40,STD-citrate_synthase-40,POS-citrate_synthase,POS-citrate_synthase,POS-citrate_synthase,,,,Name
+G,,,,,,,,,,,,,Well ID
+,,,,,,,,,,,,,Name
+H,,,,,,,,,,,,,Well ID
+,,,,,,,,,,,,,Name
+
