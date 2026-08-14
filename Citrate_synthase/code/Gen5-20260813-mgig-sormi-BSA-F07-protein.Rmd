@@ -1,0 +1,471 @@
+---
+title: "Gen5-20260813-mgig-sormi-BSA-F07-protein"
+author: "Sam White"
+date: "2026-08-13"
+output:
+  github_document:
+    toc: true
+    number_sections: true
+  bookdown::html_document2:
+    theme: cosmo
+    toc: true
+    toc_float: true
+    number_sections: true
+    code_folding: show
+    code_download: true
+  html_document:
+    theme: cosmo
+    toc: true
+    toc_float: true
+    number_sections: true
+    code_folding: show
+    code_download: true
+---
+
+# BACKGROUND
+
+Protein quantification (BCA/Bradford-style, 595&nbsp;nm) of *Magallana gigas*
+(Pacific oyster) SoRMI plate `F07`, 16 samples (`F07_01`-`F07_08`, ambient and
+36&deg;C exposure) plus an 8-point BSA standard curve, each measured in
+triplicate wells.
+
+The raw Gen5 export (`Gen5-20260813-mgig-BSA-F07-absorbance.csv`) is a
+per-well table where each triplicate group's first row carries the
+sample/standard ID and the instrument's own pre-computed
+mean/SD/CV-of-concentration, and the two replicate rows below it carry only
+well-level data. This document ignores the instrument's pre-computed
+summary columns and recomputes mean, SD, and CV independently in R via
+`dplyr`, for both the raw absorbance (595&nbsp;nm) and the concentration.
+
+**CV QC metric used for exclusion:** the >15% technical-replicate CV
+exclusion rule (including for standard-curve points) is applied to **CV of
+concentration** (matching what the instrument's own `CV (%)` column already
+represents for this export -- verified against the raw file: e.g. `SPL1`'s
+given Mean/SD/CV of 694.467/49.577/7.139 are exactly the mean/SD/CV of its
+three `[Concentration]` values, not of its `595` values). Concentration CV
+is the more sensitive metric here: several groups exceed 15% on
+concentration while none do on raw absorbance, since back-calculation
+against a curve with a non-zero intercept amplifies small absorbance
+differences into larger relative concentration differences.
+
+Two edge cases in the raw `[Concentration]` column need explicit handling:
+
+- **Censored reads.** Wells reading outside the instrument's own internal
+  standard-curve range are reported as `<0.000` or `>2100.000` rather than a
+  number. These are parsed to a `_censored` flag plus the boundary value,
+  and excluded from concentration mean/SD/CV calculations (their true value
+  is unknown, not equal to the boundary).
+- **The zero (blank) BSA standard** (`STD8`) is *always* censored
+  (`<0.000` on all three wells), by construction -- a true-zero standard's
+  back-calculated concentration is not a meaningful quantity to compute a
+  CV on, and this is not a data-quality problem. `STD8` is therefore exempt
+  from the concentration-CV exclusion rule and is retained as the curve's
+  origin point on the strength of its (excellent) 595 CV instead.
+
+Any other group left with fewer than 2 valid (non-censored) concentration
+replicates has an undefined (`NA`) concentration CV and is treated as
+failing QC, consistent with the source file itself being unable to compute
+a CV there either (`?????`). In this plate's data, every sample well yields
+a numeric (non-censored) concentration, so this case only arises for the
+zero BSA standard (which is exempted, above).
+
+# SETUP
+
+## Libraries
+```{r setup, include=TRUE}
+library(knitr)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+
+knitr::opts_chunk$set(
+  echo = TRUE,         # Display code chunks
+  eval = TRUE,         # Evaluate code chunks
+  warning = FALSE,     # Hide warnings
+  message = FALSE,     # Hide messages
+  comment = "",        # Prevents appending '##' to beginning of lines in code output
+  results = 'hold'     # Holds output so it's all printed together after code chunk
+)
+```
+
+## Set output directory
+```{r output-dir}
+output_dir <- "../outputs/Gen5-20260813-mgig-BSA-F07"
+dir.create(output_dir, showWarnings = FALSE, recursive = TRUE)
+```
+
+# DATA IMPORT
+
+The raw file is a Gen5 per-well export with non-syntactic column names
+(`[Concentration]`, `CV (%)`, etc.) and a UTF-8 byte-order mark on the first
+header cell, so columns are renamed by position immediately after import
+rather than referenced by their original names.
+
+```{r read-raw-data}
+data_path <- "../data/BSA/raw_absorbance/Gen5-20260813-mgig-BSA-F07-absorbance.csv"
+
+protein_raw <- read.csv(data_path, stringsAsFactors = FALSE, check.names = FALSE,
+                         na.strings = c("", "NA"))
+colnames(protein_raw) <- c("well_id", "name", "well", "std_conc_known", "abs_595",
+                           "gen5_concentration", "gen5_count", "gen5_mean",
+                           "gen5_sd", "gen5_cv")
+
+cat("--- protein_raw: as imported from the Gen5 export ---\n")
+str(protein_raw)
+```
+
+# RESHAPING
+
+`well_id` and `name` are only populated on the first row of each
+triplicate group in the raw export, so they are filled downward. Each row
+is also classified as a `standard` (`well_id` starts with `STD`) or a
+`sample` (`SPL`), and the instrument's censored concentration strings
+(`<0.000`, `>2100.000`) are parsed into a numeric value plus a
+`gen5_concentration_censored` flag.
+
+```{r reshape-long}
+protein_long <- protein_raw %>%
+  select(well_id, name, well, std_conc_known, abs_595, gen5_concentration) %>%
+  fill(well_id, name, .direction = "down") %>%
+  mutate(
+    type = if_else(grepl("^STD", well_id), "standard", "sample"),
+    gen5_concentration_censored = grepl("^[<>]", gen5_concentration),
+    gen5_concentration_numeric  = as.numeric(gsub("[<>]", "", gen5_concentration))
+  )
+
+cat("--- protein_long: one row per well, group identifiers filled down ---\n")
+str(protein_long)
+```
+
+# MEAN VALUES
+
+## Mean 595 nm absorbance
+```{r mean-595}
+mean_595_by_group <- protein_long %>%
+  group_by(well_id, name, type, std_conc_known) %>%
+  summarise(n_wells  = n(),
+            mean_595 = mean(abs_595),
+            .groups  = "drop")
+
+cat("--- mean_595_by_group ---\n")
+str(mean_595_by_group)
+```
+
+## Mean concentration
+Censored wells (reading outside the instrument's own standard-curve range)
+are dropped before averaging, since their true concentration is unknown.
+```{r mean-concentration}
+mean_conc_by_group <- protein_long %>%
+  filter(!gen5_concentration_censored) %>%
+  group_by(well_id, name, type, std_conc_known) %>%
+  summarise(n_wells_valid_conc  = n(),
+            mean_concentration  = mean(gen5_concentration_numeric),
+            .groups = "drop")
+
+cat("--- mean_conc_by_group ---\n")
+str(mean_conc_by_group)
+```
+
+# STANDARD DEVIATION AND COEFFICIENT OF VARIATION
+
+## SD and CV of 595 nm absorbance
+```{r sd-cv-595}
+sd_cv_595_by_group <- protein_long %>%
+  group_by(well_id, name, type, std_conc_known) %>%
+  summarise(
+    n_wells  = n(),
+    mean_595 = mean(abs_595),
+    sd_595   = sd(abs_595),
+    cv_595   = 100 * sd_595 / mean_595,
+    .groups  = "drop"
+  )
+
+cat("--- sd_cv_595_by_group ---\n")
+str(sd_cv_595_by_group)
+```
+
+## SD and CV of concentration
+```{r sd-cv-concentration}
+sd_cv_conc_by_group <- protein_long %>%
+  filter(!gen5_concentration_censored) %>%
+  group_by(well_id, name, type, std_conc_known) %>%
+  summarise(
+    n_wells_valid_conc  = n(),
+    mean_concentration  = mean(gen5_concentration_numeric),
+    sd_concentration    = sd(gen5_concentration_numeric),
+    cv_concentration    = 100 * sd_concentration / mean_concentration,
+    .groups = "drop"
+  )
+
+cat("--- sd_cv_conc_by_group ---\n")
+str(sd_cv_conc_by_group)
+```
+
+## Combined per-group summary
+```{r combine-group-stats}
+group_stats <- sd_cv_595_by_group %>%
+  left_join(
+    sd_cv_conc_by_group %>%
+      select(well_id, mean_concentration, sd_concentration, cv_concentration, n_wells_valid_conc),
+    by = "well_id"
+  ) %>%
+  arrange(type, well_id)
+
+cat("--- group_stats: one row per sample/standard, 595- and concentration-level stats ---\n")
+str(group_stats)
+kable(group_stats, digits = 3)
+```
+
+# CV-BASED EXCLUSION
+
+Groups with CV(concentration) > 15% -- or an undefined concentration CV due
+to insufficient valid (non-censored) replicates -- are flagged and excluded
+from all downstream analysis, including standard-curve fitting. The zero
+BSA standard (`STD8`) is exempt from this rule (see Background) and is
+always retained.
+
+```{r cv-exclusion}
+group_stats <- group_stats %>%
+  mutate(
+    is_zero_standard = type == "standard" & !is.na(std_conc_known) & std_conc_known == 0,
+    high_cv = !is_zero_standard & (is.na(cv_concentration) | cv_concentration > 15)
+  )
+
+excluded_groups <- group_stats %>% filter(high_cv)
+
+cat("--- excluded_groups: CV(concentration) > 15% (or undefined), dropped from further analysis ---\n")
+str(excluded_groups)
+kable(excluded_groups %>%
+        select(well_id, name, type, std_conc_known, n_wells_valid_conc,
+               mean_concentration, sd_concentration, cv_concentration),
+      digits = 3)
+
+clean_group_stats <- group_stats %>% filter(!high_cv)
+
+cat("\nRetained after CV exclusion:", nrow(clean_group_stats), "of", nrow(group_stats), "groups\n")
+str(clean_group_stats)
+```
+
+# STANDARD CURVE
+
+Fit using only the retained (CV &le; 15%) standard points: known BSA
+concentration (`Conc/Dil`) on the x-axis, mean 595&nbsp;nm absorbance on the
+y-axis.
+
+```{r fit-standard-curve}
+standards_clean <- clean_group_stats %>% filter(type == "standard")
+
+cat("--- standards_clean: standard points retained for curve fitting ---\n")
+str(standards_clean)
+
+standard_curve_model <- lm(mean_595 ~ std_conc_known, data = standards_clean)
+
+curve_slope     <- unname(coef(standard_curve_model)[2])
+curve_intercept <- unname(coef(standard_curve_model)[1])
+curve_r2        <- summary(standard_curve_model)$r.squared
+
+cat("Standard curve fit: 595 =", format(curve_slope, digits = 6), "* concentration +",
+    format(curve_intercept, digits = 4), "\n")
+cat("R2:", round(curve_r2, 5), "\n")
+```
+
+## Plot standard curve
+```{r plot-standard-curve, fig.width=7, fig.height=5.5}
+eq_label <- paste0("y = ", format(curve_slope, digits = 4, scientific = TRUE), "x + ",
+                    sprintf("%.4f", curve_intercept),
+                    "\nR² = ", sprintf("%.4f", curve_r2))
+
+standard_curve_plot <- ggplot(standards_clean, aes(x = std_conc_known, y = mean_595)) +
+  geom_smooth(method = "lm", formula = y ~ x, se = FALSE, color = "steelblue", linewidth = 0.6) +
+  geom_errorbar(aes(ymin = mean_595 - sd_595, ymax = mean_595 + sd_595),
+                width = 30, color = "grey40") +
+  geom_point(size = 2.6, color = "steelblue") +
+  annotate("text", x = -Inf, y = Inf, label = eq_label,
+           hjust = -0.08, vjust = 1.3, size = 3.6, fontface = "bold") +
+  labs(x = "BSA standard concentration (µg/mL)",
+       y = "Mean absorbance (595 nm)",
+       title = "BSA standard curve",
+       subtitle = "Points with technical-replicate CV(concentration) > 15% excluded (see below)") +
+  theme_bw(base_size = 12)
+
+print(standard_curve_plot)
+ggsave(file.path(output_dir, "standard_curve_595.png"), standard_curve_plot,
+       width = 7, height = 5.5, dpi = 300)
+```
+
+Standard points excluded from the curve:
+```{r excluded-standards}
+excluded_standards <- group_stats %>% filter(type == "standard", high_cv)
+
+cat("--- excluded_standards ---\n")
+str(excluded_standards)
+kable(excluded_standards %>%
+        select(well_id, std_conc_known, mean_concentration, sd_concentration, cv_concentration),
+      digits = 3)
+```
+
+# APPLYING THE STANDARD CURVE TO SAMPLES
+
+Samples that passed CV QC are back-calculated against the fitted curve.
+Samples whose mean 595 falls outside the retained standards' absorbance
+range are flagged as extrapolated.
+
+```{r back-calculate-samples}
+samples_clean <- clean_group_stats %>%
+  filter(type == "sample") %>%
+  mutate(
+    se_595                    = sd_595 / sqrt(n_wells),
+    calculated_concentration  = (mean_595 - curve_intercept) / curve_slope,
+    in_curve_range            = mean_595 >= min(standards_clean$mean_595) &
+                                  mean_595 <= max(standards_clean$mean_595)
+  ) %>%
+  arrange(name)
+
+cat("--- samples_clean: CV-QC-passing samples, quantified against the fitted standard curve ---\n")
+str(samples_clean)
+```
+
+```{r out-of-range-samples}
+cat("Samples with absorbance outside the retained standard curve's range (extrapolated):\n")
+kable(samples_clean %>% filter(!in_curve_range) %>%
+        select(well_id, name, mean_595, calculated_concentration),
+      digits = 3)
+```
+
+## Plot samples on standard curve
+
+Every QC-passing sample is plotted at its own mean 595 and back-calculated
+concentration, with vertical error bars of &plusmn;1 standard error (of
+mean 595, across its 2-3 retained technical replicates), overlaid on the
+standard curve fit line and retained standard points.
+
+```{r plot-samples-on-curve, fig.width=8, fig.height=5.5}
+samples_on_curve_plot <- ggplot() +
+  geom_smooth(data = standards_clean, aes(x = std_conc_known, y = mean_595),
+              method = "lm", formula = y ~ x, se = FALSE,
+              color = "steelblue", linewidth = 0.6) +
+  geom_point(data = standards_clean, aes(x = std_conc_known, y = mean_595),
+             size = 2.6, color = "steelblue") +
+  geom_errorbar(data = samples_clean,
+                aes(x = calculated_concentration,
+                    ymin = mean_595 - se_595, ymax = mean_595 + se_595),
+                width = 30, color = "grey40") +
+  geom_point(data = samples_clean,
+             aes(x = calculated_concentration, y = mean_595, shape = in_curve_range),
+             size = 2.4, color = "firebrick", alpha = 0.85) +
+  scale_shape_manual(values = c(`TRUE` = 16, `FALSE` = 4),
+                      labels = c(`TRUE` = "in range", `FALSE` = "extrapolated"),
+                      name = "Sample status") +
+  labs(x = "Concentration (µg/mL)",
+       y = "Mean absorbance (595 nm)",
+       title = "BSA standard curve with QC-passing samples overlaid",
+       subtitle = "Samples plotted at their back-calculated concentration; error bars = ±1 SE of mean 595") +
+  theme_bw(base_size = 12)
+
+print(samples_on_curve_plot)
+ggsave(file.path(output_dir, "standard_curve_with_samples.png"), samples_on_curve_plot,
+       width = 8, height = 5.5, dpi = 300)
+```
+
+# RESULTS TABLE
+
+```{r results-table}
+results_table <- samples_clean %>%
+  transmute(
+    Sample                              = name,
+    `Well ID`                           = well_id,
+    `Mean 595`                          = round(mean_595, 3),
+    `CV 595 (%)`                        = round(cv_595, 2),
+    `CV concentration (%)`              = round(cv_concentration, 2),
+    `Calculated concentration (ug/mL)`  = round(calculated_concentration, 1),
+    `In standard curve range`           = ifelse(in_curve_range, "yes", "NO - extrapolated")
+  ) %>%
+  arrange(gsub("[0-9]+$", "", `Well ID`), as.numeric(gsub("^[A-Za-z]+", "", `Well ID`)))
+
+kable(results_table)
+```
+
+Only samples passing *all* QC -- CV &le; 15% and within the retained
+standard curve's range (i.e. not extrapolated) -- are written to the CSV
+output.
+
+```{r results-table-export}
+results_table_export <- results_table %>% filter(`In standard curve range` == "yes")
+
+cat("--- results_table_export: samples passing all QC (CV and in-range), written to CSV ---\n")
+str(results_table_export)
+
+write.csv(results_table_export, file.path(output_dir, "sample_protein_concentrations.csv"), row.names = FALSE)
+```
+
+# SUMMARY
+
+- `r nrow(group_stats)` sample/standard triplicate groups were imported
+  (`r sum(group_stats$type == "standard")` BSA standards,
+  `r sum(group_stats$type == "sample")` samples).
+- `r nrow(excluded_groups)` group(s) exceeded 15% technical-replicate
+  CV(concentration), or had an undefined CV from insufficient valid
+  replicates, and were excluded from all downstream analysis:
+  `r paste(paste0(excluded_groups$well_id, " (", excluded_groups$name, ")"), collapse = ", ")`.
+- The BSA standard curve was fit on the `r nrow(standards_clean)` remaining
+  standard points: slope = `r format(curve_slope, digits = 4)`,
+  intercept = `r format(curve_intercept, digits = 4)`,
+  R&sup2; = `r round(curve_r2, 4)`.
+- `r sum(!samples_clean$in_curve_range)` CV-QC-passing sample(s) fell
+  outside the retained standard curve's absorbance range and are flagged as
+  extrapolated in the results table above.
+
+## Samples passing QC
+
+Sample names are sorted naturally (e.g. `F07_02_ambient` before
+`F07_10_ambient`, and ignoring any stray punctuation), rather than by plain
+lexicographic string order.
+
+```{r natural-sort-key}
+natural_sort_key <- function(x) gsub("[^A-Za-z0-9]", "", x)
+```
+
+```{r summary-passing-samples}
+passing_samples_table <- samples_clean %>%
+  transmute(sample_name = name,
+            `concentration(ug/mL)` = round(calculated_concentration, 1)) %>%
+  arrange(natural_sort_key(sample_name))
+
+cat("--- passing_samples_table: samples passing CV QC, name + calculated concentration ---\n")
+str(passing_samples_table)
+
+kable(passing_samples_table)
+```
+
+## Samples recommended for re-assay
+
+```{r summary-qc-objects}
+failed_qc_samples    <- excluded_groups %>% filter(type == "sample") %>% arrange(name)
+extrapolated_samples <- samples_clean %>% filter(!in_curve_range) %>% arrange(name)
+
+cat("--- failed_qc_samples: samples excluded from analysis on CV grounds ---\n")
+str(failed_qc_samples)
+cat("\n--- extrapolated_samples: QC-passing samples outside the retained standard curve's range ---\n")
+str(extrapolated_samples)
+```
+
+```{r reassay-table}
+reassay_candidates <- bind_rows(
+  failed_qc_samples %>%
+    transmute(`Sample name` = name,
+              `Rationale for re-assay` = as.character(ifelse(
+                is.na(cv_concentration),
+                "CV undefined (< 2 valid replicates)",
+                "CV > 15%"
+              ))),
+  extrapolated_samples %>%
+    transmute(`Sample name` = name,
+              `Rationale for re-assay` = "outside standard curve range")
+) %>%
+  arrange(natural_sort_key(`Sample name`))
+
+cat("--- reassay_candidates: all samples flagged for re-assay, with rationale ---\n")
+str(reassay_candidates)
+
+kable(reassay_candidates)
+```
