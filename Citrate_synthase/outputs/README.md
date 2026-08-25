@@ -22,4 +22,12 @@ suffix) in `../code`.
   Outputs from `../code/Gen5-20260813-mgig-sormi-BSA-F05-F07-reassay-protein.Rmd`
   (re-assay plate for samples flagged by the `F05`/`F07` analyses).
 
+- [`Gen5-20260825-mgig-sormi-citrate_synthase-F05-F07-temperature-comparison/`](Gen5-20260825-mgig-sormi-citrate_synthase-F05-F07-temperature-comparison/README.md):
+  Outputs from
+  `../code/Gen5-20260825-mgig-sormi-citrate_synthase-F05-F07-temperature-comparison.Rmd`
+  -- cross-plate comparison of citrate synthase activity between families
+  `F05` and `F07` at ambient and 36 &deg;C. Takes the per-plate
+  `citrate_synthase_activity_results.csv` files as input rather than
+  plate-reader files.
+
 ---
