@@ -24,7 +24,7 @@ output:
 
 # Background
 
-Juvenile oysters were subjected to OAE conditions (10°C) for 6hrs on 20260828. After exposure, oysters were transferred to standard sea water conditions. On 20260831, 46 OAE oysters and 46 control oysters were subjected to 36°C heat stress. Oysters were randomly distributed across four, 48-well clear plates and submerged in 2mL of resazurin working solution. Fluorescence was measured every 30mins in a Synergy HTX (Agilent) plate reader.
+Juvenile oysters were subjected to OAE conditions (10°C) for 6hrs on 20260828. After exposure, oysters were transferred to standard sea water conditions. On 20260831, 46 OAE oysters and 46 control oysters were subjected to 36°C heat stress. Oysters were randomly distributed across four, 48-well clear plates and submerged in 2mL of resazurin working solution. Fluorescence was measured every 30mins through 3hrs, plus an additional read at 5hrs, in a Synergy HTX (Agilent) plate reader.
 
 Resazurin working-solution temperatures were recorded by the plate reader at each read (mean across the four plates):
 
@@ -37,6 +37,7 @@ Resazurin working-solution temperatures were recorded by the plate reader at eac
 | 2               | 24.7     |
 | 2.5             | 25.1     |
 | 3               | 25.5     |
+| 5               | 26.3     |
 
 See `Resazurin/data/20260831-mgig-OAE-36C/README.md` for full experimental notes.
 
