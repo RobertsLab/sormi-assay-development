@@ -1,0 +1,860 @@
+================================================================================
+Metabolic curve shape under acute stress forecasts family-level survival in
+Pacific oysters: a multi-feature resazurin index for non-lethal phenotyping
+================================================================================
+
+DRAFT MANUSCRIPT — v0.1 (2026-09-19)
+
+Authors: [Steven Roberts, Samuel J. White, Louis Plough, ... — ORDER TBD]
+Affiliations:
+  1. School of Aquatic and Fishery Sciences, University of Washington, Seattle, WA
+  2. USDA Agricultural Research Service, Pacific Shellfish Research Unit,
+     Newport, OR [PLOUGH — confirm]
+  [additional affiliations TBD]
+
+Corresponding author: Steven Roberts, sr320@uw.edu
+
+Keywords: Magallana gigas; Crassostrea gigas; resazurin; metabolic rate;
+thermal tolerance; selective breeding; phenotyping; heat survival; glycogen
+
+Bracketed text in ALL CAPS, e.g. [PLOUGH: ...], marks placeholders to be
+filled in by co-authors. Bracketed text in lower case marks items the
+lead author must verify or expand before submission.
+
+--------------------------------------------------------------------------------
+ABSTRACT
+--------------------------------------------------------------------------------
+
+Identifying stress-resilient oyster families is central to selective
+breeding for summer survival, but the reference phenotype — survival
+through a lethal heat or salinity challenge — destroys the animals it
+measures and requires weeks of husbandry per cohort. Resazurin, a
+redox-sensitive dye whose fluorescence tracks whole-animal metabolic rate,
+offers a non-lethal, plate-reader-based alternative, yet most applications
+reduce the resulting time course to a single number (slope or area under
+the curve). Here we asked whether the full shape of the resazurin
+fluorescence curve, summarised as ~20 quantitative features per
+individual, could recover the survival ranking of nine USDA Pacific oyster
+(Magallana gigas) families. We pooled seven independent lethal challenges
+(33–36 °C, 35 °C + 9 ppt, and freshwater → 36 °C; n = 1,095 oysters) into a
+composite, severity-normalised survival score per family, and separately
+ran nine resazurin experiments (969 individual traces) under three
+contexts: seawater heat (33–36 °C), freshwater at room temperature, and
+freshwater combined with 36 °C heat. Curve features were extracted per
+individual, averaged per family and context, screened by Spearman rank
+correlation with the survival score, and validated by leave-one-family-out
+cross-validation (LOFO-CV). Two coherent signals emerged. First, under
+seawater heat, metabolic capacity traits (total and early AUC, maximum
+slope, peak value, metabolic scope) were all negatively correlated with
+survival (rho = −0.83 to −0.87, p < 0.01): families that ramped metabolism
+most under heat survived least. Second, timing traits were positive
+predictors: the time to steepest metabolic decline under freshwater + heat
+was the single best predictor (rho = 0.90, p = 0.002; LOFO-CV rho = 0.81),
+i.e., hardy families delayed their metabolic crash. A four-feature
+resazurin index (time to steepest decline, curve stability, initial slope,
+and depth of collapse, measured under freshwater + heat) predicted the
+survival ranking out-of-sample (LOFO-CV rho = 0.79, RMSE = 7.9 score
+units), correctly placing the hardiest (family 5) and most fragile (family
+7) families at opposite ends. Signals were strongest when resazurin was
+measured under a challenge that mirrored the survival stressor rather than
+at rest. [PLOUGH: one to two sentences summarising the complementary
+younger-seed resazurin and glycogen prediction results and their
+agreement/disagreement with the adult-stage ranking.] These results
+indicate that a few hours of non-lethal resazurin measurement under a
+matched stressor can pre-screen candidate families for confirmatory
+survival testing, and that curve shape — not just curve magnitude — carries
+the predictive information.
+
+--------------------------------------------------------------------------------
+1. INTRODUCTION
+--------------------------------------------------------------------------------
+
+Summer mortality of Pacific oysters (Magallana gigas, formerly Crassostrea
+gigas) is a persistent constraint on West Coast aquaculture, and family-
+and line-level variation in survival is the raw material for selective
+breeding programs such as the USDA ARS Pacific Shellfish Research Unit
+program [ref: Plough/USDA program description; Molecular Breeding Program
+refs] and the Molluscan Broodstock Program [ref]. The phenotype of
+interest, however, is intrinsically expensive: survival under a
+field-relevant stressor is measured by exposing tens of animals per family
+to a lethal challenge and scoring mortality over days, or by planting
+families in the field and waiting a season. Breeding programs therefore
+have strong incentive to find rapid, non-lethal, laboratory-based proxies
+that rank families in the same order as the lethal challenge.
+
+Metabolic rate is an attractive candidate proxy. Whole-animal respirometry
+has long linked metabolic phenotype to thermal tolerance in bivalves
+[refs: Sokolova et al. 2012 energy-limited tolerance; Pörtner OCLTT;
+bivalve metabolic depression refs], and the concept of metabolic depression
+— a regulated down-shift of energy turnover under stress — is a recognised
+survival strategy in intertidal molluscs [refs: Guppy & Withers 1999;
+Storey & Storey]. But respirometry is low-throughput. Resazurin, a blue,
+non-fluorescent redox dye that is reduced to pink, fluorescent resorufin
+by cellular metabolic activity, has recently been adapted as a
+high-throughput whole-organism proxy for metabolic rate in oysters
+(Huffmyer et al. 2025, bioRxiv 10.1101/2025.11.06.686367). Huffmyer et al.
+showed that resazurin fluorescence correlates with oxygen consumption,
+that it resolves temperature-dependent metabolic optima and tipping points,
+and that families and lines differ in their resazurin response. That work
+also reported a first indication that metabolic response to acute thermal
+stress is related to predicted breeding performance.
+
+Most resazurin analyses, including the initial protocol, summarise each
+animal's fluorescence time course as a single scalar — typically the
+fold-change at the final time point, the slope of a linear fit, or the
+area under the curve (AUC). This discards information. A resazurin curve
+measured during an acute challenge is a short time series that encodes
+how quickly metabolism is stimulated, how high it goes, whether and when
+it plateaus or declines, and how variable it is. If stress-resilient
+families differ from fragile ones in the *dynamics* of their metabolic
+response — for example, by depressing metabolism sooner or by avoiding an
+early over-shoot — then features describing the shape of the curve should
+predict survival better than magnitude alone.
+
+Here we test that hypothesis directly. Within the SORMI (Summer Oyster
+Resilience & Mortality Index) assay-development project we generated two
+independent bodies of data on the same nine USDA M. gigas families: (i)
+seven lethal survival challenges, pooled into a single severity-normalised
+composite survival score per family, and (ii) nine resazurin experiments
+spanning resting, freshwater, heat, and combined freshwater + heat
+conditions. We extracted a comprehensive set of curve features from each
+individual resazurin trace, aggregated them to the family level, and
+asked: (1) which features, measured under which condition, best track the
+family survival ranking; (2) whether a predictor selected in-sample
+survives leave-one-family-out cross-validation; and (3) whether a simple
+multi-feature index outperforms any single feature. Because the two data
+sets were collected on different individuals, this is a family-level
+(genetic/cohort) prediction rather than an individual-level one.
+
+[PLOUGH: Paragraph introducing the complementary experiments: same
+families assayed as younger seed (age/size to specify) at USDA ARS
+Newport, using (a) the resazurin assay and (b) tissue glycogen content
+after a short heat exposure vs. control, to test whether either proxy
+measured earlier in life predicts the same adult-stage family survival
+ranking. State the rationale — the earlier a family can be ranked, the
+more useful the proxy is to a breeding program — and the specific
+hypothesis for glycogen (e.g., that energy-reserve depletion under acute
+heat, or baseline reserve, tracks survival).]
+
+--------------------------------------------------------------------------------
+2. MATERIALS AND METHODS
+--------------------------------------------------------------------------------
+
+2.1 Animals and families
+
+Oysters were from nine full-sib USDA ARS Pacific Shellfish Research Unit
+families (labelled 1, 2, 3, 5, 6, 7, 8, 9 and 10; family 4 was not
+available) [PLOUGH: spawning date, cross design, parental origin/line,
+nursery conditions, and date/size at transfer to the University of
+Washington]. Animals were held at the University of Washington
+[specify: Seattle campus tank room and/or NOAA Manchester Research
+Station] in flowing or recirculating seawater at ambient temperature
+[specify: temperature range, feeding regime] prior to experiments.
+Experiments used juvenile (seed-stage) oysters in most cases; two
+resazurin experiments (2026-04-15 and 2026-06-24) used adult animals
+[verify/insert mean shell length or ImageJ area per cohort; e.g., mean
+area 779 mm2 for the 2026-04-27 survival cohort].
+
+A labelling error affected two survival experiments (2026-05-11 and
+2026-06-09) and several resazurin experiments: two groups were labelled
+"9" and "9b" while family 2 was absent, and the correct assignment (one of
+the two is family 2, the other family 9) was lost. Rather than guess, all
+"9" and "9b" individuals were excluded from those two survival
+experiments, and all "9b" individuals (n = 152 resazurin traces) were
+excluded from the resazurin analysis. Family 9 is therefore scored from
+the experiments in which it appears unambiguously, and results involving
+family 9 are interpreted with this caveat.
+
+2.2 Survival challenges and the composite survival phenotype
+
+Seven lethal challenge experiments were run between 27 April and 7 July
+2026 (Table 1). Stressors were acute heat in seawater (33 °C, 35 °C or
+36 °C), heat combined with low salinity (35 °C, 9 ppt), and a freshwater
+exposure followed by transfer to 36 °C. Container format varied (12- or
+24-well plates with 4 mL seawater per well; ~100 mL cups; tank-room
+"cans" and tri-pours), as did duration (42–188 h) and per-family sample
+size (3–40 individuals). Mortality was scored at repeated time points by
+gaping/lack of response [specify criterion], and each individual was
+reduced to a (time of death or censoring, status) pair. Full protocols are
+in the per-experiment README files in the project repository.
+
+Because experiments differed in severity (overall mortality 33–99%), raw
+survival is not comparable across dates. We therefore scored each family
+within each experiment on two 0–1 metrics: the proportion alive at the
+final time point (surv_prop) and the mean restricted lifetime divided by
+the observation window (rel_surv_time; equal to the restricted mean
+survival time normalised to the experiment duration, because every
+individual was observed until death or the end of the experiment). Within
+each experiment, each metric was converted to a percentile among the
+families present in that experiment, 100 × (rank − 0.5)/n, removing the
+experiment-severity effect. A family's composite survival score is the
+mean of these percentiles across all experiments and both metrics
+(range 0–100; higher = hardier). Secondary phenotypes, mean surv_prop and
+mean rel_surv_time across experiments, were carried through as sensitivity
+checks. Family differences within experiments were tested by log-rank
+test. Analyses used R (v4.5.1) with the survival and ggsurvfit packages.
+
+2.3 Resazurin metabolic assays
+
+Resazurin assays followed the Roberts Lab protocol
+(https://robertslab.github.io/resources/protocols/resazurin-assay/) as
+described in Huffmyer et al. (2025). Briefly, a working solution was
+prepared from a resazurin stock (final concentration [specify], with
+0.1% DMSO and 1% penicillin/streptomycin/fungizone) in either artificial
+seawater (Instant Ocean, [specify salinity]) or, for freshwater-stress
+runs, dechlorinated tap water. Individual oysters were placed in 4 mL of
+working solution in clear 12-well plates (juveniles) or in 70–100 mL in
+individual cups (adults), with wells or cups lacking an oyster serving as
+blanks. Plates or cups were held either at room temperature (~20–22 °C)
+or in an incubator/water table at the target stress temperature (33 or
+36 °C); solution temperature was logged with an infrared thermometer and
+typically reached the target within 1–1.5 h. At each time point (every
+0.5–1 h for 3–4 h, or hourly over longer runs; Table 2), fluorescence was
+read directly on the 12-well plate or on a 200–250 µL aliquot transferred
+to a 96-well plate, using a Synergy HTX plate reader (Agilent) with Gen5
+software [specify excitation/emission wavelengths and gain]. Oysters were
+photographed and their projected shell area (mm2) measured in ImageJ for
+size normalisation.
+
+Nine resazurin experiments were included (Table 2). Each was assigned to
+one of three stress contexts on the basis of the medium and temperature:
+seawater heat (sw_heat; 33–36 °C in seawater; 4 experiments), freshwater
+at room temperature (freshwater_rt; 4 experiments), and freshwater
+combined with 36 °C heat (fw_heat; 1 experiment, 2026-05-05). A pooled
+"all" context combined every experiment. A tenth experiment (2026-07-13,
+36 °C, adults from four families only) was not included in the
+cross-experiment feature set. [verify; state reason]
+
+2.4 Fluorescence processing
+
+For each well and time point, raw relative fluorescence units (RFU) were
+expressed as fold-change relative to that well's T0 reading. The mean
+blank fold-change for the same plate and time point was subtracted to
+give a blank-corrected fold-change (corrected_fc), which removes
+temperature- and time-dependent autoreduction of the dye. A
+size-normalised metric (corrected_fc divided by shell area, mm2;
+metabolism_per_area) was computed in parallel. Wells flagged for
+exclusion in the layout metadata (e.g., dead animals, pipetting errors)
+and plates with inconsistent well counts across time points were dropped
+before analysis. Both value metrics were carried through all downstream
+steps.
+
+2.5 Curve feature extraction
+
+For every individual trace with at least two time points, we computed a
+fixed panel of curve features from the (time, value) series (Table 3;
+code in Resazurin/code/03.5-resazurin-curve-features-all-experiments.Rmd).
+Features fell into four groups:
+
+  Capacity / magnitude — final_value, peak_value, trough_value,
+    auc_total (trapezoidal AUC), auc_early and auc_late (AUC before and
+    after the median segment midpoint), delta_auc_late_minus_early,
+    late_early_auc_ratio, metabolic_scope (peak − baseline), final_delta
+    (final − baseline).
+  Rate — initial_slope (first segment), vmax (maximum segment slope),
+    min_slope (most negative segment slope).
+  Timing — time_to_peak, time_to_trough, time_to_vmax,
+    time_to_min_slope (time at which the steepest decline occurred),
+    inflection_time (time of maximum change in slope).
+  Depression / stability — depression_abs (peak − final, floored at 0),
+    metabolic_depression_index (depression_abs / |metabolic_scope|),
+    resilience_ratio (final / peak), stability_cv (coefficient of
+    variation of the trace), and a categorical trajectory_class
+    (monotonic_increase, rise_then_depress, depress_then_recover,
+    monotonic_decrease, stable, complex) derived from the sign sequence
+    of segment slopes.
+
+baseline_value (the T0 reference, ≈1 by construction) was retained in the
+feature table but excluded from all ranking and prediction analyses.
+Within each experiment, the ability of each feature to discriminate
+families was assessed by one-way ANOVA (feature ~ family) with eta-squared
+as effect size and Benjamini–Hochberg adjustment across features, with
+Kruskal–Wallis tests and Tukey HSD pairwise contrasts as checks.
+
+2.6 Family-level feature matrix and screening
+
+Per-individual features were averaged to family means within each
+context × value-metric combination, and in the pooled "all" context. A
+feature was retained only if family means were available for at least
+six of the nine families. For every (context, metric, feature) we
+computed Spearman rank correlation (primary; "does resazurin recover the
+ranking?") and Pearson correlation (secondary) between the family-mean
+feature and each survival phenotype across families (n = 8–9 families).
+Because ~200 correlations were screened at n ≤ 9, unadjusted p-values are
+reported for ranking purposes only, and we emphasise blocks of
+mechanistically related features that move together over any single
+value.
+
+2.7 Cross-validated prediction
+
+To estimate how well a predictor selected in-sample would place a new
+family, we used leave-one-family-out cross-validation (LOFO-CV). For a
+given feature, each family in turn was held out, a linear model
+(composite score ~ family-mean feature) was fit to the remaining
+families, and the held-out family's score was predicted. Performance was
+summarised as the Spearman correlation between predicted and observed
+scores across all held-out predictions (CV rho) and the root-mean-square
+error (CV RMSE, in score units). Candidate features for LOFO-CV were the
+three strongest |rho| features within each context × metric.
+
+2.8 Multi-feature resazurin index
+
+Within the context and value metric that produced the best
+cross-validated single feature, we took the four features with the
+largest |Spearman rho| with the composite score, z-scored each family
+mean across families, multiplied by the sign of its correlation so that
+higher always meant "more survival-like", and averaged the four signed
+z-scores to give a resazurin index per family. Averaging pre-specified
+z-scores rather than fitting a multiple regression keeps the number of
+fitted parameters at two (intercept and slope of score ~ index) and
+avoids over-fitting at n = 8. The index was then evaluated by the same
+LOFO-CV procedure.
+
+2.9 Complementary early-life (seed) assays [PLOUGH]
+
+[PLOUGH: Describe the experiments conducted at USDA ARS Newport on
+younger seed from the same nine families.
+  (a) Animals: age (days/weeks post-set), size (mean shell height or
+      area), n per family, holding conditions.
+  (b) Resazurin: working solution, container format (well plate size,
+      volume), temperature treatment(s) (e.g., ambient vs. acute heat
+      at __ °C), time points, plate reader and settings, size
+      normalisation. Note any deviations from the UW protocol.
+  (c) Glycogen: design (heat at __ °C vs. control for 3 h), tissue
+      sampled (whole body / specific tissue), n per family per
+      treatment, extraction and assay method (e.g., Promega Glycogen-Glo
+      luminescent assay with standard curve; normalisation to tissue wet
+      weight or protein), plate layout and controls.
+  (d) Statistics: how family means (and heat − control differences)
+      were computed, and how they were compared with the UW composite
+      survival score (Spearman rho, LOFO-CV as above, or otherwise).
+  (e) Whether seed-stage resazurin curve features were extracted with
+      the same code (Section 2.5) to allow a like-for-like comparison of
+      feature rankings between life stages.]
+
+2.10 Data and code availability
+
+All raw plate-reader exports, layout metadata, survivorship tables,
+analysis notebooks and rendered outputs are in the public repository
+https://github.com/RobertsLab/sormi-assay-development (directories
+Resazurin/, heat-survivorship/). The analyses reported here correspond to
+notebooks 03.5-resazurin-curve-features-all-experiments.Rmd and
+04-resazurin-family-phenotype-prediction.Rmd (Resazurin/code/) and
+09-mgig-survivorship-cross-experiment-summary.qmd
+(heat-survivorship/code/). An interactive dashboard of all resazurin
+runs is at https://sormi.science/resazurin-dashboard.html.
+[PLOUGH: location of seed-stage resazurin and glycogen data/code.]
+
+--------------------------------------------------------------------------------
+3. RESULTS
+--------------------------------------------------------------------------------
+
+3.1 Families differ consistently in survival across stressors
+
+The seven challenges pooled 1,095 oysters and ranged from mild (freshwater
+→ 36 °C, 33% mortality; 33 °C on 27 April, 49%) to near-total (33 °C on
+11 May, 99%; 35 °C on 6 July, 97%) (Table 1). Family differences within
+experiments were significant by log-rank test in four of seven
+experiments (p = 0.0008 to 0.024) and marginal in two others (p = 0.05–
+0.06). After within-experiment percentile scoring, the composite survival
+score ranged from 71.0 (family 5) to 35.3 (family 7) (Table 4). Family 5
+was hardiest, followed by families 9 (63.2) and 2 (59.0); families 8, 3
+and 1 were intermediate (52.7, 48.8, 46.9); and families 6, 10 and 7 were
+least hardy (40.8, 36.7, 35.3). The ranking was broadly consistent across
+individual experiments [insert family_consistency figure reference and a
+sentence on the range of per-experiment percentiles for the top and
+bottom families]. Composite score, mean surv_prop and mean rel_surv_time
+were positively correlated with each other [insert rho].
+
+3.2 Resazurin curve features discriminate families within experiments
+
+Nine resazurin experiments yielded 969 individual fluorescence traces
+(99–162 per experiment; 4–14 time points each; Table 2). Family explained
+a substantial share of variance in curve features within experiments. In
+the juvenile 12-well-plate runs, trough_value was the single most
+family-discriminating feature (eta-squared 0.82–0.95 in the freshwater
+and freshwater + heat experiments; BH-adjusted p < 10^-28) [note: check
+whether trough_value's extreme F-values in the freshwater runs reflect
+near-degenerate values, e.g., troughs pinned at the T0 reference, and
+consider whether it should be interpreted as a shape trait]. In the
+seawater-heat experiments the best discriminators were late-phase
+capacity traits (delta_auc_late_minus_early, peak_value, metabolic_scope,
+final_value; eta-squared ≈ 0.20, BH p = 0.04 on 2026-06-02) and timing
+traits (time_to_min_slope, inflection_time). Trajectory classes also
+differed by family: under freshwater + heat, every individual of family
+5, 6 and 8 showed a monotonic increase in corrected fold-change over 4 h,
+whereas 64% of family 7 and 45% of family 3 individuals rose and then
+depressed (Table 5).
+
+3.3 Screening: capacity under heat is negatively, and timing positively,
+    associated with survival
+
+Across 8 context × metric combinations, [insert number] features passed
+the ≥6-family filter and were screened against the composite score
+(Figure 1; Table 6; full table in feature_phenotype_correlations.csv).
+Two coherent blocks of features emerged.
+
+Capacity block (negative). Under seawater heat (sw_heat, size-normalised
+metric), every metabolic-capacity feature was negatively correlated with
+survival: auc_total (rho = −0.87, p = 0.005), vmax (−0.87, p = 0.005),
+auc_early (−0.85, p = 0.006), auc_late, final_value, metabolic_scope and
+peak_value (all −0.83, p = 0.008), and final_delta (−0.77, p = 0.02)
+(n = 9 families). The same features were negatively correlated using the
+non-normalised metric (auc_total and vmax rho = −0.73, p = 0.03) and in
+the pooled "all" context (vmax rho = −0.78; depression_abs rho = −0.80,
+p = 0.01). Families that ramped their metabolic signal highest and fastest
+when heated in seawater were the families that survived least in the
+lethal challenges. The capacity block was also the strongest predictor of
+the secondary phenotype mean surv_prop (auc_early rho = −0.92, p = 0.001;
+auc_total and vmax rho = −0.90, p = 0.002).
+
+Timing / stability block (positive). The strongest single association in
+the entire screen was time_to_min_slope measured under freshwater + heat
+(fw_heat): rho = 0.90 (p = 0.002; Pearson r = 0.87, p = 0.005; n = 8
+families, family 2 not present in that experiment) for both value
+metrics (which coincide for a timing feature). The same feature measured
+under freshwater at room temperature was also strongly positive (rho =
+0.83, p = 0.015), and time_to_peak under seawater heat was positive (rho
+= 0.73, p = 0.03). Hardy families reached their steepest metabolic
+decline later, i.e., they sustained their trajectory longer before
+crashing. Under fw_heat, stability_cv was negatively associated with
+survival (rho = −0.83, p = 0.015; hardy families had steadier traces),
+initial_slope was positively associated (rho = 0.76, p = 0.04;
+size-normalised) and depression_abs negatively (rho = −0.66). The pooled
+trough_value (size-normalised) was positively associated with survival
+(rho = 0.82, p = 0.01; Pearson r = 0.87, p = 0.002).
+
+Context mattered. The strongest associations came from runs that imposed
+a stressor (sw_heat or fw_heat); the freshwater-at-room-temperature
+context produced weaker and less consistent correlations, and no resting
+seawater run was available for comparison [note: state explicitly that
+no seawater/room-temperature control run of these families exists in the
+feature set].
+
+3.4 Cross-validation: timing under freshwater + heat generalises best
+
+Twenty-four candidate single features (top three per context × metric)
+were evaluated by LOFO-CV (Table 7). time_to_min_slope under fw_heat had
+the highest out-of-sample rank agreement (CV rho = 0.81, CV RMSE = 7.7
+score units; in-sample rho = 0.90), followed by pooled trough_value (CV
+rho = 0.75, RMSE = 7.0) and pooled depression_abs (CV rho = 0.72, RMSE =
+9.1). The seawater-heat capacity features, despite in-sample rho of
+−0.87, generalised less well (vmax CV rho = 0.67, RMSE = 14.0; auc_total
+CV rho = 0.65, RMSE = 13.3), reflecting their more skewed family-mean
+distributions (Pearson r ≈ −0.64 vs Spearman −0.87) and the leverage of
+individual families in a linear fit at n = 9. stability_cv under fw_heat
+fell from in-sample rho −0.83 to CV rho 0.52. Figure 2 shows observed
+versus family-mean time_to_min_slope; family 5 (score 71) had the latest
+steepest decline and family 7 (score 35) among the earliest.
+
+3.5 A four-feature resazurin index predicts the survival ranking
+    out-of-sample
+
+Within the fw_heat / corrected_fc combination, the four features with
+the largest |rho| were time_to_min_slope (+0.90), stability_cv (−0.83),
+initial_slope (+0.71) and depression_abs (−0.66). Their sign-aligned,
+z-scored average — the resazurin index — was correlated with the
+composite score at rho = 0.81 in-sample and rho = 0.79 under LOFO-CV,
+with CV RMSE 7.9 score units (Figure 3; Table 8). The index ranged from
+−1.44 (family 7, observed score 35.3, CV-predicted 32.1) to +1.27 (family
+5, observed 71.0, predicted 64.6), with family 9 second on both scales
+(index 1.09; observed 63.2, predicted 62.5). The intermediate families
+(8, 3, 1, 10) were predicted within 4–8 score units of observation; the
+largest miss was family 6 (index 0.31, predicted 53.2 vs observed 40.8).
+In words, a "survivor-like" resazurin profile under freshwater + heat is
+one that rises promptly, stays steady, does not collapse far from its
+peak, and reaches its steepest decline late (Figure 4, heatmap of the ten
+top features by survival rank).
+
+3.6 Complementary early-life (seed) assays [PLOUGH]
+
+[PLOUGH: Results of the younger-seed experiments on the same families.
+Suggested sub-sections:
+  3.6.1 Seed-stage resazurin. Family differences in the seed-stage
+        curves; which curve features (extracted with the same code as
+        Section 2.5, if possible) correlated with the adult composite
+        survival score; Spearman rho and LOFO-CV rho for the best
+        single feature and for the four-feature index computed on seed
+        data; whether the direction of the capacity (negative) and
+        timing (positive) associations replicated.
+  3.6.2 Glycogen. Family means of glycogen content in control and after
+        3 h heat; heat − control difference (depletion) by family;
+        correlation of baseline glycogen and of heat-induced change with
+        the composite survival score; whether glycogen adds independent
+        information to the resazurin index (e.g., partial correlation or
+        a two-predictor z-score index).
+  3.6.3 Cross-life-stage agreement. Spearman rho between the seed-stage
+        and adult-stage family rankings on each proxy; a figure with
+        families as points, seed-stage proxy on x, adult composite
+        survival on y (mirroring Figures 2–3).
+  Insert Table 9 (seed-stage feature screening) and Figure 5 (seed-stage
+  proxy vs. adult survival).]
+
+--------------------------------------------------------------------------------
+4. DISCUSSION
+--------------------------------------------------------------------------------
+
+4.1 Curve shape, not magnitude, carries the predictive signal
+
+The central result is that the survival ranking of nine oyster families
+across seven lethal challenges could be recovered from a few hours of
+non-lethal resazurin measurement — but only when the fluorescence time
+course was decomposed into shape features and measured under a matching
+stressor. The best single predictor was not the AUC or final fold-change
+that conventional analyses report, but the time at which the trace
+reached its steepest decline (time_to_min_slope). A four-feature index
+combining that timing feature with trace stability, initial slope and
+depth of collapse recovered the ranking out-of-sample (LOFO-CV rho =
+0.79), placing the hardiest and most fragile families correctly at the
+extremes. This supports the premise motivating the study: the dynamics
+of the metabolic response to acute stress are phenotypically informative
+in a way that a single summary scalar is not.
+
+4.2 Hardy families restrain and delay their metabolic response
+
+The direction of the capacity signal is the counter-intuitive finding.
+Under seawater heat, every measure of metabolic output — AUC, maximum
+slope, peak, scope — was negatively correlated with survival. Families
+that ramped up resazurin reduction most when heated were the families
+that died fastest in the lethal challenges. This is a coherent block of
+six to eight mutually correlated features moving together, which is what
+makes it credible at n = 9 families. Huffmyer et al. (2025) reported an
+analogous pattern in their acute thermal stress experiments [verify
+wording: oysters exhibiting greater metabolic stimulation under acute
+heat showed poorer outcomes / lower predicted performance], and the
+result aligns with the long-standing view that regulated metabolic
+depression, rather than sustained metabolic stimulation, is the adaptive
+response of intertidal bivalves to acute thermal stress [refs: Sokolova
+2013; Guppy & Withers 1999; Pörtner]. Metabolic over-shoot under heat may
+reflect a failure to suppress ATP demand, accelerated depletion of
+reserves and accumulation of oxidative damage; the timing block —
+hardy families delay their steepest decline and show steadier traces —
+is consistent with families that sustain a controlled response longer
+before the system fails. We note that the resazurin signal is a
+whole-animal reduction rate that integrates gill ventilation, tissue
+perfusion and cellular redox state, so "metabolic capacity" here should
+not be equated narrowly with oxygen consumption [ref Huffmyer
+validation].
+
+4.3 Measure under the stressor you want to predict
+
+Associations were strongest in the two contexts that imposed a stressor
+(seawater heat; freshwater + heat) and weakest under freshwater at room
+temperature. The best single feature and the index both came from the
+single freshwater + 36 °C experiment — the resazurin condition most
+similar to the most discriminating survival challenge (freshwater → 36
+°C, log-rank p < 0.0001). For a breeding program this is a practical
+recommendation: a resazurin screen should be run under an acute version
+of the field stressor of interest, not at rest. It also raises the
+possibility that a battery of short challenges (heat, low salinity,
+combined) could yield stressor-specific family rankings.
+
+4.4 A screen, not an oracle
+
+Several limitations bound the interpretation. First, n = 9 families
+(eight for the fw_heat context) means that any single correlation is
+fragile, ~200 feature × context × metric combinations were screened, and
+unadjusted p-values are reported for ranking rather than inference. Our
+mitigations — emphasising coherent feature blocks, LOFO-CV, and a
+pre-specified z-score index rather than a fitted multiple regression —
+reduce but do not eliminate optimism in the reported CV rho, because
+feature selection itself was performed on the full data set. A fully
+nested CV or, better, validation on new families is required. Second,
+the resazurin and survival cohorts were different individuals of the same
+families, so this is a family-level prediction; individual-level
+prediction (resazurin then survival on the same animals) has not been
+tested. Third, the 9/9b labelling ambiguity removed family 2 from several
+experiments and leaves family 9's score based on five experiments.
+Fourth, the survival challenges varied in format and severity; the
+percentile-based composite is robust to this by design but averages over
+potentially stressor-specific rankings. Fifth, the fw_heat context is a
+single experiment, so its leading role could partly reflect a
+favourable day; replication of that condition is the highest priority.
+Finally, the very high F-statistics for trough_value in the freshwater
+runs suggest near-degenerate values in some families and that feature
+should be treated cautiously as a shape trait [verify].
+
+4.5 Early-life prediction and energetic reserves [PLOUGH]
+
+[PLOUGH: Discussion of the seed-stage results.
+  - Did the seed-stage resazurin ranking agree with the adult ranking,
+    and did the same features (timing positive, capacity negative)
+    emerge? If yes, this implies the metabolic phenotype is stable
+    across life stages and can be screened very early; if not, discuss
+    ontogenetic shifts in thermal physiology and the possibility that the
+    seed-stage signal predicts seed-stage, not adult, survival.
+  - Glycogen: did baseline reserve or heat-induced depletion track
+    survival? Relate to the energy-limited tolerance framework — families
+    that over-shoot metabolically under heat should deplete glycogen
+    faster — and state whether the glycogen result is mechanistically
+    consistent with the resazurin capacity block. Note whether glycogen
+    adds independent predictive information or is redundant with the
+    resazurin index.
+  - Practical implication: cost, throughput and destructiveness of the
+    glycogen assay vs. resazurin, and the earliest age at which a useful
+    ranking could be obtained.]
+
+4.6 Toward a composite resilience index
+
+The SORMI project is assembling several rapid assays (resazurin,
+glycogen, Na+/K+-ATPase, citrate synthase, lactate dehydrogenase, total
+antioxidant capacity) with the aim of a composite Summer Oyster
+Resilience & Mortality Index. The present results show that resazurin
+curve features alone already recover most of the family survival ranking
+and suggest how additional assays should be integrated: as sign-aligned,
+z-scored family-level features under a matched acute stressor, evaluated
+by leave-one-family-out prediction, with preference for features that
+generalise rather than those with the highest in-sample correlation.
+
+--------------------------------------------------------------------------------
+5. CONCLUSIONS
+--------------------------------------------------------------------------------
+
+Decomposing resazurin fluorescence time courses into shape features
+revealed two robust, mechanistically coherent signals of family-level
+heat survival in Pacific oysters: hardy families restrain their metabolic
+stimulation under heat and delay their metabolic decline, whereas fragile
+families over-shoot early and collapse. A four-feature index measured
+during a 4-h freshwater + heat exposure predicted the family survival
+ranking out-of-sample (LOFO-CV rho ≈ 0.8). [PLOUGH: one sentence on
+whether seed-stage resazurin and/or glycogen reproduced this ranking.]
+Resazurin curve-feature profiling is therefore a candidate non-lethal
+pre-screen for family selection, to be confirmed with additional families
+and prospective validation.
+
+--------------------------------------------------------------------------------
+ACKNOWLEDGEMENTS
+--------------------------------------------------------------------------------
+
+[Funding: SORMI / WRAC (Western Regional Aquaculture Center) award
+number; USDA ARS; other.] We thank [names] for animal husbandry and
+sampling, and the USDA ARS Pacific Shellfish Research Unit for providing
+families.
+
+--------------------------------------------------------------------------------
+REFERENCES (to be completed and formatted)
+--------------------------------------------------------------------------------
+
+Huffmyer AS, Ozguner N, Baird M, Elvrum C, Kounellas C, Dicksion D,
+  White SJ, Plough L, Gavery MR, Krebs N, Walton W, Small J,
+  Pitsenbarger M, Ealy-Whitfield H, Roberts S. 2025. From Blue to Pink:
+  Resazurin as a High-Throughput Proxy for Metabolic Rate in Oysters.
+  bioRxiv. https://doi.org/10.1101/2025.11.06.686367
+
+[Guppy M, Withers P. 1999. Metabolic depression in animals:
+  physiological perspectives and biochemical generalizations. Biol Rev.]
+[Sokolova IM, Frederich M, Bagwe R, Lannig G, Sukhotin AA. 2012. Energy
+  homeostasis as an integrative tool for assessing limits of
+  environmental stress tolerance in aquatic invertebrates. Mar Environ
+  Res.]
+[Sokolova IM. 2013. Energy-limited tolerance to stress as a conceptual
+  framework to integrate the effects of multiple stressors. Integr Comp
+  Biol.]
+[Pörtner HO. 2010. Oxygen- and capacity-limitation of thermal tolerance.
+  J Exp Biol.]
+[USDA ARS / Molluscan Broodstock Program breeding references — PLOUGH to
+  supply.]
+[Summer mortality of Pacific oysters — e.g., Cheney et al. 2000; Samain &
+  McCombie 2008; refs for West Coast context.]
+[Resazurin/alamarBlue methodological references — e.g., O'Brien et al.
+  2000 Eur J Biochem; Rampersad 2012 Sensors.]
+[Berthelin C, Kellner K, Mathieu M. 2000. Storage metabolism in the
+  Pacific oyster (Crassostrea gigas) in relation to summer mortalities
+  and reproductive cycle. Comp Biochem Physiol B. — for glycogen
+  section.]
+[R Core Team 2025; survival; ggsurvfit; tidyverse.]
+
+--------------------------------------------------------------------------------
+TABLES
+--------------------------------------------------------------------------------
+
+Table 1. Survival challenge experiments pooled into the composite
+phenotype.
+
+ Exp ID            Date        Stressor            n     Fam  Deaths  Mort%  Window(h)  Log-rank p
+ 20260427-33C      2026-04-27  33 C seawater       128   9    63      49.2   99.5       0.144
+ 20260511-33C      2026-05-11  33 C seawater        84   7    83      98.8   67         0.00076
+ 20260604-36C      2026-06-04  36 C seawater        39   8    37      94.9   42         0.0098
+ 20260609-36C      2026-06-09  36 C seawater        77   7    66      85.7   52         0.024
+ 20260706-35C      2026-07-06  35 C seawater       378   9    366     96.8   163        0.059
+ 20260706-35C09ppt 2026-07-06  35 C / 9 ppt        204   9    171     83.8   167        0.050
+ 20260707-FW       2026-07-07  Freshwater -> 36 C  185   9    61      33.0   188        0.000077
+
+n and Fam are after exclusion of ambiguous 9/9b individuals. [Add
+container format and animal size columns.]
+
+Table 2. Resazurin experiments included in the curve-feature analysis.
+
+ Experiment                     Context        Medium       Temp     Stage     n traces  Time pts  Duration(h)
+ 20260415-36C                   sw_heat        seawater     36 C*    adult     126       4-5       [verify]
+ 20260429-freshwater_stress     freshwater_rt  tap water    ~20 C    juvenile   99       10        [verify]
+ 20260505-mgig-freshwater-RT    freshwater_rt  tap water    ~20 C    juvenile   99        7        [verify]
+ 20260505-mgig-freshwater-36C   fw_heat        tap water    36 C     juvenile   99        5        4
+ 20260511-mgig-freshwater-RT    freshwater_rt  tap water    ~20 C    juvenile   87       13-14     [verify]
+ 20260602-mgig-36C              sw_heat        seawater     36 C     juvenile   99        9        4
+ 20260602-mgig-freshwater-RT    freshwater_rt  tap water    21-27 C  juvenile   99        7        [verify]
+ 20260604-mgig-36C              sw_heat        seawater     36 C     juvenile   99        8-9      4
+ 20260624-mgig-33C              sw_heat        seawater     33 C     adult     162        4        3
+
+* Temperature was raised to 40 C part-way through the 2026-04-15 run
+(time not recorded). n traces are per value metric before exclusion of
+9b-labelled individuals (152 total).
+
+Table 3. Curve features extracted from each individual resazurin trace.
+[Format Section 2.5 list as a table with name, definition, unit, and
+group.]
+
+Table 4. Family composite survival phenotype.
+
+ Rank  Family  n exps  Total n  Overall mort %  Mean surv_prop  Mean rel_surv  Composite score
+ 1     5       7       129      67.4            0.329           0.787          71.0
+ 2     9       5       119      75.6            0.346           0.794          63.2
+ 3     2       5        92      68.5            0.356           0.715          59.0
+ 4     8       7       123      82.1            0.190           0.701          52.7
+ 5     3       7       121      72.7            0.218           0.695          48.8
+ 6     1       7       128      75.8            0.219           0.703          46.9
+ 7     6       7       122      84.4            0.186           0.671          40.8
+ 8     10      7       116      81.9            0.185           0.671          36.7
+ 9     7       6       145      84.8            0.168           0.691          35.3
+
+Table 5. Trajectory-class proportions by family under freshwater + 36 C
+(corrected_fc; n = 11 per family).
+
+ Family  Monotonic increase  Rise then depress
+ 1       0.73                0.27
+ 3       0.55                0.45
+ 5       1.00                0.00
+ 6       1.00                0.00
+ 7       0.36                0.64
+ 8       1.00                0.00
+ 9       0.91                0.09
+ 10      0.91                0.09
+
+Table 6. Top resazurin curve features associated with the composite
+survival score (screening; Spearman rho, unadjusted p).
+
+ Context        Metric      Feature             n  rho     p       Pearson r
+ fw_heat        fc / area   time_to_min_slope   8   0.904  0.0021   0.869
+ sw_heat        area        auc_total           9  -0.867  0.0045  -0.640
+ sw_heat        area        vmax                9  -0.867  0.0045  -0.639
+ sw_heat        area        auc_early           9  -0.850  0.0061  -0.591
+ freshwater_rt  fc / area   time_to_min_slope   8   0.833  0.015    0.78-0.79
+ fw_heat        fc / area   stability_cv        8  -0.833  0.015   -0.824
+ sw_heat        area        auc_late            9  -0.833  0.0083  -0.654
+ sw_heat        area        final_value         9  -0.833  0.0083  -0.631
+ sw_heat        area        metabolic_scope     9  -0.833  0.0083  -0.632
+ sw_heat        area        peak_value          9  -0.833  0.0083  -0.632
+ all            area        trough_value        9   0.817  0.011    0.871
+ all            area        depression_abs      9  -0.800  0.014   -0.765
+ freshwater_rt  area        initial_slope       8   0.786  0.028    0.851
+ all            area        vmax                9  -0.783  0.017   -0.583
+ sw_heat        area        final_delta         9  -0.767  0.021   -0.631
+ fw_heat        area        initial_slope       8   0.762  0.037    0.818
+ all            fc          depression_abs      9  -0.750  0.025   -0.701
+ sw_heat        fc          auc_total           9  -0.733  0.031   -0.605
+ sw_heat        fc          vmax                9  -0.733  0.031   -0.617
+ sw_heat        fc          time_to_peak        9   0.728  0.026    0.691
+
+fc = blank-corrected fold-change; area = fc normalised to shell area.
+
+Table 7. Leave-one-family-out cross-validation of single-feature
+predictors of the composite survival score (selected rows; full table in
+lofo_cv_performance.csv).
+
+ Context        Metric  Feature            n  In-sample rho  CV rho  CV RMSE
+ fw_heat        fc      time_to_min_slope  8   0.904         0.810   7.7
+ all            area    trough_value       9   0.817         0.750   7.0
+ all            area    depression_abs     9  -0.800         0.717   9.1
+ freshwater_rt  area    inflection_time    8  -0.667         0.667   8.0
+ freshwater_rt  area    initial_slope      8   0.786         0.667   8.0
+ fw_heat        area    initial_slope      8   0.762         0.667   8.7
+ sw_heat        area    vmax               9  -0.867         0.667  14.0
+ sw_heat        area    auc_total          9  -0.867         0.650  13.3
+ fw_heat        fc      stability_cv       8  -0.833         0.524   8.2
+ sw_heat        fc      auc_total          9  -0.733         0.517  12.8
+
+Table 8. Resazurin index (fw_heat, corrected_fc; mean of sign-aligned
+z-scores of time_to_min_slope, stability_cv, initial_slope,
+depression_abs) and cross-validated prediction of the composite score.
+
+ Family  Resazurin index  Observed score  CV-predicted score
+ 5        1.27            71.0            64.6
+ 9        1.09            63.2            62.5
+ 6        0.31            40.8            53.2
+ 8        0.11            52.7            50.7
+ 3       -0.27            48.8            46.2
+ 10      -0.44            36.7            44.2
+ 1       -0.63            46.9            41.9
+ 7       -1.44            35.3            32.1
+
+In-sample Spearman rho = 0.81; LOFO-CV rho = 0.79; CV RMSE = 7.9. Family
+2 absent from the fw_heat experiment.
+
+Table 9. [PLOUGH: Seed-stage resazurin features and glycogen measures vs.
+adult composite survival score.]
+
+--------------------------------------------------------------------------------
+FIGURE LEGENDS
+--------------------------------------------------------------------------------
+
+Figure 1. Which resazurin curve features track family survival ranking.
+Spearman rho between family-mean feature and composite survival score,
+for the eight strongest features in each stress context (columns) and
+value metric (rows). Blue bars, unadjusted p < 0.05. Note the consistent
+negative sign of capacity features under seawater heat and the positive
+sign of timing features. (Source:
+figures/feature_phenotype_correlation_ranking.png)
+
+Figure 2. Best single predictor. Family composite survival score versus
+family-mean time to steepest metabolic decline (time_to_min_slope,
+blank-corrected fold-change) measured under freshwater + 36 °C. Points
+are families; line and band are the linear fit ± 95% CI. Spearman rho =
+0.90; LOFO-CV rho = 0.81. (Source: figures/best_single_predictor_scatter.png)
+
+Figure 3. Multi-feature resazurin index versus family survival. The
+index is the mean of sign-aligned z-scores of four features
+(time_to_min_slope, stability_cv, initial_slope, depression_abs) measured
+under freshwater + 36 °C. LOFO-CV rho = 0.79. (Source:
+figures/resazurin_index_scatter.png)
+
+Figure 4. Family metabolic profiles ordered by survival rank. Heatmap of
+z-scored family means for the ten features most correlated with survival
+under freshwater + 36 °C; families ordered from hardiest (left) to least
+hardy (right). (Source: figures/family_profile_heatmap.png)
+
+Figure 5. [PLOUGH: Seed-stage proxy (resazurin feature/index, glycogen)
+versus adult composite survival score, same layout as Figures 2–3.]
+
+Supplementary Figure S1. Composite survival phenotype: family ranking
+and per-experiment consistency (family_ranking.png,
+family_consistency.png, family_survival_heatmap.png).
+
+Supplementary Figure S2. Mean blank-corrected fold-change curves by
+family for each resazurin experiment.
+
+Supplementary Figure S3. Schematic of the four index features on an
+example curve (figures/index_feature_schematic.png).
+
+--------------------------------------------------------------------------------
+OPEN ITEMS FOR CO-AUTHORS
+--------------------------------------------------------------------------------
+
+1. [PLOUGH] Fill all [PLOUGH: ...] placeholders: family origin/spawn
+   details; seed-stage resazurin and glycogen methods, results, table,
+   figure, and discussion.
+2. Verify resazurin working-solution concentration, plate-reader
+   wavelengths/gain, and salinity of Instant Ocean medium.
+3. Insert animal age/size for each cohort and the survival-challenge
+   mortality criterion.
+4. Decide whether to re-run notebook 04 with (a) nested feature
+   selection inside the LOFO loop to remove selection optimism, and
+   (b) cup_id_group removed from the numeric feature set (currently
+   carried as a "feature" for the 2026-06-24 experiment; it did not rank
+   but should not be there).
+5. Confirm reason 2026-07-13 experiment is excluded from the feature
+   set, or include it and re-render.
+6. Add the freshwater → 36 °C survival challenge as an explicit
+   comparison to the fw_heat resazurin context in Section 4.3.
+7. Complete and format references; choose target journal [e.g.,
+   Aquaculture; Journal of Shellfish Research; Comparative Biochemistry
+   and Physiology A; Frontiers in Marine Science].
