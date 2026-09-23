@@ -1,0 +1,5 @@
+metric,window,kw_statistic,kw_df,kw_p
+fold_change,acute_0_2h,22.65525114155247,5,3.9282800865529394e-4
+fold_change,full_0_18.75h,25.765601217655956,5,9.907777923238183e-5
+metabolism_per_area_mm2_measurement,acute_0_2h,18.082572298325715,5,0.0028446790987977583
+metabolism_per_area_mm2_measurement,full_0_18.75h,22.960806697108012,5,3.434397491697799e-4
