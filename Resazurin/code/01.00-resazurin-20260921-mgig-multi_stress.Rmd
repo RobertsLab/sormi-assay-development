@@ -65,6 +65,8 @@ All outputs are written to `out_dir` (`Resazurin/outputs/01.00-resazurin-2026092
 | `auc_summary.csv` | Group-level AUC summary statistics (mean, SD, SE, median) |
 | `metabolism.csv` | Full per-well per-timepoint metabolism data frame |
 | `pairwise_stats.csv` | Tukey-adjusted pairwise comparisons from AUC linear models |
+| `plate_auc_summary.csv` | Per-plate AUC summary statistics (mean, SD, SE, median) |
+| `plate_pairwise_stats.csv` | Tukey-adjusted plate comparisons, across all plates and within each treatment |
 
 # Setup
 
@@ -1143,7 +1145,7 @@ compute_auc <- function(df, value_col, group_vars) {
 
 # Only include grouping columns that are actually present in the data
 individual_vars <- intersect(
-  c("trace_id", "family_id_group", "treatment_group"),
+  c("trace_id", "plate_id", "family_id_group", "treatment_group"),
   names(metabolism_df)
 )
 
@@ -1323,8 +1325,10 @@ add_sig_brackets <- function(p, pairs_df, group_levels, y_vals) {
 
   for (i in seq_len(nrow(sig_pairs))) {
     parts <- str_split(as.character(sig_pairs$contrast[i]), " - ", 2)[[1]]
-    g1 <- trimws(parts[1])
-    g2 <- trimws(parts[2])
+    # emmeans wraps level names containing "-" in parentheses, e.g.
+    # "(heat_mech_no-water)"; strip them so labels match the x-axis levels.
+    g1 <- str_remove_all(trimws(parts[1]), "^\\(|\\)$")
+    g2 <- str_remove_all(trimws(parts[2]), "^\\(|\\)$")
     x1 <- match(g1, group_levels)
     x2 <- match(g2, group_levels)
     if (is.na(x1) || is.na(x2)) next
@@ -1360,16 +1364,22 @@ for (met in metrics_to_test) {
     df_p <- df %>%
       mutate(x = factor(treatment_group, levels = sort(unique(treatment_group))))
     grps <- levels(df_p$x)
+    # Point shape shows the plate each oyster was on, so plate effects within
+    # a treatment are visible at a glance (see "Plate Effects" below).
+    df_p <- df_p %>% mutate(plate = toupper(plate_id))
     p <- ggplot(df_p, aes(x = x, y = AUC, fill = x)) +
       geom_boxplot(alpha = 0.6, outlier.shape = NA) +
-      geom_jitter(width = 0.15, alpha = 0.4, size = 1.5) +
+      geom_jitter(aes(shape = plate), width = 0.15, alpha = 0.6, size = 1.8) +
       scale_fill_manual(values = trt_colours[grps], guide = "none") +
+      scale_shape_manual(values = seq_along(unique(df_p$plate)) + 14,
+                         name = "Plate") +
       labs(x = "Treatment", y = y_lab) +
-      theme_classic(base_size = 13)
+      theme_classic(base_size = 13) +
+      theme(axis.text.x = element_text(angle = 20, hjust = 1))
     p <- add_sig_brackets(p, stats$pairs_trt, grps, df_p$AUC)
     print(p)
     ggsave(file.path(fig_dir, paste0("auc_treatment_", met, ".png")),
-           p, width = 5, height = 5)
+           p, width = 6, height = 5.5)
   }
 
   # ── Family main effect (x = family, tick = family name) ───────────────
@@ -1476,6 +1486,195 @@ for (met in metrics_to_test) {
 ```
 
 
+# Plate Effects
+
+Each plate is one 12-well read of one treatment, so a plate difference
+within the same treatment cannot be caused by the treatment. Two plates
+per treatment are available here, which lets us ask whether plate (read
+batch, positioning, handling order, etc.) explains variation in AUC.
+Three views are provided, all using per-oyster AUC:
+
+1. **All plates**: one-way ANOVA on plate with Tukey pairwise contrasts.
+2. **Within each treatment**: plate comparison among the plates that carry
+   the same treatment. A significant difference here is a plate effect.
+3. **Plate nested in treatment** (`AUC ~ treatment / plate`): the
+   `treatment:plate` row tests plate-within-treatment variation overall. The
+   `treatment` row in that table uses the oyster-level residual as its
+   error term, which ignores plate. Because plates are the experimental
+   units for treatment, the treatment test is repeated with the
+   plate-within-treatment mean square as the error term (**treatment
+   tested against plates**); with only two plates per treatment it has
+   very few denominator df and low power.
+
+```{r plate-stats}
+run_plate_stats <- function(auc_df) {
+  auc_df <- auc_df %>% mutate(plate = factor(toupper(plate_id)))
+  if (nlevels(droplevels(auc_df$plate)) < 2) return(NULL)
+
+  has_trt <- "treatment_group" %in% names(auc_df) &&
+    any(!is.na(auc_df$treatment_group))
+  if (has_trt) auc_df <- auc_df %>% mutate(treatment = factor(treatment_group))
+
+  # 1. All plates
+  m_all <- lm(AUC ~ plate, data = auc_df)
+  out <- list(
+    anova_all = anova(m_all),
+    pairs_all = as.data.frame(pairs(emmeans(m_all, ~ plate), adjust = "tukey")),
+    within    = list(),
+    nested    = NULL,
+    trt_vs_plates = NULL
+  )
+  if (!has_trt) return(out)
+
+  # 2. Plates within each treatment (only treatments with >= 2 plates)
+  for (trt in sort(unique(as.character(auc_df$treatment)))) {
+    d <- auc_df %>% filter(treatment == trt) %>% mutate(plate = droplevels(plate))
+    if (nlevels(d$plate) < 2) next
+    m <- lm(AUC ~ plate, data = d)
+    out$within[[trt]] <- list(
+      anova = anova(m),
+      pairs = as.data.frame(pairs(emmeans(m, ~ plate), adjust = "tukey"))
+    )
+  }
+
+  # 3. Plate nested in treatment; treatment tested against plate-within-treatment
+  plates_per_trt <- auc_df %>% distinct(treatment, plate) %>% count(treatment)
+  if (nrow(auc_df) > 0 && any(plates_per_trt$n > 1)) {
+    m_nest <- lm(AUC ~ treatment / plate, data = auc_df)
+    an <- anova(m_nest)
+    out$nested <- an
+    if ("treatment:plate" %in% rownames(an) && an["treatment:plate", "Df"] > 0) {
+      f <- an["treatment", "Mean Sq"] / an["treatment:plate", "Mean Sq"]
+      out$trt_vs_plates <- tibble(
+        term  = "treatment (error = plate within treatment)",
+        NumDF = an["treatment", "Df"],
+        DenDF = an["treatment:plate", "Df"],
+        F     = f,
+        p     = pf(f, an["treatment", "Df"], an["treatment:plate", "Df"],
+                   lower.tail = FALSE)
+      )
+    }
+  }
+  out
+}
+
+plate_stats <- map(
+  set_names(metrics_to_test),
+  ~ run_plate_stats(auc_all %>% filter(metric == .x))
+)
+
+# Per-plate AUC summary
+plate_summary <- auc_all %>%
+  mutate(plate = toupper(plate_id)) %>%
+  group_by(across(any_of(c("metric", "treatment_group", "plate")))) %>%
+  summarise(
+    n      = n(),
+    mean   = mean(AUC, na.rm = TRUE),
+    sd     = sd(AUC, na.rm = TRUE),
+    se     = sd / sqrt(n),
+    median = median(AUC, na.rm = TRUE),
+    .groups = "drop"
+  )
+```
+
+## Results by metric
+
+```{r plate-stats-results, results='asis'}
+for (met in metrics_to_test) {
+  res <- plate_stats[[met]]
+  if (is.null(res)) next
+  cat("\n\n### Metric:", met, "\n\n")
+
+  cat("**AUC by plate:**\n\n")
+  cat(knitr::kable(plate_summary %>% filter(metric == met) %>% select(-metric),
+                   digits = 4, format = "pipe"), sep = "\n")
+  cat("\n\n**All plates: ANOVA:**\n\n")
+  cat(knitr::kable(as.data.frame(res$anova_all), digits = 4, format = "pipe"),
+      sep = "\n")
+  cat("\n\n**All plates: pairwise (Tukey):**\n\n")
+  cat(knitr::kable(res$pairs_all, digits = 4, format = "pipe"), sep = "\n")
+
+  for (trt in names(res$within)) {
+    cat("\n\n**Within", trt, "- plate ANOVA:**\n\n")
+    cat(knitr::kable(as.data.frame(res$within[[trt]]$anova), digits = 4,
+                     format = "pipe"), sep = "\n")
+    cat("\n\n**Within", trt, "- plate pairwise (Tukey):**\n\n")
+    cat(knitr::kable(res$within[[trt]]$pairs, digits = 4, format = "pipe"),
+        sep = "\n")
+  }
+
+  if (!is.null(res$nested)) {
+    cat("\n\n**Plate nested in treatment (`AUC ~ treatment / plate`):**\n\n")
+    cat(knitr::kable(as.data.frame(res$nested), digits = 4, format = "pipe"),
+        sep = "\n")
+  }
+  if (!is.null(res$trt_vs_plates)) {
+    cat("\n\n**Treatment tested against plate-within-treatment:**\n\n")
+    cat(knitr::kable(res$trt_vs_plates, digits = 4, format = "pipe"), sep = "\n")
+  }
+  cat("\n")
+}
+```
+
+## AUC box plots by plate
+
+Brackets are drawn only for significant (p \< 0.05) Tukey contrasts. Boxes
+are ordered by treatment then plate and coloured by treatment, so plates
+that received the same treatment sit side by side.
+
+```{r plate-boxplots}
+for (met in metrics_to_test) {
+  res <- plate_stats[[met]]
+  if (is.null(res)) next
+  y_lab <- auc_y_label(met)
+
+  df <- auc_all %>%
+    filter(metric == met) %>%
+    mutate(plate = toupper(plate_id),
+           trt   = if ("treatment_group" %in% names(.)) treatment_group
+                   else NA_character_)
+
+  plate_levels <- df %>% distinct(trt, plate) %>% arrange(trt, plate) %>% pull(plate)
+  df <- df %>% mutate(x = factor(plate, levels = plate_levels))
+  use_trt <- any(!is.na(df$trt))
+
+  fill_aes <- if (use_trt) aes(fill = trt) else aes(fill = x)
+  fill_scale <- if (use_trt) {
+    scale_fill_manual(values = trt_colours, name = "Treatment")
+  } else {
+    scale_fill_manual(values = setNames(make_palette(length(plate_levels)),
+                                        plate_levels), guide = "none")
+  }
+
+  # ── All plates ─────────────────────────────────────────────────────────
+  p <- ggplot(df, aes(x = x, y = AUC)) +
+    geom_boxplot(fill_aes, alpha = 0.6, outlier.shape = NA) +
+    geom_jitter(width = 0.15, alpha = 0.5, size = 1.5) +
+    fill_scale +
+    labs(x = "Plate", y = y_lab) +
+    theme_classic(base_size = 13)
+  p <- add_sig_brackets(p, res$pairs_all, plate_levels, df$AUC)
+  print(p)
+  ggsave(file.path(fig_dir, paste0("auc_plate_", met, ".png")),
+         p, width = 7, height = 5.5)
+
+  # ── Plates within each treatment ───────────────────────────────────────
+  for (trt in names(res$within)) {
+    d <- df %>% filter(trt == !!trt) %>% mutate(x = droplevels(x))
+    grps <- levels(d$x)
+    p <- ggplot(d, aes(x = x, y = AUC)) +
+      geom_boxplot(fill = trt_colours[[trt]], alpha = 0.6, outlier.shape = NA) +
+      geom_jitter(width = 0.15, alpha = 0.5, size = 1.5) +
+      labs(x = paste("Plate (", trt, ")"), y = y_lab) +
+      theme_classic(base_size = 13)
+    p <- add_sig_brackets(p, res$within[[trt]]$pairs, grps, d$AUC)
+    print(p)
+    ggsave(file.path(fig_dir, paste0("auc_plate_within_", trt, "_", met, ".png")),
+           p, width = 4, height = 5)
+  }
+}
+```
+
 # Save Output Data
 
 ```{r save-output}
@@ -1499,6 +1698,19 @@ stats_compiled <- map_dfr(metrics_to_test, function(met) {
 
 write_csv(stats_compiled,
           file.path(out_dir, "pairwise_stats.csv"))
+
+write_csv(plate_summary, file.path(out_dir, "plate_auc_summary.csv"))
+
+plate_pairwise <- map_dfr(metrics_to_test, function(met) {
+  res <- plate_stats[[met]]
+  if (is.null(res)) return(tibble())
+  bind_rows(
+    res$pairs_all %>% mutate(comparison = "all plates"),
+    map_dfr(names(res$within), function(trt)
+      res$within[[trt]]$pairs %>% mutate(comparison = paste("within", trt)))
+  ) %>% mutate(metric = met)
+})
+write_csv(plate_pairwise, file.path(out_dir, "plate_pairwise_stats.csv"))
 
 message("Output files written to: ", out_dir)
 ```
