@@ -1,0 +1,747 @@
+---
+title: "05.1-resazurin-multi_stress-curve-features-prediction"
+author: "Steven Roberts"
+date: "`r format(Sys.time(), '%Y-%m-%d')`"
+output:
+  github_document:
+    toc: true
+    number_sections: true
+  bookdown::html_document2:
+    theme: cosmo
+    toc: true
+    toc_float: true
+    number_sections: true
+    code_folding: show
+    code_download: true
+  html_document:
+    theme: cosmo
+    toc: true
+    toc_float: true
+    number_sections: true
+    code_folding: show
+    code_download: true
+editor_options:
+  chunk_output_type: console
+---
+
+# Background
+
+**Question:** *Does the shape of a resazurin curve identify which stress an
+oyster experienced, and which curve features carry that signal?*
+
+This notebook applies the notebook-04 framework (feature screen →
+cross-validated prediction → composite index) to the 20260921 multi-stress
+run. 04 predicted a family's *survival* from family-mean curve features. Here
+there is a single family and **six distinct stresses** (plates `C`, `R`, `S`,
+`T`, `U`, `V`), none of which is a control. The unit of prediction is therefore
+the **individual oyster**, and the target is **which of the six stresses** it
+was exposed to.
+
+| 04 (family phenotype) | 05.1 (multi-stress) |
+|---|---|
+| Family-mean features (n ≈ 9 families) | Per-individual features (n = 72; 12 per stress) |
+| Spearman correlation with survival | Kruskal-Wallis effect size (ε²) across six stresses |
+| Stress contexts (`sw_heat`, `fw_heat`, …) | Curve windows (acute 0–2 h, full 0–18.75 h) |
+| Leave-one-family-out CV regression | Leave-one-oyster-out CV classification (LDA) |
+| Composite resazurin index | Stress-signature PCA and composite suppression index |
+
+Each stress is also characterised **on its own**: for every stress, which
+features set it apart from the other five (one-vs-rest).
+
+## Caveats (read first)
+
+- **One plate per stress**: plate and stress are confounded, so a "stress
+  signature" could partly be a plate effect.
+- **Few timepoints** (7, with a single 2 → 18.75 h interval): slope and timing
+  features are coarse, and full-run features are dominated by the overnight
+  read.
+- **Stress names** are not yet in `layout.csv`; results use plate letters.
+
+## Expected inputs
+
+| Path | Description |
+|------|-------------|
+| `Resazurin/outputs/05.00-resazurin-20260921-mgig-multi_stress/metabolism.csv` | Per-well per-timepoint fold change and size-normalised metabolism (from 05.00) |
+
+## Expected outputs
+
+All written to
+`Resazurin/outputs/05.1-resazurin-multi_stress-curve-features-prediction/`.
+
+| File | Description |
+|------|-------------|
+| `curve_features.csv` | Per-individual curve features, per window and metric |
+| `feature_stress_screen.csv` | Kruskal-Wallis screen of every feature across the six stresses |
+| `stress_feature_profile.csv` | Per-stress median of every feature |
+| `stress_signature_one_vs_rest.csv` | For each stress, each feature's Cliff's delta vs the other five |
+| `loo_cv_performance.csv` | Leave-one-out CV accuracy by window, metric and number of features |
+| `loo_cv_predictions.csv` | Per-oyster observed vs CV-predicted stress for the best model |
+| `stress_index.csv` | Per-oyster composite suppression index and PCA scores |
+| `figures/` | Screen ranking, signature heatmap, confusion matrix, PCA, index |
+
+# Setup
+
+```{r setup}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  eval = TRUE,
+  warning = FALSE,
+  message = FALSE,
+  comment = "",
+  results = "hold"
+)
+```
+
+```{r libraries}
+library(tidyverse)
+library(rprojroot)
+```
+
+```{r paths}
+proj_root <- rprojroot::find_rstudio_root_file()
+
+metabolism_path <- file.path(
+  proj_root, "Resazurin", "outputs",
+  "05.00-resazurin-20260921-mgig-multi_stress", "metabolism.csv"
+)
+
+out_dir <- file.path(
+  proj_root, "Resazurin", "outputs",
+  "05.1-resazurin-multi_stress-curve-features-prediction"
+)
+fig_dir <- file.path(out_dir, "figures")
+dir.create(fig_dir, recursive = TRUE, showWarnings = FALSE)
+
+stopifnot(file.exists(metabolism_path))
+```
+
+# Helper Functions
+
+Curve-feature extraction is taken from notebook 03.5 so feature definitions
+match across the repo.
+
+```{r helper-fns}
+safe_divide <- function(num, den) {
+  if_else(is.finite(num) & is.finite(den) & abs(den) > .Machine$double.eps,
+          num / den, NA_real_)
+}
+
+trapezoid_auc <- function(time_hr, value) {
+  ok <- is.finite(time_hr) & is.finite(value)
+  t <- time_hr[ok]; v <- value[ok]
+  if (length(t) < 2) return(NA_real_)
+  ord <- order(t); t <- t[ord]; v <- v[ord]
+  sum(diff(t) * (head(v, -1) + tail(v, -1)) / 2)
+}
+
+segment_auc <- function(time_hr, value) {
+  ok <- is.finite(time_hr) & is.finite(value)
+  t <- time_hr[ok]; v <- value[ok]
+  if (length(t) < 2) {
+    return(tibble(t_start = numeric(), t_end = numeric(),
+                  t_mid = numeric(), auc = numeric()))
+  }
+  ord <- order(t); t <- t[ord]; v <- v[ord]
+  tibble(t_start = head(t, -1), t_end = tail(t, -1),
+         t_mid = (head(t, -1) + tail(t, -1)) / 2,
+         auc = diff(t) * (head(v, -1) + tail(v, -1)) / 2)
+}
+
+classify_trajectory <- function(slopes, slope_tol = 1e-12) {
+  if (length(slopes) == 0 || all(!is.finite(slopes))) return(NA_character_)
+  s <- slopes[is.finite(slopes)]
+  signs <- case_when(s > slope_tol ~ 1L, s < -slope_tol ~ -1L, TRUE ~ 0L)
+  nonzero <- signs[signs != 0L]
+  if (length(nonzero) == 0) return("stable")
+  if (all(nonzero > 0)) return("monotonic_increase")
+  if (all(nonzero < 0)) return("monotonic_decrease")
+  first_neg <- which(nonzero < 0)[1]
+  first_pos <- which(nonzero > 0)[1]
+  if (first_pos < first_neg) return("rise_then_depress")
+  if (first_neg < first_pos) return("depress_then_recover")
+  "complex"
+}
+
+extract_curve_features_one <- function(df, value_col) {
+  df <- df %>%
+    filter(is.finite(time_hr), is.finite(.data[[value_col]])) %>%
+    arrange(time_hr)
+  if (nrow(df) < 2) return(tibble())
+
+  t <- df$time_hr
+  v <- df[[value_col]]
+  dt <- diff(t); dv <- diff(v)
+  valid_slope <- is.finite(dt) & dt > 0 & is.finite(dv)
+  slopes <- dv[valid_slope] / dt[valid_slope]
+  slope_midpoints <- ((head(t, -1) + tail(t, -1)) / 2)[valid_slope]
+  seg_auc <- segment_auc(t, v)
+  split_time <- median(seg_auc$t_mid, na.rm = TRUE)
+  early_auc <- sum(seg_auc$auc[seg_auc$t_mid <= split_time])
+  late_auc  <- sum(seg_auc$auc[seg_auc$t_mid >  split_time])
+
+  baseline_value <- v[1]
+  final_value <- v[length(v)]
+  peak_idx <- which.max(v); trough_idx <- which.min(v)
+  peak_value <- v[peak_idx]; trough_value <- v[trough_idx]
+  peak_after_baseline <- peak_value - baseline_value
+  depression_abs <- if (peak_idx < length(v)) max(peak_value - final_value, 0) else 0
+
+  vmax_idx <- if (length(slopes) > 0) which.max(slopes) else NA_integer_
+  min_slope_idx <- if (length(slopes) > 0) which.min(slopes) else NA_integer_
+  curvature <- diff(slopes)
+  inflection_idx <- if (length(curvature) > 0) which.max(abs(curvature)) + 1L else NA_integer_
+
+  tibble(
+    baseline_value = baseline_value,
+    final_value = final_value,
+    peak_value = peak_value,
+    trough_value = trough_value,
+    time_to_peak = t[peak_idx],
+    time_to_trough = t[trough_idx],
+    auc_total = trapezoid_auc(t, v),
+    auc_early = early_auc,
+    auc_late = late_auc,
+    delta_auc_late_minus_early = late_auc - early_auc,
+    late_early_auc_ratio = safe_divide(late_auc, early_auc),
+    initial_slope = slopes[1],
+    vmax = if (length(slopes) > 0) max(slopes) else NA_real_,
+    time_to_vmax = if (!is.na(vmax_idx)) slope_midpoints[vmax_idx] else NA_real_,
+    min_slope = if (length(slopes) > 0) min(slopes) else NA_real_,
+    time_to_min_slope = if (!is.na(min_slope_idx)) slope_midpoints[min_slope_idx] else NA_real_,
+    inflection_time = if (!is.na(inflection_idx)) slope_midpoints[inflection_idx] else NA_real_,
+    metabolic_scope = peak_after_baseline,
+    final_delta = final_value - baseline_value,
+    depression_abs = depression_abs,
+    metabolic_depression_index = safe_divide(depression_abs, abs(peak_after_baseline)),
+    resilience_ratio = safe_divide(final_value, peak_value),
+    stability_cv = safe_divide(sd(v), abs(mean(v))),
+    trajectory_class = classify_trajectory(slopes),
+    n_timepoints = nrow(df)
+  )
+}
+
+cliffs_delta <- function(x, y) mean(sign(outer(x, y, "-")))
+
+make_stress_palette <- function(levels) {
+  okabe_ito <- c("#E69F00", "#56B4E9", "#009E73", "#CC79A7",
+                 "#0072B2", "#D55E00", "#F0E442")
+  setNames(okabe_ito[seq_along(levels)], levels)
+}
+```
+
+# Load Metabolism Data
+
+```{r load}
+metabolism <- read_csv(metabolism_path, show_col_types = FALSE) %>%
+  mutate(treatment_group = str_to_lower(as.character(treatment_group)))
+
+stress_levels <- sort(unique(metabolism$treatment_group))
+stress_pal <- make_stress_palette(stress_levels)
+
+metabolism %>%
+  group_by(treatment_group) %>%
+  summarise(n_indiv = n_distinct(trace_id),
+            timepoints = paste(sort(unique(time_hr)), collapse = ", "),
+            .groups = "drop")
+```
+
+# Curve Feature Extraction
+
+Features are extracted for two **windows**, which play the role of 04's stress
+contexts:
+
+- `acute_0_2h`: the five dense reads (0–2 h), the early response.
+- `full_0_18.75h`: all seven reads, including the overnight endpoint.
+
+and for two **metrics**: `fold_change` (RFU / T0) and
+`metabolism_per_area_mm2_measurement` (fold change / shell area).
+
+```{r curve-features}
+windows <- list(acute_0_2h = 2, full_0_18.75h = Inf)
+metrics <- c("fold_change", "metabolism_per_area_mm2_measurement")
+
+curve_features <- expand_grid(window = names(windows), value_metric = metrics) %>%
+  pmap_dfr(function(window, value_metric) {
+    metabolism %>%
+      filter(time_hr <= windows[[window]]) %>%
+      group_by(trace_id, treatment_group, area_mm2_measurement) %>%
+      group_modify(~ extract_curve_features_one(.x, value_metric)) %>%
+      ungroup() %>%
+      mutate(window = window, value_metric = value_metric)
+  })
+
+write_csv(curve_features, file.path(out_dir, "curve_features.csv"))
+
+# baseline_value is the normalisation reference (fold change = 1 at T0) and
+# n_timepoints is constant; neither is a response trait.
+feature_cols <- curve_features %>%
+  select(where(is.numeric)) %>%
+  select(-any_of(c("n_timepoints", "baseline_value", "area_mm2_measurement"))) %>%
+  names()
+
+feature_long <- curve_features %>%
+  pivot_longer(all_of(feature_cols), names_to = "feature", values_to = "value") %>%
+  filter(is.finite(value)) %>%
+  group_by(window, value_metric, feature) %>%
+  filter(sd(value) > 0) %>%          # drop features constant across oysters
+  ungroup()
+
+feature_long %>% count(window, value_metric, name = "n_rows")
+```
+
+# Screen: Which Features Separate the Six Stresses?
+
+For each window × metric × feature, a Kruskal-Wallis test across the six
+stresses. Effect size is rank epsilon-squared (ε² = H / (n − 1); 0 = no
+separation, 1 = perfect). P-values are BH-adjusted across all screened
+features.
+
+```{r feature-screen}
+feature_stress_screen <- feature_long %>%
+  group_by(window, value_metric, feature) %>%
+  summarise(
+    n = n(),
+    kw_H = unname(kruskal.test(value ~ factor(treatment_group))$statistic),
+    kw_p = kruskal.test(value ~ factor(treatment_group))$p.value,
+    .groups = "drop"
+  ) %>%
+  mutate(epsilon_sq = kw_H / (n - 1),
+         kw_p_bh = p.adjust(kw_p, "BH")) %>%
+  arrange(desc(epsilon_sq))
+
+write_csv(feature_stress_screen, file.path(out_dir, "feature_stress_screen.csv"))
+
+knitr::kable(
+  feature_stress_screen %>%
+    slice_head(n = 20) %>%
+    transmute(window, value_metric, feature, n,
+              epsilon_sq = round(epsilon_sq, 3),
+              kw_p_bh = signif(kw_p_bh, 3)),
+  caption = "Top 20 curve features separating the six stresses"
+)
+```
+
+```{r screen-plot, fig.width=11, fig.height=8}
+p_screen <- feature_stress_screen %>%
+  mutate(value_metric = recode(value_metric,
+           fold_change = "fold change",
+           metabolism_per_area_mm2_measurement = "per mm²")) %>%
+  ggplot(aes(epsilon_sq, reorder(feature, epsilon_sq), fill = kw_p_bh < 0.05)) +
+  geom_col() +
+  facet_grid(value_metric ~ window) +
+  scale_fill_manual(values = c("FALSE" = "grey70", "TRUE" = "#0072B2"),
+                    name = "BH p < 0.05") +
+  labs(x = "Kruskal-Wallis epsilon² (separation of six stresses)",
+       y = "Curve feature",
+       title = "Which resazurin curve features distinguish the stresses?") +
+  theme_classic(base_size = 10)
+p_screen
+ggsave(file.path(fig_dir, "feature_stress_screen.png"), p_screen,
+       width = 11, height = 8)
+```
+
+# Each Stress on Its Own
+
+## Stress feature profiles
+
+Median of each feature per stress, z-scored across stresses, for the leading
+window × metric. Each column is one stress's metabolic signature.
+
+```{r best-context}
+best_ctx <- feature_stress_screen %>%
+  group_by(window, value_metric) %>%
+  summarise(mean_top5 = mean(sort(epsilon_sq, decreasing = TRUE)[1:5]),
+            .groups = "drop") %>%
+  slice_max(mean_top5, n = 1)
+best_window <- best_ctx$window
+best_metric <- best_ctx$value_metric
+cat("Leading context: window =", best_window, "| metric =", best_metric, "\n")
+```
+
+```{r stress-profile, fig.width=10, fig.height=7}
+stress_feature_profile <- feature_long %>%
+  group_by(window, value_metric, feature, treatment_group) %>%
+  summarise(median = median(value), mean = mean(value), .groups = "drop")
+write_csv(stress_feature_profile, file.path(out_dir, "stress_feature_profile.csv"))
+
+profile_features <- feature_stress_screen %>%
+  filter(window == best_window, value_metric == best_metric) %>%
+  slice_max(epsilon_sq, n = 15, with_ties = FALSE) %>%
+  pull(feature)
+
+severity_order <- stress_feature_profile %>%
+  filter(window == "full_0_18.75h", value_metric == "fold_change",
+         feature == "auc_total") %>%
+  arrange(median) %>% pull(treatment_group)
+
+p_prof <- stress_feature_profile %>%
+  filter(window == best_window, value_metric == best_metric,
+         feature %in% profile_features) %>%
+  group_by(feature) %>%
+  mutate(z = as.numeric(scale(median))) %>%
+  ungroup() %>%
+  mutate(treatment_group = factor(toupper(treatment_group),
+                                  levels = toupper(severity_order)),
+         feature = factor(feature, levels = rev(profile_features))) %>%
+  ggplot(aes(treatment_group, feature, fill = z)) +
+  geom_tile(color = "white") +
+  scale_fill_gradient2(low = "#2166AC", mid = "white", high = "#B2182B",
+                       name = "Stress median z") +
+  labs(x = "Stress (ordered by full-run AUC, low -> high)", y = "Curve feature",
+       title = "Resazurin feature signature of each stress",
+       subtitle = sprintf("window = %s | metric = %s | top 15 features by epsilon²",
+                          best_window, best_metric)) +
+  theme_minimal(base_size = 11)
+p_prof
+ggsave(file.path(fig_dir, "stress_signature_heatmap.png"), p_prof,
+       width = 10, height = 7)
+```
+
+## What sets each stress apart (one-vs-rest)
+
+For each stress separately, Cliff's delta of every feature in that stress vs
+the other five pooled (positive = higher in this stress), with Wilcoxon p
+BH-adjusted within stress.
+
+```{r one-vs-rest}
+stress_signature <- feature_long %>%
+  group_by(window, value_metric, feature) %>%
+  group_modify(function(df, key) {
+    map_dfr(stress_levels, function(g) {
+      x <- df$value[df$treatment_group == g]
+      y <- df$value[df$treatment_group != g]
+      tibble(stress = g,
+             median_stress = median(x), median_rest = median(y),
+             cliffs_delta = cliffs_delta(x, y),
+             wilcox_p = suppressWarnings(wilcox.test(x, y)$p.value))
+    })
+  }) %>%
+  ungroup() %>%
+  group_by(stress) %>%
+  mutate(wilcox_p_bh = p.adjust(wilcox_p, "BH")) %>%
+  ungroup()
+
+write_csv(stress_signature, file.path(out_dir, "stress_signature_one_vs_rest.csv"))
+
+top_by_stress <- stress_signature %>%
+  group_by(stress) %>%
+  slice_max(abs(cliffs_delta), n = 3, with_ties = FALSE) %>%
+  ungroup()
+
+knitr::kable(
+  top_by_stress %>%
+    transmute(stress = toupper(stress), window, value_metric, feature,
+              median_stress = signif(median_stress, 3),
+              median_rest = signif(median_rest, 3),
+              cliffs_delta = round(cliffs_delta, 2),
+              wilcox_p_bh = signif(wilcox_p_bh, 2)),
+  caption = "Three most distinctive features of each stress (vs the other five)"
+)
+```
+
+```{r one-vs-rest-boxplots, fig.width=12, fig.height=8}
+top1 <- top_by_stress %>% group_by(stress) %>% slice_head(n = 1) %>% ungroup()
+
+p_top1 <- top1 %>%
+  select(stress, window, value_metric, feature) %>%
+  left_join(feature_long, by = c("window", "value_metric", "feature"),
+            relationship = "many-to-many") %>%
+  mutate(panel = sprintf("%s: %s\n(%s, %s)", toupper(stress), feature, window,
+                         ifelse(value_metric == "fold_change", "FC", "per mm²")),
+         highlight = treatment_group == stress,
+         treatment_group = factor(toupper(treatment_group), levels = toupper(stress_levels))) %>%
+  ggplot(aes(treatment_group, value, fill = highlight)) +
+  geom_boxplot(outlier.shape = NA, alpha = 0.7) +
+  geom_jitter(width = 0.15, size = 0.9) +
+  facet_wrap(~ panel, scales = "free_y") +
+  scale_fill_manual(values = c("FALSE" = "grey85", "TRUE" = "#D55E00"), guide = "none") +
+  labs(x = "Stress", y = "Feature value",
+       title = "Most distinctive feature of each stress (highlighted vs the rest)") +
+  theme_classic(base_size = 10)
+p_top1
+ggsave(file.path(fig_dir, "most_distinctive_feature_per_stress.png"), p_top1,
+       width = 12, height = 8)
+```
+
+# Cross-validated Prediction (leave-one-oyster-out)
+
+A screen over ~80 features × contexts overfits easily. As in 04, the honest
+test is out-of-sample: **leave one oyster out**, select the top-*k* features
+by ε² *using only the remaining 71 oysters*, fit a linear discriminant
+analysis (LDA) on the z-scored features, and predict the held-out oyster's
+stress. Chance accuracy with six balanced classes is 1/6 ≈ 0.17.
+
+```{r loo-fn}
+loo_lda <- function(wide, k) {
+  # wide: trace_id, treatment_group, feature columns
+  feats_all <- setdiff(names(wide), c("trace_id", "treatment_group"))
+  y <- factor(wide$treatment_group, levels = stress_levels)
+  preds <- character(nrow(wide))
+  for (i in seq_len(nrow(wide))) {
+    train <- wide[-i, ]
+    # feature selection inside the fold (no leakage)
+    eps <- map_dbl(feats_all, function(f) {
+      v <- train[[f]]
+      if (sd(v) == 0) return(-Inf)
+      unname(kruskal.test(v ~ factor(train$treatment_group))$statistic)
+    })
+    feats <- feats_all[order(eps, decreasing = TRUE)][seq_len(k)]
+    mu <- map_dbl(feats, ~ mean(train[[.x]]))
+    sdv <- map_dbl(feats, ~ sd(train[[.x]]))
+    xtr <- scale(as.matrix(train[, feats]), center = mu, scale = sdv)
+    xte <- scale(as.matrix(wide[i, feats]), center = mu, scale = sdv)
+    fit <- tryCatch(MASS::lda(xtr, grouping = y[-i], tol = 1e-8),
+                    error = function(e) NULL)
+    preds[i] <- if (is.null(fit)) NA_character_ else
+      as.character(predict(fit, xte)$class)
+  }
+  tibble(trace_id = wide$trace_id, observed = as.character(y), predicted = preds)
+}
+```
+
+```{r loo-run}
+set.seed(20260921)
+ks <- c(1, 2, 3, 5, 8)
+
+contexts <- distinct(feature_long, window, value_metric)
+
+loo_results <- contexts %>%
+  pmap_dfr(function(window, value_metric) {
+    wide <- feature_long %>%
+      filter(window == !!window, value_metric == !!value_metric) %>%
+      select(trace_id, treatment_group, feature, value) %>%
+      pivot_wider(names_from = feature, values_from = value) %>%
+      drop_na()
+    map_dfr(ks, function(k) {
+      loo_lda(wide, k) %>% mutate(window = window, value_metric = value_metric, k = k)
+    })
+  })
+
+loo_cv_performance <- loo_results %>%
+  group_by(window, value_metric, k) %>%
+  summarise(n = n(),
+            accuracy = mean(predicted == observed, na.rm = TRUE),
+            .groups = "drop") %>%
+  mutate(chance = 1 / length(stress_levels),
+         # one-sided binomial test vs chance
+         binom_p = map2_dbl(round(accuracy * n), n,
+                            ~ binom.test(.x, .y, p = 1 / length(stress_levels),
+                                         alternative = "greater")$p.value)) %>%
+  arrange(desc(accuracy))
+
+write_csv(loo_cv_performance, file.path(out_dir, "loo_cv_performance.csv"))
+
+knitr::kable(
+  loo_cv_performance %>%
+    mutate(accuracy = round(accuracy, 3), binom_p = signif(binom_p, 3)),
+  caption = "Leave-one-oyster-out LDA: accuracy of predicting stress from curve features"
+)
+```
+
+## Best model: confusion matrix
+
+```{r confusion, fig.width=7, fig.height=6}
+best_model <- loo_cv_performance %>% slice_max(accuracy, n = 1, with_ties = FALSE)
+
+loo_cv_predictions <- loo_results %>%
+  semi_join(best_model, by = c("window", "value_metric", "k"))
+write_csv(loo_cv_predictions, file.path(out_dir, "loo_cv_predictions.csv"))
+
+conf <- loo_cv_predictions %>%
+  count(observed, predicted) %>%
+  complete(observed = stress_levels, predicted = stress_levels, fill = list(n = 0)) %>%
+  mutate(across(c(observed, predicted), ~ factor(toupper(.x), levels = toupper(stress_levels))))
+
+p_conf <- ggplot(conf, aes(predicted, fct_rev(observed), fill = n)) +
+  geom_tile(color = "white") +
+  geom_text(aes(label = n), size = 5) +
+  scale_fill_gradient(low = "white", high = "#0072B2", guide = "none") +
+  coord_equal() +
+  labs(x = "Predicted stress (LOO-CV)", y = "Observed stress",
+       title = "Which stresses does resazurin tell apart?",
+       subtitle = sprintf("%s | %s | top %d features | accuracy = %.2f (chance = %.2f)",
+                          best_model$window, best_model$value_metric, best_model$k,
+                          best_model$accuracy, best_model$chance)) +
+  theme_minimal(base_size = 12)
+p_conf
+ggsave(file.path(fig_dir, "loo_cv_confusion_matrix.png"), p_conf,
+       width = 7, height = 6)
+
+per_stress_acc <- loo_cv_predictions %>%
+  group_by(stress = observed) %>%
+  summarise(n = n(), recall = mean(predicted == observed), .groups = "drop")
+knitr::kable(per_stress_acc %>% mutate(stress = toupper(stress), recall = round(recall, 2)),
+             caption = "Per-stress LOO-CV recall (best model)")
+```
+
+# Composite Stress Index
+
+As in 04's resazurin index, the leading features are combined into one axis.
+Two complementary summaries:
+
+1. **PCA** of the top features (z-scored). Shows whether the stresses fall
+   along one gradient or several.
+2. **Suppression index**: the mean of the z-scored top features, with each
+   feature's sign aligned to full-run fold-change AUC. Higher = more metabolic
+   activity. Stresses are ranked on it, and its stability is checked by
+   leave-one-oyster-out (the index weights are recomputed without each oyster).
+
+```{r pca, fig.width=8, fig.height=6}
+idx_features <- feature_stress_screen %>%
+  filter(window == best_window, value_metric == best_metric) %>%
+  slice_max(epsilon_sq, n = 8, with_ties = FALSE) %>%
+  pull(feature)
+
+idx_wide <- feature_long %>%
+  filter(window == best_window, value_metric == best_metric,
+         feature %in% idx_features) %>%
+  select(trace_id, treatment_group, feature, value) %>%
+  pivot_wider(names_from = feature, values_from = value) %>%
+  drop_na()
+
+pca <- prcomp(idx_wide[, idx_features], center = TRUE, scale. = TRUE)
+var_expl <- summary(pca)$importance[2, 1:2]
+
+pca_df <- bind_cols(idx_wide %>% select(trace_id, treatment_group),
+                    as_tibble(pca$x[, 1:2]))
+
+p_pca <- ggplot(pca_df, aes(PC1, PC2, color = treatment_group)) +
+  stat_ellipse(level = 0.68, linewidth = 0.6) +
+  geom_point(size = 2.3, alpha = 0.85) +
+  scale_color_manual(values = stress_pal, labels = toupper, name = "Stress") +
+  labs(x = sprintf("PC1 (%.0f%%)", 100 * var_expl[1]),
+       y = sprintf("PC2 (%.0f%%)", 100 * var_expl[2]),
+       title = "Resazurin curve-feature space by stress",
+       subtitle = sprintf("PCA of top %d features | %s | %s",
+                          length(idx_features), best_window, best_metric)) +
+  theme_classic(base_size = 12)
+p_pca
+ggsave(file.path(fig_dir, "feature_pca_by_stress.png"), p_pca, width = 8, height = 6)
+
+knitr::kable(round(pca$rotation[, 1:2], 2), caption = "PCA loadings")
+```
+
+```{r suppression-index, fig.width=8, fig.height=5}
+anchor <- curve_features %>%
+  filter(window == "full_0_18.75h", value_metric == "fold_change") %>%
+  select(trace_id, anchor_auc = auc_total)
+
+idx_df <- idx_wide %>% left_join(anchor, by = "trace_id")
+
+compute_index <- function(train, test) {
+  signs <- map_dbl(idx_features, ~ sign(cor(train[[.x]], train$anchor_auc,
+                                            method = "spearman")))
+  z <- map2(idx_features, signs, function(f, s) {
+    s * (test[[f]] - mean(train[[f]])) / sd(train[[f]])
+  })
+  rowMeans(do.call(cbind, z))
+}
+
+idx_df$suppression_index <- compute_index(idx_df, idx_df)
+idx_df$suppression_index_loo <- map_dbl(seq_len(nrow(idx_df)),
+  ~ compute_index(idx_df[-.x, ], idx_df[.x, ]))
+
+stress_index <- idx_df %>%
+  select(trace_id, treatment_group, suppression_index, suppression_index_loo) %>%
+  left_join(pca_df %>% select(trace_id, PC1, PC2), by = "trace_id")
+write_csv(stress_index, file.path(out_dir, "stress_index.csv"))
+
+idx_kw <- kruskal.test(suppression_index_loo ~ factor(treatment_group), data = stress_index)
+
+idx_order <- stress_index %>%
+  group_by(treatment_group) %>%
+  summarise(median_idx = median(suppression_index_loo), .groups = "drop") %>%
+  arrange(median_idx)
+
+p_idx <- stress_index %>%
+  mutate(treatment_group = factor(treatment_group, levels = idx_order$treatment_group)) %>%
+  ggplot(aes(treatment_group, suppression_index_loo, fill = treatment_group)) +
+  geom_boxplot(outlier.shape = NA, alpha = 0.6) +
+  geom_jitter(width = 0.15, size = 1.6) +
+  geom_hline(yintercept = 0, linetype = 2, linewidth = 0.3) +
+  scale_fill_manual(values = stress_pal, guide = "none") +
+  scale_x_discrete(labels = toupper) +
+  labs(x = "Stress (ordered by median index)",
+       y = "Suppression index (LOO; higher = more metabolic activity)",
+       title = "Composite resazurin index by stress",
+       subtitle = sprintf("mean of %d sign-aligned z-scored features | Kruskal-Wallis p = %.2g",
+                          length(idx_features), idx_kw$p.value)) +
+  theme_classic(base_size = 12)
+p_idx
+ggsave(file.path(fig_dir, "suppression_index_by_stress.png"), p_idx,
+       width = 8, height = 5)
+
+knitr::kable(idx_order %>% mutate(treatment_group = toupper(treatment_group),
+                                  median_idx = round(median_idx, 2)),
+             caption = "Stresses ranked by composite suppression index (low = most suppressed)")
+```
+
+# Synthesis
+
+```{r synthesis, results='asis'}
+top3 <- feature_stress_screen %>% slice_head(n = 3)
+
+cat("## Screening result\n\n")
+cat("Features that best separate the six stresses:\n\n")
+for (i in seq_len(nrow(top3))) {
+  cat(sprintf("- **%s** (%s / %s): epsilon² = %.2f (BH p = %.2g)\n",
+              top3$feature[i], top3$value_metric[i], top3$window[i],
+              top3$epsilon_sq[i], top3$kw_p_bh[i]))
+}
+
+cat("\n## Cross-validated result\n\n")
+cat(sprintf(
+  "Best leave-one-oyster-out model: %s / %s with top %d features, accuracy = %.2f vs chance %.2f (binomial p = %.2g).\n\n",
+  best_model$window, best_model$value_metric, best_model$k,
+  best_model$accuracy, best_model$chance, best_model$binom_p))
+cat("Per-stress recall: ",
+    paste(sprintf("%s = %.2f", toupper(per_stress_acc$stress), per_stress_acc$recall),
+          collapse = ", "), "\n\n")
+
+cat("## Each stress\n\n")
+for (g in stress_levels) {
+  tb <- top_by_stress %>% filter(stress == g) %>% slice_head(n = 1)
+  cat(sprintf("- **Stress %s**: most distinctive feature `%s` (%s, %s), median %.3g vs %.3g in the other stresses (Cliff's d = %.2f).\n",
+              toupper(g), tb$feature, tb$window,
+              ifelse(tb$value_metric == "fold_change", "fold change", "per mm²"),
+              tb$median_stress, tb$median_rest, tb$cliffs_delta))
+}
+
+cat(sprintf("\nComposite index order (most → least suppressed): %s.\n",
+            paste(toupper(idx_order$treatment_group), collapse = " < ")))
+```
+
+## Interpretation
+
+The tables above are regenerated on every render. Read them with these points
+in mind:
+
+- **Magnitude vs shape.** If the leading features are capacity traits (AUC,
+  vmax, final value), the stresses differ mainly in *how much* metabolism they
+  allow. If timing and ratio features (time to vmax, late/early ratio,
+  resilience ratio) also rank highly, the stresses differ in *how* the
+  response unfolds. That is the stronger basis for fingerprinting stresses from
+  resazurin alone.
+- **Confusion structure.** Stresses that are confused with one another in the
+  LOO-CV matrix produce indistinguishable resazurin phenotypes at this
+  sampling density, even if their mean AUCs differ.
+- **Plate confound.** With one plate per stress, a replicated design (≥ 2
+  plates per stress, positions randomised) is needed before a stress signature
+  can be separated from a plate effect.
+
+## Recommended next steps
+
+1. Add stress names to `layout.csv` (`treatment.group`) and re-render 05.00 →
+   05.1.
+2. Replicate plates within each stress to break the plate × stress confound.
+3. Add reads between 2 h and 18.75 h: the overnight gap leaves most shape
+   features unresolved.
+4. If these animals are followed for survival, join per-individual survival to
+   `stress_index.csv` and test whether the index predicts outcome within each
+   stress (the individual-level version of notebook 04).
+
+# Session info
+
+```{r session-info}
+sessionInfo()
+```
