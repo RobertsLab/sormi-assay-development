@@ -11,6 +11,8 @@ Steven Roberts
     ranking](#atpase-vs-overall-survival-ranking)
 -   [ATPase vs survival in each
     experiment](#atpase-vs-survival-in-each-experiment)
+-   [Within-family heat response vs
+    survival](#within-family-heat-response-vs-survival)
 
 # Overview
 
@@ -41,7 +43,7 @@ stopifnot(!any(is.na(nak$Condition)))
 ```
 
 Family summaries: median activity under each condition (median is robust
-to the failed M21 assay), and the heat response as the 36C − Ambient
+to the failed M21 assay), and the heat response as the 36C - Ambient
 difference.
 
 ``` r
@@ -157,3 +159,105 @@ ggplot(exp_cor, aes(x = atpase_metric, y = exp_label, fill = rho)) +
 ```
 
 ![](02-NaK-ATPase-vs-family-survival_files/figure-gfm/per-experiment-1.png)<!-- -->
+
+# Within-family heat response vs survival
+
+Does the change in ATPase between 36C and Ambient *within* a family
+predict survival? The heat response is expressed three ways:
+
+-   `diff`: difference in medians (36C - Ambient), as above
+-   `log2ratio`: log2(median 36C / median Ambient), a relative change
+-   `cohens_d`: standardized mean difference, scaling the change by
+    within-family variability
+
+`wilcox_p` tests whether 36C and Ambient differ within each family.
+
+``` r
+heat_resp <- nak %>%
+  group_by(family) %>%
+  summarise(
+    diff      = median(ATPase[Condition == "36C"]) - median(ATPase[Condition == "Ambient"]),
+    log2ratio = log2(median(ATPase[Condition == "36C"]) / median(ATPase[Condition == "Ambient"])),
+    cohens_d  = (mean(ATPase[Condition == "36C"]) - mean(ATPase[Condition == "Ambient"])) /
+      sqrt((var(ATPase[Condition == "36C"]) + var(ATPase[Condition == "Ambient"])) / 2),
+    wilcox_p  = suppressWarnings(
+      wilcox.test(ATPase[Condition == "36C"], ATPase[Condition == "Ambient"])$p.value),
+    .groups = "drop"
+  ) %>%
+  inner_join(fam_rank, by = "family") %>%
+  arrange(desc(composite_score))
+
+heat_resp %>%
+  select(family, composite_score, mean_surv_prop, diff, log2ratio, cohens_d, wilcox_p) %>%
+  knitr::kable(digits = 3)
+```
+
+| family | composite\_score | mean\_surv\_prop |   diff | log2ratio | cohens\_d | wilcox\_p |
+|:-------|-----------------:|-----------------:|-------:|----------:|----------:|----------:|
+| 5      |             71.0 |            0.329 |  0.172 |     0.072 |     0.557 |     0.267 |
+| 9      |             63.2 |            0.346 | -0.818 |    -0.329 |    -1.304 |     0.002 |
+| 2      |             59.0 |            0.356 |  0.359 |     0.125 |     0.292 |     0.267 |
+| 8      |             52.7 |            0.190 | -0.422 |    -0.168 |    -0.784 |     0.098 |
+| 3      |             48.8 |            0.218 | -0.806 |    -0.231 |    -0.463 |     0.116 |
+| 1      |             46.9 |            0.219 | -1.311 |    -0.425 |    -0.488 |     0.245 |
+| 6      |             40.8 |            0.186 |  0.789 |     0.282 |     0.118 |     0.412 |
+| 10     |             36.7 |            0.185 | -1.737 |    -0.550 |    -0.859 |     0.037 |
+| 7      |             35.3 |            0.168 | -0.128 |    -0.044 |    -0.454 |     0.202 |
+
+``` r
+heat_long <- heat_resp %>%
+  pivot_longer(c(diff, log2ratio, cohens_d),
+               names_to = "response_metric", values_to = "response_value") %>%
+  mutate(response_metric = factor(response_metric, levels = c("diff", "log2ratio", "cohens_d")))
+
+heat_cor <- heat_long %>%
+  pivot_longer(c(composite_score, mean_surv_prop),
+               names_to = "survival_metric", values_to = "survival_value") %>%
+  group_by(response_metric, survival_metric) %>%
+  summarise(rho = cor(response_value, survival_value, method = "spearman"),
+            p   = cor.test(response_value, survival_value, method = "spearman", exact = TRUE)$p.value,
+            .groups = "drop")
+
+knitr::kable(heat_cor, digits = 3)
+```
+
+| response\_metric | survival\_metric |   rho |     p |
+|:-----------------|:-----------------|------:|------:|
+| diff             | composite\_score | 0.183 | 0.644 |
+| diff             | mean\_surv\_prop | 0.117 | 0.776 |
+| log2ratio        | composite\_score | 0.183 | 0.644 |
+| log2ratio        | mean\_surv\_prop | 0.117 | 0.776 |
+| cohens\_d        | composite\_score | 0.167 | 0.678 |
+| cohens\_d        | mean\_surv\_prop | 0.167 | 0.678 |
+
+``` r
+heat_lab <- filter(heat_cor, survival_metric == "composite_score")
+
+ggplot(heat_long, aes(x = response_value, y = composite_score)) +
+  geom_vline(xintercept = 0, linetype = "dashed", colour = "grey70") +
+  geom_smooth(method = "lm", se = FALSE, colour = "grey60", linewidth = 0.5) +
+  geom_point(aes(shape = wilcox_p < 0.05), size = 2.5) +
+  geom_text(aes(label = family), nudge_y = 3, size = 3) +
+  geom_text(data = heat_lab,
+            aes(label = sprintf("rho = %.2f, p = %.2f", rho, p)),
+            x = -Inf, y = Inf, hjust = -0.1, vjust = 1.5, size = 3, inherit.aes = FALSE) +
+  scale_shape_manual(values = c(`FALSE` = 1, `TRUE` = 16),
+                     labels = c(`FALSE` = "no", `TRUE` = "yes"),
+                     name = "36C vs Ambient\np < 0.05") +
+  facet_wrap(~ response_metric, scales = "free_x",
+             labeller = as_labeller(c(diff = "36C - Ambient (median)",
+                                      log2ratio = "log2(36C / Ambient)",
+                                      cohens_d = "Cohen's d"))) +
+  labs(x = "Within-family ATPase heat response",
+       y = "Composite survival score\n(higher = hardier)") +
+  theme_bw()
+```
+
+![](02-NaK-ATPase-vs-family-survival_files/figure-gfm/heat-response-plot-1.png)<!-- -->
+
+The heat response does not track survival under any of the three metrics
+(Spearman rho 0.12-0.18, all p &gt; 0.6). The two hardiest families (5,
+2) held or slightly raised ATPase at 36C, but family 9 (second hardiest)
+showed the clearest decline and family 6 (near the bottom) the largest
+increase. Only families 9 and 10 changed significantly within family,
+and they sit at opposite ends of the survival ranking.
