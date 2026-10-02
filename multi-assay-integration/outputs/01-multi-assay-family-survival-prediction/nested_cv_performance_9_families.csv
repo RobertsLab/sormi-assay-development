@@ -1,0 +1,4 @@
+pool,n_predictors,nested_rho,nested_rmse,perm_p,most_selected
+ATPase only,3,-0.5666666666666667,19.925182088769176,0.6517412935323383,atp.ambient; atp.heat; atp.log2ratio
+resazurin only,82,0.6833333333333333,12.406669980137552,0.04477611940298507,rz.all.area.trough_value; rz.sw_heat.fc.time_to_peak; rz.sw_heat.fc.time_to_vmax
+resazurin + ATPase,85,0.6833333333333333,12.406669980137552,0.05970149253731343,rz.all.area.trough_value; rz.sw_heat.fc.time_to_peak; rz.sw_heat.fc.time_to_vmax

@@ -1,0 +1,302 @@
+k,predictors,loo_rmse,loo_rho,includes_atpase,includes_resazurin
+1,rz.all.area.trough_value,7.66449670262795,0.642857142857143,FALSE,TRUE
+1,rz.fw_heat.fc.time_to_min_slope,7.698030296024654,0.8095238095238095,FALSE,TRUE
+1,rz.freshwater_rt.area.inflection_time,7.956025470715378,0.6666666666666667,FALSE,TRUE
+1,rz.freshwater_rt.area.initial_slope,8.011196804481488,0.6666666666666667,FALSE,TRUE
+1,rz.all.fc.inflection_time,8.053742222328191,0.6666666666666667,FALSE,TRUE
+1,rz.fw_heat.area.stability_cv,8.162104664565724,0.5238095238095238,FALSE,TRUE
+1,rz.fw_heat.fc.stability_cv,8.162104664565726,0.5238095238095238,FALSE,TRUE
+1,rz.freshwater_rt.fc.inflection_time,8.204558808966715,0.5238095238095238,FALSE,TRUE
+1,rz.all.area.inflection_time,8.534115674294156,0.6190476190476192,FALSE,TRUE
+1,rz.fw_heat.area.initial_slope,8.701859563021255,0.6666666666666667,FALSE,TRUE
+1,rz.fw_heat.area.auc_early,9.183127151336853,0.5952380952380953,FALSE,TRUE
+1,rz.fw_heat.fc.initial_slope,9.431595599680461,0.6190476190476192,FALSE,TRUE
+1,rz.sw_heat.area.auc_late,9.841174447634998,0.6904761904761907,FALSE,TRUE
+1,rz.all.area.vmax,9.908080261284228,0.6904761904761907,FALSE,TRUE
+1,rz.all.area.depression_abs,10.068490921736583,0.761904761904762,FALSE,TRUE
+1,rz.freshwater_rt.fc.time_to_min_slope,10.225849377745634,0.5714285714285715,FALSE,TRUE
+1,rz.freshwater_rt.fc.stability_cv,10.346449171818708,0.5000000000000001,FALSE,TRUE
+1,rz.sw_heat.area.delta_auc_late_minus_early,10.419763401250616,0.6666666666666667,FALSE,TRUE
+1,rz.all.fc.vmax,10.427071719960864,0.6190476190476192,FALSE,TRUE
+1,rz.sw_heat.fc.auc_total,10.48356852777255,0.40476190476190477,FALSE,TRUE
+1,rz.freshwater_rt.fc.initial_slope,10.56825459266905,0.4761904761904763,FALSE,TRUE
+1,rz.freshwater_rt.area.stability_cv,10.584600399383808,0.5000000000000001,FALSE,TRUE
+1,rz.sw_heat.area.metabolic_scope,10.65152638072661,0.5952380952380953,FALSE,TRUE
+1,rz.sw_heat.area.peak_value,10.652577426086312,0.5952380952380953,FALSE,TRUE
+1,rz.sw_heat.area.final_delta,10.682276981896765,0.5952380952380953,FALSE,TRUE
+1,rz.sw_heat.area.final_value,10.683341051834756,0.5952380952380953,FALSE,TRUE
+1,rz.sw_heat.fc.metabolic_scope,10.705555441154075,0.4523809523809525,FALSE,TRUE
+1,rz.sw_heat.fc.peak_value,10.70564934420334,0.4523809523809525,FALSE,TRUE
+1,rz.sw_heat.fc.final_delta,10.729158327443326,0.4761904761904763,FALSE,TRUE
+1,rz.sw_heat.fc.final_value,10.729318972428995,0.4761904761904763,FALSE,TRUE
+1,rz.fw_heat.area.auc_total,10.790558653459948,0.4761904761904763,FALSE,TRUE
+1,rz.sw_heat.area.auc_total,10.80706098947547,0.761904761904762,FALSE,TRUE
+1,rz.sw_heat.fc.vmax,10.820845805191313,0.6190476190476192,FALSE,TRUE
+1,rz.all.area.delta_auc_late_minus_early,10.97140294977638,0.4761904761904763,FALSE,TRUE
+1,rz.all.fc.delta_auc_late_minus_early,11.199525958072918,0.2619047619047619,FALSE,TRUE
+1,rz.all.area.metabolic_scope,11.203959355928383,0.28571428571428575,FALSE,TRUE
+1,rz.all.area.peak_value,11.214184453302039,0.28571428571428575,FALSE,TRUE
+1,rz.all.area.final_delta,11.236222871731165,0.28571428571428575,FALSE,TRUE
+1,rz.all.area.final_value,11.246518257276518,0.28571428571428575,FALSE,TRUE
+1,rz.fw_heat.fc.auc_early,11.254028658445003,0.5476190476190477,FALSE,TRUE
+1,rz.freshwater_rt.area.time_to_min_slope,11.29829828799466,0.5952380952380953,FALSE,TRUE
+1,rz.sw_heat.fc.auc_late,11.311899661670804,0.4523809523809525,FALSE,TRUE
+1,rz.freshwater_rt.fc.delta_auc_late_minus_early,11.353925861442683,0.16666666666666669,FALSE,TRUE
+1,rz.freshwater_rt.area.delta_auc_late_minus_early,11.384437481218225,0.11904761904761907,FALSE,TRUE
+1,rz.sw_heat.area.vmax,11.392568700965828,0.761904761904762,FALSE,TRUE
+1,rz.freshwater_rt.area.time_to_vmax,11.427608803589372,0.14285714285714288,FALSE,TRUE
+1,rz.freshwater_rt.fc.time_to_vmax,11.432880031965112,0.2619047619047619,FALSE,TRUE
+1,rz.all.fc.metabolic_scope,11.46668502126194,0.16666666666666669,FALSE,TRUE
+1,rz.all.fc.peak_value,11.475834415310274,0.16666666666666669,FALSE,TRUE
+1,rz.all.fc.final_delta,11.499528461247108,0.16666666666666669,FALSE,TRUE
+1,rz.freshwater_rt.fc.trough_value,11.503335289167122,0.28571428571428575,FALSE,TRUE
+1,rz.all.fc.final_value,11.508985657141517,0.16666666666666669,FALSE,TRUE
+1,rz.all.fc.time_to_vmax,11.525945700106318,0.1904761904761905,FALSE,TRUE
+1,rz.fw_heat.fc.trough_value,11.589500481134655,0.380952380952381,FALSE,TRUE
+1,rz.fw_heat.fc.auc_total,11.595100319100274,0.09523809523809525,FALSE,TRUE
+1,rz.all.area.late_early_auc_ratio,11.65252201638801,0.3571428571428572,FALSE,TRUE
+1,rz.all.fc.late_early_auc_ratio,11.662205260854979,0.33333333333333337,FALSE,TRUE
+1,rz.all.area.time_to_vmax,11.67436162788025,0.1904761904761905,FALSE,TRUE
+1,rz.fw_heat.area.auc_late,11.727859342074723,0.09523809523809525,FALSE,TRUE
+1,rz.sw_heat.area.late_early_auc_ratio,11.757553051674543,0.2619047619047619,FALSE,TRUE
+1,rz.sw_heat.fc.late_early_auc_ratio,11.757553051674545,0.2619047619047619,FALSE,TRUE
+1,rz.freshwater_rt.fc.late_early_auc_ratio,11.763702468337549,0.1904761904761905,FALSE,TRUE
+1,rz.freshwater_rt.area.late_early_auc_ratio,11.811285551960351,0.16666666666666669,FALSE,TRUE
+1,rz.all.fc.trough_value,11.833377441836566,0.42857142857142866,FALSE,TRUE
+1,rz.all.fc.depression_abs,11.855937223494177,0.6904761904761907,FALSE,TRUE
+1,rz.fw_heat.fc.depression_abs,11.879475733681604,0.16666666666666669,FALSE,TRUE
+1,rz.sw_heat.fc.delta_auc_late_minus_early,11.89799432977977,0.02380952380952381,FALSE,TRUE
+1,rz.fw_heat.area.depression_abs,11.966532982032236,0.28571428571428575,FALSE,TRUE
+1,rz.freshwater_rt.fc.depression_abs,12.118895507978685,0.16666666666666669,FALSE,TRUE
+1,rz.fw_heat.area.metabolic_depression_index,12.124646864618356,0.16666666666666669,FALSE,TRUE
+1,rz.fw_heat.fc.metabolic_depression_index,12.12464686461836,0.16666666666666669,FALSE,TRUE
+1,rz.fw_heat.area.resilience_ratio,12.140903603274651,0.16666666666666669,FALSE,TRUE
+1,rz.fw_heat.fc.resilience_ratio,12.140903603274689,0.16666666666666669,FALSE,TRUE
+1,rz.all.fc.time_to_min_slope,12.202640579652527,0.2619047619047619,FALSE,TRUE
+1,rz.sw_heat.fc.time_to_peak,12.20856966065647,0.5238095238095238,FALSE,TRUE
+1,rz.fw_heat.area.trough_value,12.21553626909894,0.3095238095238096,FALSE,TRUE
+1,rz.fw_heat.fc.time_to_vmax,12.288112265385738,0.2619047619047619,FALSE,TRUE
+1,rz.all.fc.time_to_trough,12.312907409861705,0.28571428571428575,FALSE,TRUE
+1,rz.all.area.time_to_trough,12.331987465209501,0.28571428571428575,FALSE,TRUE
+1,rz.freshwater_rt.area.trough_value,12.342702486090756,0.33333333333333337,FALSE,TRUE
+1,rz.fw_heat.fc.late_early_auc_ratio,12.410899262413102,0.28571428571428575,FALSE,TRUE
+1,rz.fw_heat.area.late_early_auc_ratio,12.410899262413112,0.28571428571428575,FALSE,TRUE
+1,rz.fw_heat.fc.time_to_peak,12.519970719210875,0.04761904761904762,FALSE,TRUE
+1,rz.sw_heat.fc.time_to_trough,12.54185641546401,0.28571428571428575,FALSE,TRUE
+1,rz.all.area.time_to_min_slope,12.552667417426571,0.1904761904761905,FALSE,TRUE
+1,rz.fw_heat.fc.auc_late,12.590233384934713,-0.07142857142857144,FALSE,TRUE
+1,rz.all.fc.auc_late,12.635654261311291,0,FALSE,TRUE
+1,atp.heat,12.770119331127326,0.3095238095238096,TRUE,FALSE
+1,rz.all.area.auc_late,12.7766796176789,-0.07142857142857144,FALSE,TRUE
+1,rz.all.fc.time_to_peak,12.875625663362545,0.40476190476190477,FALSE,TRUE
+1,rz.all.area.time_to_peak,13.010346249555242,0.3095238095238096,FALSE,TRUE
+1,rz.sw_heat.fc.stability_cv,13.169800930013185,0.04761904761904762,FALSE,TRUE
+1,rz.sw_heat.area.stability_cv,13.169800930013189,0.04761904761904762,FALSE,TRUE
+1,rz.fw_heat.area.final_value,13.183414528984036,0.02380952380952381,FALSE,TRUE
+1,rz.freshwater_rt.area.depression_abs,13.228699884636352,0.04761904761904762,FALSE,TRUE
+1,rz.sw_heat.fc.time_to_vmax,13.24344843026094,-0.07142857142857144,FALSE,TRUE
+1,rz.fw_heat.area.peak_value,13.249565214706296,0.02380952380952381,FALSE,TRUE
+1,rz.all.fc.initial_slope,13.363610079265385,-0.3571428571428572,FALSE,TRUE
+1,rz.sw_heat.area.depression_abs,13.376431722797825,0.6190476190476192,FALSE,TRUE
+1,rz.fw_heat.area.vmax,13.412739455373377,0.2619047619047619,FALSE,TRUE
+2,rz.fw_heat.fc.time_to_min_slope + rz.sw_heat.area.late_early_auc_ratio,2.3050957322669916,1,FALSE,TRUE
+2,rz.fw_heat.fc.time_to_min_slope + rz.sw_heat.fc.late_early_auc_ratio,2.3050957322669925,1,FALSE,TRUE
+2,rz.fw_heat.fc.time_to_min_slope + rz.sw_heat.area.trough_value,2.685006010163243,0.9523809523809526,FALSE,TRUE
+2,rz.all.area.inflection_time + rz.fw_heat.fc.time_to_min_slope,3.0583130804634653,0.9761904761904763,FALSE,TRUE
+2,rz.all.fc.inflection_time + rz.all.fc.time_to_vmax,3.0715309152045727,0.9523809523809526,FALSE,TRUE
+2,rz.all.fc.time_to_trough + rz.fw_heat.fc.time_to_min_slope,3.1979085514540952,1,FALSE,TRUE
+2,rz.freshwater_rt.fc.time_to_peak + rz.fw_heat.fc.initial_slope,3.23735898544409,0.9761904761904763,FALSE,TRUE
+2,rz.all.area.time_to_trough + rz.fw_heat.fc.time_to_min_slope,3.247709955326907,1,FALSE,TRUE
+2,rz.fw_heat.area.trough_value + rz.sw_heat.fc.time_to_peak,3.3276969541195514,0.904761904761905,FALSE,TRUE
+2,rz.fw_heat.fc.time_to_min_slope + rz.sw_heat.fc.time_to_trough,3.328872265410188,0.9761904761904763,FALSE,TRUE
+2,rz.freshwater_rt.fc.inflection_time + rz.freshwater_rt.area.final_value,3.3613963075035516,0.9523809523809526,FALSE,TRUE
+2,rz.freshwater_rt.fc.inflection_time + rz.freshwater_rt.area.final_delta,3.361611335970893,0.9523809523809526,FALSE,TRUE
+2,rz.freshwater_rt.fc.inflection_time + rz.freshwater_rt.area.peak_value,3.4170422915615384,0.9523809523809526,FALSE,TRUE
+2,rz.freshwater_rt.fc.inflection_time + rz.freshwater_rt.area.metabolic_scope,3.4176330724406903,0.9523809523809526,FALSE,TRUE
+2,rz.fw_heat.area.depression_abs + rz.sw_heat.area.late_early_auc_ratio,3.4560151913537687,0.9761904761904763,FALSE,TRUE
+2,rz.fw_heat.area.depression_abs + rz.sw_heat.fc.late_early_auc_ratio,3.456015191353771,0.9761904761904763,FALSE,TRUE
+2,rz.fw_heat.fc.time_to_min_slope + rz.sw_heat.fc.time_to_vmax,3.4620523114582764,0.9761904761904763,FALSE,TRUE
+2,rz.fw_heat.fc.trough_value + rz.sw_heat.fc.time_to_peak,3.4630822496694846,0.904761904761905,FALSE,TRUE
+2,rz.all.fc.inflection_time + rz.all.area.time_to_vmax,3.5257479432770173,0.9285714285714287,FALSE,TRUE
+2,rz.all.fc.time_to_peak + rz.fw_heat.fc.time_to_min_slope,3.553137104659095,0.9761904761904763,FALSE,TRUE
+2,rz.all.fc.inflection_time + rz.fw_heat.fc.time_to_min_slope,3.6170932100983904,0.9523809523809526,FALSE,TRUE
+2,rz.all.fc.inflection_time + rz.all.fc.trough_value,4.033325443039471,0.9761904761904763,FALSE,TRUE
+2,rz.freshwater_rt.fc.inflection_time + rz.freshwater_rt.area.vmax,4.123896131989912,0.9285714285714287,FALSE,TRUE
+2,rz.fw_heat.fc.time_to_min_slope + rz.sw_heat.fc.inflection_time,4.2002129433494,0.9761904761904763,FALSE,TRUE
+2,rz.freshwater_rt.fc.time_to_peak + rz.freshwater_rt.area.time_to_min_slope,4.200580474691838,0.904761904761905,FALSE,TRUE
+2,rz.fw_heat.area.stability_cv + rz.sw_heat.area.vmax,4.207349181241609,0.904761904761905,FALSE,TRUE
+2,rz.fw_heat.fc.stability_cv + rz.sw_heat.area.vmax,4.207349181241614,0.904761904761905,FALSE,TRUE
+2,rz.all.area.inflection_time + rz.all.area.time_to_vmax,4.258896824669739,0.904761904761905,FALSE,TRUE
+2,rz.all.area.time_to_peak + rz.fw_heat.fc.time_to_min_slope,4.26233968429758,1,FALSE,TRUE
+2,rz.all.fc.trough_value + rz.all.area.inflection_time,4.3208709349991645,0.9761904761904763,FALSE,TRUE
+2,rz.fw_heat.fc.time_to_min_slope + rz.sw_heat.fc.trough_value,4.406170627452833,0.8333333333333335,FALSE,TRUE
+2,rz.freshwater_rt.area.initial_slope + rz.sw_heat.fc.late_early_auc_ratio,4.431208757746173,0.8571428571428573,FALSE,TRUE
+2,rz.freshwater_rt.area.initial_slope + rz.sw_heat.area.late_early_auc_ratio,4.431208757746174,0.8571428571428573,FALSE,TRUE
+2,rz.freshwater_rt.area.inflection_time + rz.freshwater_rt.area.vmax,4.441849478590007,0.904761904761905,FALSE,TRUE
+2,rz.fw_heat.fc.metabolic_depression_index + rz.sw_heat.area.late_early_auc_ratio,4.45895645007346,0.9761904761904763,FALSE,TRUE
+2,rz.fw_heat.fc.metabolic_depression_index + rz.sw_heat.fc.late_early_auc_ratio,4.458956450073462,0.9761904761904763,FALSE,TRUE
+2,rz.fw_heat.area.metabolic_depression_index + rz.sw_heat.area.late_early_auc_ratio,4.458956450073477,0.9761904761904763,FALSE,TRUE
+2,rz.fw_heat.area.metabolic_depression_index + rz.sw_heat.fc.late_early_auc_ratio,4.458956450073479,0.9761904761904763,FALSE,TRUE
+2,rz.fw_heat.area.resilience_ratio + rz.sw_heat.area.late_early_auc_ratio,4.465133088410053,0.9761904761904763,FALSE,TRUE
+2,rz.fw_heat.area.resilience_ratio + rz.sw_heat.fc.late_early_auc_ratio,4.465133088410054,0.9761904761904763,FALSE,TRUE
+2,rz.fw_heat.fc.resilience_ratio + rz.sw_heat.area.late_early_auc_ratio,4.4651330884101155,0.9761904761904763,FALSE,TRUE
+2,rz.fw_heat.fc.resilience_ratio + rz.sw_heat.fc.late_early_auc_ratio,4.465133088410117,0.9761904761904763,FALSE,TRUE
+2,rz.fw_heat.fc.time_to_min_slope + rz.sw_heat.fc.time_to_peak,4.474471055217596,1,FALSE,TRUE
+2,rz.all.area.inflection_time + rz.fw_heat.area.depression_abs,4.526454271678863,0.9285714285714287,FALSE,TRUE
+2,rz.all.fc.inflection_time + rz.freshwater_rt.area.time_to_vmax,4.6431652382699,0.880952380952381,FALSE,TRUE
+2,rz.all.area.inflection_time + rz.fw_heat.fc.depression_abs,4.66120797835429,0.9285714285714287,FALSE,TRUE
+2,rz.freshwater_rt.fc.time_to_peak + rz.fw_heat.fc.auc_early,4.672907337444065,0.8571428571428573,FALSE,TRUE
+2,rz.all.area.time_to_vmax + rz.fw_heat.fc.time_to_min_slope,4.704494739184844,0.9523809523809526,FALSE,TRUE
+2,rz.freshwater_rt.area.final_delta + rz.freshwater_rt.area.inflection_time,4.70927221499644,0.880952380952381,FALSE,TRUE
+2,rz.freshwater_rt.area.final_value + rz.freshwater_rt.area.inflection_time,4.719351586089968,0.880952380952381,FALSE,TRUE
+2,rz.fw_heat.area.stability_cv + rz.sw_heat.fc.time_to_peak,4.734551875624416,0.8333333333333335,FALSE,TRUE
+2,rz.fw_heat.fc.stability_cv + rz.sw_heat.fc.time_to_peak,4.734551875624422,0.8333333333333335,FALSE,TRUE
+2,rz.freshwater_rt.area.inflection_time + rz.freshwater_rt.area.metabolic_scope,4.754176301529255,0.880952380952381,FALSE,TRUE
+2,rz.freshwater_rt.area.inflection_time + rz.freshwater_rt.area.peak_value,4.7640207447765315,0.880952380952381,FALSE,TRUE
+2,rz.freshwater_rt.fc.time_to_vmax + rz.freshwater_rt.area.inflection_time,4.7773591543910525,0.8571428571428573,FALSE,TRUE
+2,rz.all.area.inflection_time + rz.fw_heat.fc.time_to_peak,4.781560810552518,0.9523809523809526,FALSE,TRUE
+2,rz.all.area.inflection_time + rz.fw_heat.area.resilience_ratio,4.799751673535691,0.880952380952381,FALSE,TRUE
+2,rz.all.area.inflection_time + rz.fw_heat.fc.resilience_ratio,4.799751673535731,0.880952380952381,FALSE,TRUE
+2,rz.all.area.inflection_time + rz.fw_heat.area.metabolic_depression_index,4.814929514378489,0.880952380952381,FALSE,TRUE
+2,rz.all.area.inflection_time + rz.fw_heat.fc.metabolic_depression_index,4.814929514378494,0.880952380952381,FALSE,TRUE
+2,rz.fw_heat.fc.time_to_min_slope + rz.sw_heat.fc.auc_early,4.8303469036164755,0.9523809523809526,FALSE,TRUE
+2,rz.fw_heat.area.trough_value + rz.sw_heat.area.vmax,4.861484141370127,0.8571428571428573,FALSE,TRUE
+2,rz.all.area.inflection_time + rz.freshwater_rt.area.initial_slope,4.879489688861272,0.904761904761905,FALSE,TRUE
+2,rz.freshwater_rt.fc.inflection_time + rz.freshwater_rt.area.auc_late,4.908018066328701,0.9285714285714287,FALSE,TRUE
+2,rz.freshwater_rt.area.inflection_time + rz.fw_heat.fc.time_to_min_slope,4.931095134180509,0.8095238095238095,FALSE,TRUE
+2,rz.fw_heat.fc.trough_value + rz.sw_heat.area.vmax,4.956321375695084,0.8571428571428573,FALSE,TRUE
+2,rz.all.fc.inflection_time + rz.fw_heat.fc.depression_abs,5.069953160178385,0.8571428571428573,FALSE,TRUE
+2,rz.all.fc.time_to_vmax + rz.fw_heat.fc.time_to_min_slope,5.09595289114769,0.8095238095238095,FALSE,TRUE
+2,rz.freshwater_rt.fc.time_to_min_slope + rz.freshwater_rt.fc.time_to_peak,5.133452200609599,0.9285714285714287,FALSE,TRUE
+2,rz.freshwater_rt.fc.inflection_time + rz.freshwater_rt.area.stability_cv,5.16725117845497,0.7142857142857144,FALSE,TRUE
+2,rz.freshwater_rt.fc.trough_value + rz.fw_heat.fc.time_to_min_slope,5.228019040074786,0.9523809523809526,FALSE,TRUE
+2,rz.all.fc.inflection_time + rz.freshwater_rt.area.initial_slope,5.228825755299871,0.9285714285714287,FALSE,TRUE
+2,rz.all.area.inflection_time + rz.fw_heat.area.trough_value,5.2460213992979945,0.7142857142857144,FALSE,TRUE
+2,rz.all.area.inflection_time + rz.fw_heat.fc.trough_value,5.247039012840721,0.7380952380952382,FALSE,TRUE
+2,rz.all.fc.inflection_time + rz.fw_heat.area.depression_abs,5.292340918312295,0.7857142857142858,FALSE,TRUE
+2,rz.freshwater_rt.area.trough_value + rz.fw_heat.fc.time_to_min_slope,5.296651836450717,0.8571428571428573,FALSE,TRUE
+2,rz.all.fc.inflection_time + rz.fw_heat.fc.time_to_peak,5.300392649995521,0.8571428571428573,FALSE,TRUE
+2,rz.all.fc.time_to_peak + rz.freshwater_rt.area.initial_slope,5.3174361063587385,0.8333333333333335,FALSE,TRUE
+2,rz.fw_heat.area.trough_value + rz.sw_heat.fc.auc_early,5.3263223738152154,0.7142857142857144,FALSE,TRUE
+2,rz.freshwater_rt.area.initial_slope + rz.sw_heat.fc.time_to_peak,5.328106119742641,0.904761904761905,FALSE,TRUE
+2,rz.all.fc.inflection_time + rz.freshwater_rt.fc.time_to_vmax,5.329738898279504,0.8333333333333335,FALSE,TRUE
+2,rz.fw_heat.fc.trough_value + rz.sw_heat.fc.auc_early,5.349649259392841,0.8095238095238095,FALSE,TRUE
+2,rz.fw_heat.fc.stability_cv + rz.sw_heat.area.auc_early,5.368300765590685,0.761904761904762,FALSE,TRUE
+2,rz.fw_heat.area.stability_cv + rz.sw_heat.area.auc_early,5.368300765590687,0.761904761904762,FALSE,TRUE
+2,rz.fw_heat.area.stability_cv + rz.sw_heat.area.auc_total,5.4405820496316615,0.7380952380952382,FALSE,TRUE
+2,rz.fw_heat.fc.stability_cv + rz.sw_heat.area.auc_total,5.440582049631668,0.7380952380952382,FALSE,TRUE
+2,rz.fw_heat.fc.time_to_min_slope + rz.sw_heat.fc.min_slope,5.443159051364643,0.8095238095238095,FALSE,TRUE
+2,rz.all.fc.final_value + rz.freshwater_rt.fc.inflection_time,5.443753576342299,0.904761904761905,FALSE,TRUE
+2,rz.all.fc.final_delta + rz.freshwater_rt.fc.inflection_time,5.45874013978008,0.904761904761905,FALSE,TRUE
+2,rz.fw_heat.fc.time_to_min_slope + rz.sw_heat.area.auc_total,5.458820763722488,0.880952380952381,FALSE,TRUE
+2,rz.all.fc.peak_value + rz.freshwater_rt.fc.inflection_time,5.464357990952288,0.904761904761905,FALSE,TRUE
+2,rz.all.area.vmax + rz.fw_heat.area.stability_cv,5.470863017274778,0.8333333333333335,FALSE,TRUE
+2,rz.all.area.vmax + rz.fw_heat.fc.stability_cv,5.470863017274786,0.8333333333333335,FALSE,TRUE
+2,rz.all.fc.metabolic_scope + rz.freshwater_rt.fc.inflection_time,5.478894090488493,0.904761904761905,FALSE,TRUE
+2,rz.freshwater_rt.fc.inflection_time + rz.freshwater_rt.area.auc_total,5.483571799762611,0.880952380952381,FALSE,TRUE
+2,rz.freshwater_rt.fc.inflection_time + rz.freshwater_rt.fc.stability_cv,5.48976900106715,0.6666666666666667,FALSE,TRUE
+2,rz.all.fc.inflection_time + rz.fw_heat.area.resilience_ratio,5.508972278905537,0.7857142857142858,FALSE,TRUE
+2,rz.all.fc.inflection_time + rz.fw_heat.fc.resilience_ratio,5.508972278905579,0.7857142857142858,FALSE,TRUE
+2,rz.freshwater_rt.area.initial_slope + rz.sw_heat.area.auc_early,5.516423444453558,0.7380952380952382,FALSE,TRUE
+2,rz.all.fc.inflection_time + rz.fw_heat.area.metabolic_depression_index,5.522607829340434,0.7857142857142858,FALSE,TRUE
+3,rz.all.fc.inflection_time + rz.all.area.time_to_vmax + rz.freshwater_rt.fc.min_slope,0.5948136135889738,1,FALSE,TRUE
+3,rz.freshwater_rt.fc.time_to_peak + rz.freshwater_rt.area.stability_cv + rz.fw_heat.fc.initial_slope,0.6429674376907115,1,FALSE,TRUE
+3,rz.all.area.time_to_peak + rz.fw_heat.fc.time_to_min_slope + rz.sw_heat.area.trough_value,0.7105991236160588,1,FALSE,TRUE
+3,rz.fw_heat.fc.time_to_min_slope + rz.sw_heat.fc.auc_total + rz.sw_heat.area.delta_auc_late_minus_early,0.8166713415023892,1,FALSE,TRUE
+3,rz.freshwater_rt.fc.stability_cv + rz.freshwater_rt.fc.time_to_peak + rz.fw_heat.fc.initial_slope,0.8393292950620683,1,FALSE,TRUE
+3,rz.all.fc.vmax + rz.all.area.inflection_time + rz.fw_heat.fc.time_to_min_slope,0.8424529702879869,1,FALSE,TRUE
+3,rz.fw_heat.fc.auc_early + rz.fw_heat.fc.time_to_min_slope + rz.sw_heat.area.late_early_auc_ratio,0.8707769957313277,1,FALSE,TRUE
+3,rz.fw_heat.fc.auc_early + rz.fw_heat.fc.time_to_min_slope + rz.sw_heat.fc.late_early_auc_ratio,0.870776995731328,1,FALSE,TRUE
+3,rz.fw_heat.fc.time_to_min_slope + rz.sw_heat.fc.late_early_auc_ratio + rz.sw_heat.fc.min_slope,0.9513121059197841,1,FALSE,TRUE
+3,rz.fw_heat.fc.time_to_min_slope + rz.sw_heat.fc.min_slope + rz.sw_heat.area.late_early_auc_ratio,0.9513121059197848,1,FALSE,TRUE
+3,rz.all.area.time_to_peak + rz.freshwater_rt.area.depression_abs + rz.fw_heat.fc.resilience_ratio,0.9717324434221408,1,FALSE,TRUE
+3,rz.all.area.time_to_peak + rz.freshwater_rt.area.depression_abs + rz.fw_heat.area.resilience_ratio,0.9717324434222476,1,FALSE,TRUE
+3,rz.all.fc.time_to_peak + rz.fw_heat.fc.time_to_min_slope + rz.sw_heat.fc.trough_value,0.9989204689385445,1,FALSE,TRUE
+3,rz.all.fc.peak_value + rz.freshwater_rt.fc.time_to_peak + rz.fw_heat.fc.initial_slope,1.0393139145112906,0.9761904761904763,FALSE,TRUE
+3,rz.all.fc.metabolic_scope + rz.freshwater_rt.fc.time_to_peak + rz.fw_heat.fc.initial_slope,1.039511687645598,0.9761904761904763,FALSE,TRUE
+3,rz.all.fc.final_value + rz.freshwater_rt.fc.time_to_peak + rz.fw_heat.fc.initial_slope,1.0561342138607837,0.9761904761904763,FALSE,TRUE
+3,rz.all.fc.final_delta + rz.freshwater_rt.fc.time_to_peak + rz.fw_heat.fc.initial_slope,1.0562774885675004,0.9761904761904763,FALSE,TRUE
+3,rz.fw_heat.fc.time_to_min_slope + rz.sw_heat.fc.trough_value + rz.sw_heat.area.late_early_auc_ratio,1.0635352291835287,0.9761904761904763,FALSE,TRUE
+3,rz.fw_heat.fc.time_to_min_slope + rz.sw_heat.fc.late_early_auc_ratio + rz.sw_heat.fc.trough_value,1.0635352291835294,0.9761904761904763,FALSE,TRUE
+3,rz.all.fc.inflection_time + rz.all.area.final_delta + rz.fw_heat.area.metabolic_depression_index,1.091004540198252,0.9761904761904763,FALSE,TRUE
+3,rz.all.fc.inflection_time + rz.all.area.final_delta + rz.fw_heat.fc.metabolic_depression_index,1.091004540198255,0.9761904761904763,FALSE,TRUE
+3,rz.all.fc.inflection_time + rz.all.area.final_delta + rz.fw_heat.fc.depression_abs,1.0937720830051532,1,FALSE,TRUE
+3,rz.all.fc.inflection_time + rz.all.area.metabolic_scope + rz.fw_heat.fc.depression_abs,1.093781312662725,1,FALSE,TRUE
+3,rz.all.fc.inflection_time + rz.all.area.final_value + rz.fw_heat.area.metabolic_depression_index,1.0974405327745984,0.9761904761904763,FALSE,TRUE
+3,rz.all.fc.inflection_time + rz.all.area.final_value + rz.fw_heat.fc.metabolic_depression_index,1.0974405327746013,0.9761904761904763,FALSE,TRUE
+3,rz.all.fc.inflection_time + rz.all.area.metabolic_scope + rz.fw_heat.area.metabolic_depression_index,1.0976773993603528,0.9761904761904763,FALSE,TRUE
+3,rz.all.fc.inflection_time + rz.all.area.metabolic_scope + rz.fw_heat.fc.metabolic_depression_index,1.0976773993603561,0.9761904761904763,FALSE,TRUE
+3,rz.all.fc.inflection_time + rz.all.area.final_value + rz.fw_heat.fc.depression_abs,1.1004335725291523,1,FALSE,TRUE
+3,rz.all.fc.inflection_time + rz.all.area.peak_value + rz.fw_heat.fc.depression_abs,1.1006558821658432,1,FALSE,TRUE
+3,rz.all.fc.inflection_time + rz.all.area.peak_value + rz.fw_heat.area.metabolic_depression_index,1.1043165783704751,0.9761904761904763,FALSE,TRUE
+3,rz.all.fc.inflection_time + rz.all.area.peak_value + rz.fw_heat.fc.metabolic_depression_index,1.104316578370478,0.9761904761904763,FALSE,TRUE
+3,rz.all.fc.inflection_time + rz.all.area.final_delta + rz.fw_heat.fc.resilience_ratio,1.1044447261216286,0.9761904761904763,FALSE,TRUE
+3,rz.all.fc.inflection_time + rz.all.area.final_delta + rz.fw_heat.area.resilience_ratio,1.104444726121675,0.9761904761904763,FALSE,TRUE
+3,rz.all.fc.inflection_time + rz.all.area.final_value + rz.fw_heat.fc.resilience_ratio,1.1109820361457021,0.9761904761904763,FALSE,TRUE
+3,rz.all.fc.inflection_time + rz.all.area.final_value + rz.fw_heat.area.resilience_ratio,1.1109820361457499,0.9761904761904763,FALSE,TRUE
+3,rz.all.fc.inflection_time + rz.all.area.metabolic_scope + rz.fw_heat.fc.resilience_ratio,1.1132692864797191,0.9761904761904763,FALSE,TRUE
+3,rz.all.fc.inflection_time + rz.all.area.metabolic_scope + rz.fw_heat.area.resilience_ratio,1.113269286479766,0.9761904761904763,FALSE,TRUE
+3,rz.all.fc.inflection_time + rz.all.area.peak_value + rz.fw_heat.fc.resilience_ratio,1.1199885089283204,0.9761904761904763,FALSE,TRUE
+3,rz.all.fc.inflection_time + rz.all.area.peak_value + rz.fw_heat.area.resilience_ratio,1.1199885089283672,0.9761904761904763,FALSE,TRUE
+3,rz.all.fc.final_value + rz.freshwater_rt.fc.inflection_time + rz.freshwater_rt.area.late_early_auc_ratio,1.186858340103011,0.9761904761904763,FALSE,TRUE
+3,rz.all.fc.final_delta + rz.freshwater_rt.fc.inflection_time + rz.freshwater_rt.area.late_early_auc_ratio,1.2027085496015462,0.9761904761904763,FALSE,TRUE
+3,rz.all.fc.time_to_peak + rz.freshwater_rt.fc.depression_abs + rz.fw_heat.area.depression_abs,1.2072989562986012,1,FALSE,TRUE
+3,rz.fw_heat.fc.time_to_min_slope + rz.sw_heat.fc.late_early_auc_ratio + rz.sw_heat.fc.metabolic_depression_index,1.230307034312709,0.9761904761904763,FALSE,TRUE
+3,rz.fw_heat.fc.time_to_min_slope + rz.sw_heat.fc.late_early_auc_ratio + rz.sw_heat.area.metabolic_depression_index,1.230307034312709,0.9761904761904763,FALSE,TRUE
+3,rz.fw_heat.fc.time_to_min_slope + rz.sw_heat.area.late_early_auc_ratio + rz.sw_heat.area.metabolic_depression_index,1.230307034312709,0.9761904761904763,FALSE,TRUE
+3,rz.fw_heat.fc.time_to_min_slope + rz.sw_heat.fc.metabolic_depression_index + rz.sw_heat.area.late_early_auc_ratio,1.2303070343127092,0.9761904761904763,FALSE,TRUE
+3,rz.all.fc.inflection_time + rz.all.area.time_to_vmax + rz.freshwater_rt.area.min_slope,1.2341994388793982,1,FALSE,TRUE
+3,rz.all.fc.inflection_time + rz.all.fc.vmax + rz.all.area.depression_abs,1.2407349989959375,1,FALSE,TRUE
+3,rz.fw_heat.fc.time_to_min_slope + rz.sw_heat.fc.resilience_ratio + rz.sw_heat.area.late_early_auc_ratio,1.2529505183437697,0.9761904761904763,FALSE,TRUE
+3,rz.fw_heat.fc.time_to_min_slope + rz.sw_heat.fc.late_early_auc_ratio + rz.sw_heat.fc.resilience_ratio,1.2529505183437726,0.9761904761904763,FALSE,TRUE
+3,rz.all.fc.metabolic_depression_index + rz.fw_heat.fc.time_to_min_slope + rz.sw_heat.area.late_early_auc_ratio,1.2655914311062535,0.9523809523809526,FALSE,TRUE
+3,rz.all.fc.metabolic_depression_index + rz.fw_heat.fc.time_to_min_slope + rz.sw_heat.fc.late_early_auc_ratio,1.2655914311062562,0.9523809523809526,FALSE,TRUE
+3,rz.all.area.metabolic_depression_index + rz.fw_heat.fc.time_to_min_slope + rz.sw_heat.area.late_early_auc_ratio,1.2707368119763052,0.9523809523809526,FALSE,TRUE
+3,rz.all.area.metabolic_depression_index + rz.fw_heat.fc.time_to_min_slope + rz.sw_heat.fc.late_early_auc_ratio,1.2707368119763058,0.9523809523809526,FALSE,TRUE
+3,rz.freshwater_rt.area.auc_total + rz.fw_heat.fc.time_to_min_slope + rz.sw_heat.area.trough_value,1.2789404697066864,0.9761904761904763,FALSE,TRUE
+3,rz.all.fc.resilience_ratio + rz.fw_heat.fc.time_to_min_slope + rz.sw_heat.fc.late_early_auc_ratio,1.289551367682081,0.9761904761904763,FALSE,TRUE
+3,rz.all.fc.resilience_ratio + rz.fw_heat.fc.time_to_min_slope + rz.sw_heat.area.late_early_auc_ratio,1.289551367682081,0.9761904761904763,FALSE,TRUE
+3,rz.all.area.time_to_peak + rz.freshwater_rt.area.depression_abs + rz.fw_heat.fc.metabolic_depression_index,1.291553830485913,1,FALSE,TRUE
+3,rz.all.area.time_to_peak + rz.freshwater_rt.area.depression_abs + rz.fw_heat.area.metabolic_depression_index,1.2915538304859602,1,FALSE,TRUE
+3,rz.all.fc.min_slope + rz.fw_heat.fc.time_to_min_slope + rz.sw_heat.area.late_early_auc_ratio,1.2916434942972694,0.9761904761904763,FALSE,TRUE
+3,rz.all.fc.min_slope + rz.fw_heat.fc.time_to_min_slope + rz.sw_heat.fc.late_early_auc_ratio,1.2916434942972723,0.9761904761904763,FALSE,TRUE
+3,rz.all.area.resilience_ratio + rz.fw_heat.fc.time_to_min_slope + rz.sw_heat.area.late_early_auc_ratio,1.2924185345384733,0.9523809523809526,FALSE,TRUE
+3,rz.all.area.resilience_ratio + rz.fw_heat.fc.time_to_min_slope + rz.sw_heat.fc.late_early_auc_ratio,1.292418534538474,0.9523809523809526,FALSE,TRUE
+3,rz.all.fc.time_to_peak + rz.fw_heat.fc.time_to_min_slope + rz.sw_heat.area.trough_value,1.2964649390943872,1,FALSE,TRUE
+3,rz.all.area.inflection_time + rz.fw_heat.fc.depression_abs + rz.sw_heat.fc.final_value,1.2994887007611557,1,FALSE,TRUE
+3,rz.all.area.inflection_time + rz.fw_heat.fc.depression_abs + rz.sw_heat.fc.final_delta,1.3058947807630008,1,FALSE,TRUE
+3,rz.all.area.inflection_time + rz.fw_heat.area.depression_abs + rz.sw_heat.fc.peak_value,1.3180002316537724,1,FALSE,TRUE
+3,rz.all.area.inflection_time + rz.fw_heat.area.depression_abs + rz.sw_heat.fc.final_value,1.3286108245287211,1,FALSE,TRUE
+3,rz.all.area.inflection_time + rz.fw_heat.area.depression_abs + rz.sw_heat.fc.metabolic_scope,1.3321152891144783,1,FALSE,TRUE
+3,rz.fw_heat.fc.initial_slope + rz.fw_heat.fc.time_to_min_slope + rz.sw_heat.fc.late_early_auc_ratio,1.3378526652852276,1,FALSE,TRUE
+3,rz.fw_heat.fc.initial_slope + rz.fw_heat.fc.time_to_min_slope + rz.sw_heat.area.late_early_auc_ratio,1.3378526652852292,1,FALSE,TRUE
+3,rz.all.area.inflection_time + rz.fw_heat.area.depression_abs + rz.sw_heat.fc.final_delta,1.3424338268267157,1,FALSE,TRUE
+3,rz.fw_heat.fc.time_to_min_slope + rz.fw_heat.area.auc_early + rz.sw_heat.area.late_early_auc_ratio,1.3488754739557853,1,FALSE,TRUE
+3,rz.fw_heat.fc.time_to_min_slope + rz.fw_heat.area.auc_early + rz.sw_heat.fc.late_early_auc_ratio,1.3488754739557862,1,FALSE,TRUE
+3,rz.freshwater_rt.fc.time_to_peak + rz.freshwater_rt.area.delta_auc_late_minus_early + rz.fw_heat.fc.initial_slope,1.350273879236925,0.9761904761904763,FALSE,TRUE
+3,rz.all.fc.metabolic_scope + rz.freshwater_rt.fc.time_to_peak + rz.fw_heat.area.initial_slope,1.3520584123457264,0.9523809523809526,FALSE,TRUE
+3,rz.all.area.inflection_time + rz.fw_heat.fc.depression_abs + rz.sw_heat.fc.peak_value,1.3523627808458896,1,FALSE,TRUE
+3,rz.all.fc.peak_value + rz.freshwater_rt.fc.time_to_peak + rz.fw_heat.area.initial_slope,1.3563293620726327,0.9523809523809526,FALSE,TRUE
+3,rz.all.area.inflection_time + rz.fw_heat.fc.depression_abs + rz.sw_heat.fc.metabolic_scope,1.3585801958210433,1,FALSE,TRUE
+3,rz.all.fc.peak_value + rz.freshwater_rt.fc.inflection_time + rz.freshwater_rt.area.late_early_auc_ratio,1.3673723228793373,0.9761904761904763,FALSE,TRUE
+3,rz.all.fc.final_delta + rz.freshwater_rt.fc.time_to_peak + rz.fw_heat.area.initial_slope,1.385027330161943,0.9523809523809526,FALSE,TRUE
+3,rz.all.fc.metabolic_scope + rz.freshwater_rt.fc.inflection_time + rz.freshwater_rt.area.late_early_auc_ratio,1.3889963246587567,0.9761904761904763,FALSE,TRUE
+3,rz.all.fc.final_value + rz.freshwater_rt.fc.time_to_peak + rz.fw_heat.area.initial_slope,1.389547964261604,0.9523809523809526,FALSE,TRUE
+3,rz.freshwater_rt.fc.time_to_peak + rz.freshwater_rt.area.inflection_time + rz.fw_heat.fc.initial_slope,1.3903110427061616,0.9523809523809526,FALSE,TRUE
+3,rz.all.fc.auc_late + rz.fw_heat.area.trough_value + rz.sw_heat.fc.auc_early,1.3967272790411007,1,FALSE,TRUE
+3,rz.freshwater_rt.fc.trough_value + rz.fw_heat.fc.time_to_min_slope + rz.fw_heat.area.final_delta,1.4011709062151034,1,FALSE,TRUE
+3,rz.freshwater_rt.fc.delta_auc_late_minus_early + rz.freshwater_rt.fc.time_to_peak + rz.fw_heat.fc.initial_slope,1.4119564900617056,0.9761904761904763,FALSE,TRUE
+3,rz.freshwater_rt.fc.time_to_peak + rz.freshwater_rt.fc.vmax + rz.fw_heat.fc.initial_slope,1.41980624198781,0.9523809523809526,FALSE,TRUE
+3,rz.freshwater_rt.fc.trough_value + rz.fw_heat.fc.time_to_min_slope + rz.fw_heat.area.metabolic_scope,1.4210879891664412,1,FALSE,TRUE
+3,rz.freshwater_rt.fc.time_to_peak + rz.freshwater_rt.area.vmax + rz.fw_heat.fc.initial_slope,1.4343580532441245,0.9523809523809526,FALSE,TRUE
+3,rz.fw_heat.fc.time_to_min_slope + rz.sw_heat.fc.inflection_time + rz.sw_heat.area.late_early_auc_ratio,1.434693186335765,1,FALSE,TRUE
+3,rz.fw_heat.fc.time_to_min_slope + rz.sw_heat.fc.inflection_time + rz.sw_heat.fc.late_early_auc_ratio,1.434693186335766,1,FALSE,TRUE
+3,rz.freshwater_rt.fc.time_to_peak + rz.freshwater_rt.fc.time_to_vmax + rz.fw_heat.fc.initial_slope,1.4352604825970268,0.9761904761904763,FALSE,TRUE
+3,rz.freshwater_rt.fc.stability_cv + rz.freshwater_rt.fc.time_to_peak + rz.fw_heat.area.initial_slope,1.4465163703884394,0.9761904761904763,FALSE,TRUE
+3,rz.all.area.time_to_trough + rz.fw_heat.fc.time_to_min_slope + rz.sw_heat.area.trough_value,1.4500409199643391,1,FALSE,TRUE
+3,rz.freshwater_rt.area.auc_early + rz.fw_heat.fc.time_to_min_slope + rz.sw_heat.area.trough_value,1.455686808001692,1,FALSE,TRUE
+3,rz.all.area.min_slope + rz.freshwater_rt.area.time_to_peak + rz.fw_heat.fc.time_to_min_slope,1.4561907469044348,0.9761904761904763,FALSE,TRUE
+3,rz.all.fc.time_to_trough + rz.fw_heat.fc.time_to_min_slope + rz.sw_heat.area.trough_value,1.4673333306349134,1,FALSE,TRUE
+3,rz.freshwater_rt.fc.auc_late + rz.fw_heat.area.trough_value + rz.sw_heat.fc.auc_early,1.4674212501202242,0.9761904761904763,FALSE,TRUE
+3,rz.fw_heat.fc.time_to_min_slope + rz.sw_heat.fc.late_early_auc_ratio + rz.sw_heat.area.min_slope,1.4951820199316408,1,FALSE,TRUE
+3,rz.fw_heat.fc.time_to_min_slope + rz.sw_heat.area.late_early_auc_ratio + rz.sw_heat.area.min_slope,1.4951820199316408,1,FALSE,TRUE
