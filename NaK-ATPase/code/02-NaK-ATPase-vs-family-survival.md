@@ -13,6 +13,8 @@ Steven Roberts
     experiment](#atpase-vs-survival-in-each-experiment)
 -   [Within-family heat response vs
     survival](#within-family-heat-response-vs-survival)
+-   [Family rankings: ATPase vs
+    survival](#family-rankings-atpase-vs-survival)
 
 # Overview
 
@@ -261,3 +263,97 @@ The heat response does not track survival under any of the three metrics
 showed the clearest decline and family 6 (near the bottom) the largest
 increase. Only families 9 and 10 changed significantly within family,
 and they sit at opposite ends of the survival ranking.
+
+# Family rankings: ATPase vs survival
+
+Rank families (1 = highest) by survival `composite_score` and by three
+ATPase measures: baseline (Ambient median), 36C median, and the relative
+change at 36C (`log2ratio`, where rank 1 = largest gain). Spearman rho
+is the correlation of these ranks; Kendall tau is a more conservative
+rank-agreement measure for small samples.
+
+``` r
+fam_ranks <- heat_resp %>%
+  select(family, composite_score, log2ratio) %>%
+  left_join(fam_atpase %>% select(family, Ambient, `36C`), by = "family") %>%
+  mutate(
+    survival_rank = rank(-composite_score),
+    ambient_rank  = rank(-Ambient),
+    heat_rank     = rank(-`36C`),
+    relative_rank = rank(-log2ratio)
+  ) %>%
+  arrange(survival_rank)
+
+fam_ranks %>%
+  select(family, survival_rank, composite_score, ambient_rank, Ambient,
+         heat_rank, `36C`, relative_rank, log2ratio) %>%
+  knitr::kable(digits = 2)
+```
+
+| family | survival\_rank | composite\_score | ambient\_rank | Ambient | heat\_rank |  36C | relative\_rank | log2ratio |
+|:-------|---------------:|-----------------:|--------------:|--------:|-----------:|-----:|---------------:|----------:|
+| 5      |              1 |             71.0 |             9 |    3.38 |          7 | 3.56 |              3 |      0.07 |
+| 9      |              2 |             63.2 |             5 |    4.01 |          9 | 3.19 |              7 |     -0.33 |
+| 2      |              3 |             59.0 |             6 |    3.97 |          3 | 4.33 |              2 |      0.12 |
+| 8      |              4 |             52.7 |             7 |    3.84 |          8 | 3.42 |              5 |     -0.17 |
+| 3      |              5 |             48.8 |             2 |    5.44 |          1 | 4.64 |              6 |     -0.23 |
+| 1      |              6 |             46.9 |             3 |    5.14 |          5 | 3.83 |              8 |     -0.43 |
+| 6      |              7 |             40.8 |             8 |    3.66 |          2 | 4.45 |              1 |      0.28 |
+| 10     |              8 |             36.7 |             1 |    5.48 |          6 | 3.74 |              9 |     -0.55 |
+| 7      |              9 |             35.3 |             4 |    4.27 |          4 | 4.14 |              4 |     -0.04 |
+
+``` r
+rank_long <- fam_ranks %>%
+  pivot_longer(c(ambient_rank, heat_rank, relative_rank),
+               names_to = "atpase_rank", values_to = "atpase_rank_value") %>%
+  mutate(atpase_rank = factor(atpase_rank,
+                              levels = c("ambient_rank", "heat_rank", "relative_rank"),
+                              labels = c("Ambient (baseline)", "36C", "Relative change at 36C")))
+
+rank_cor <- rank_long %>%
+  group_by(atpase_rank) %>%
+  summarise(
+    spearman_rho = cor(atpase_rank_value, survival_rank, method = "spearman"),
+    spearman_p   = cor.test(atpase_rank_value, survival_rank, method = "spearman", exact = TRUE)$p.value,
+    kendall_tau  = cor(atpase_rank_value, survival_rank, method = "kendall"),
+    kendall_p    = cor.test(atpase_rank_value, survival_rank, method = "kendall", exact = TRUE)$p.value,
+    .groups = "drop"
+  )
+
+knitr::kable(rank_cor, digits = 3)
+```
+
+| atpase\_rank           | spearman\_rho | spearman\_p | kendall\_tau | kendall\_p |
+|:-----------------------|--------------:|------------:|-------------:|-----------:|
+| Ambient (baseline)     |        -0.533 |       0.148 |       -0.333 |      0.260 |
+| 36C                    |        -0.433 |       0.250 |       -0.278 |      0.358 |
+| Relative change at 36C |         0.183 |       0.644 |        0.167 |      0.612 |
+
+``` r
+rank_labels <- rank_cor %>%
+  mutate(label = sprintf("%s\nrho = %.2f, tau = %.2f", atpase_rank, spearman_rho, kendall_tau)) %>%
+  select(atpase_rank, label) %>%
+  deframe()
+
+ggplot(rank_long, aes(x = atpase_rank_value, y = survival_rank)) +
+  geom_line(data = tibble(atpase_rank_value = 1:9, survival_rank = 1:9),
+            linetype = "dashed", colour = "grey70") +
+  geom_point(size = 2.5) +
+  geom_text(aes(label = family), nudge_x = 0.3, nudge_y = -0.3, size = 3) +
+  scale_x_continuous(breaks = 1:9) +
+  scale_y_reverse(breaks = 1:9) +
+  facet_wrap(~ atpase_rank, labeller = as_labeller(rank_labels)) +
+  labs(x = "ATPase rank (1 = highest)",
+       y = "Survival rank (1 = hardiest)",
+       caption = "Dashed line: identical ranks") +
+  theme_bw()
+```
+
+![](02-NaK-ATPase-vs-family-survival_files/figure-gfm/rank-plot-1.png)<!-- -->
+
+Baseline (Ambient) ATPase gives the strongest, and inverse, ranking
+agreement: the three families with the highest baseline activity (10, 3,
+1) rank 8th, 5th and 6th for survival, and the hardiest family (5) has
+the lowest baseline. With 9 families this is not significant (Spearman p
+= 0.15; Kendall p = 0.26). The 36C ranking is weaker in the same
+direction, and the relative change at 36C does not align with survival.
