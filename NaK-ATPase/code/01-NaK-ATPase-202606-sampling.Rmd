@@ -1,0 +1,57 @@
+---
+title: "01-NaK-ATPase-202606-sampling"
+author: "Steven Roberts"
+date: "2026-10-02"
+output:
+  github_document:
+    toc: true
+  html_document:
+    theme: cosmo
+    toc: true
+    toc_float: true
+    code_folding: show
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+library(tidyverse)
+```
+
+# Data
+
+Gill Na<sup>+</sup>/K<sup>+</sup>-ATPase activity from the June 2026 sampling
+event, joined to the sampling log by `Tube ID` to recover condition and family.
+
+```{r read}
+atpase <- read_tsv("../data/202606-sampling.tsv") %>%
+  rename(ATPase = `ATPase (umol ADP/mg protein/hr)`)
+
+sampling_log <- read_csv("../../sampling-event-metadata/june-2026/sampling-log.csv") %>%
+  select(`Tube ID`, Condition, `Oyster Family ID`, `Oyster ID`)
+
+nak <- atpase %>%
+  left_join(sampling_log, by = "Tube ID") %>%
+  mutate(
+    Family = factor(`Oyster Family ID`,
+                    levels = paste("Family", sort(as.integer(str_remove(unique(`Oyster Family ID`), "Family "))))),
+    Condition = factor(Condition, levels = c("Ambient", "36C"))
+  )
+
+# every assayed tube should match a sampling-log entry
+stopifnot(!any(is.na(nak$Condition)))
+
+count(nak, Condition, Family)
+```
+
+# Plot
+
+```{r plot, fig.width=9, fig.height=5}
+ggplot(nak, aes(x = Family, y = ATPase, fill = Condition)) +
+  geom_boxplot(outlier.shape = NA, alpha = 0.6) +
+  geom_point(position = position_jitterdodge(jitter.width = 0.15), size = 1, alpha = 0.7) +
+  scale_fill_manual(values = c(Ambient = "#4C78A8", `36C` = "#E45756")) +
+  labs(x = NULL,
+       y = "Na+/K+-ATPase activity\n(umol ADP / mg protein / hr)",
+       title = "Gill Na+/K+-ATPase activity, June 2026 sampling") +
+  theme_bw()
+```
