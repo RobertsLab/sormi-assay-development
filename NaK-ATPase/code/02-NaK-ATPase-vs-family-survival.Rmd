@@ -287,3 +287,246 @@ and 6th for survival, and the hardiest family (5) has the lowest baseline. With
 9 families this is not significant (Spearman p = 0.15; Kendall p = 0.26). The
 36C ranking is weaker in the same direction, and the relative change at 36C
 does not align with survival.
+
+# Mixed-model estimates of family ATPase
+
+The family summaries above are medians of 15 oysters per condition, and most of
+the variation in ATPase is among oysters within a family. Here a mixed model
+fit to the individual oysters estimates each family's baseline and heat
+response, with an uncertainty for each, and that uncertainty is carried into
+the comparison with survival.
+
+The failed M21 assay is dropped here because, unlike the medians, model means
+are sensitive to it. Ambient and 36C are different oysters, so the heat
+response is a between-group contrast within each family.
+
+```{r mm-data}
+mm <- nak %>%
+  filter(`Tube ID` != "M21") %>%
+  mutate(Condition = factor(Condition, levels = c("Ambient", "36C")))
+
+mm %>% count(Condition)
+```
+
+## How much of the variation is between families?
+
+Separate random-intercept models for each condition partition the variance into
+between-family and within-family (among-oyster) components. The ICC is the
+between-family share. Reliability is how well a family mean from `n` oysters
+tracks the family's true mean, and `n_for_0.8` is the number of oysters per
+family needed for a reliability of 0.8.
+
+```{r mm-variance-partition}
+var_part <- mm %>%
+  group_by(Condition) %>%
+  group_modify(function(df, key) {
+    fit <- lme4::lmer(ATPase ~ 1 + (1 | family), data = df)
+    vc  <- as.data.frame(lme4::VarCorr(fit))
+    tibble(
+      n_per_family = mean(table(df$family)),
+      var_family   = vc$vcov[vc$grp == "family"],
+      var_oyster   = vc$vcov[vc$grp == "Residual"]
+    )
+  }) %>%
+  ungroup() %>%
+  mutate(
+    ICC         = var_family / (var_family + var_oyster),
+    reliability = var_family / (var_family + var_oyster / n_per_family),
+    n_for_0.8   = ceiling(4 * var_oyster / var_family)
+  )
+
+knitr::kable(var_part, digits = 3)
+```
+
+## Joint model
+
+Model: ATPase ~ Condition, with a random intercept (family baseline) and random
+Condition slope (family heat response) for each family. The residual variance
+is allowed to differ between conditions, since Ambient is more variable among
+oysters than 36C.
+
+```{r mm-fit}
+fit_hom <- nlme::lme(ATPase ~ Condition, random = ~ 1 + Condition | family,
+                     data = mm, method = "REML")
+fit_het <- nlme::lme(ATPase ~ Condition, random = ~ 1 + Condition | family,
+                     weights = nlme::varIdent(form = ~ 1 | Condition),
+                     data = mm, method = "REML")
+fit_int <- nlme::lme(ATPase ~ Condition, random = ~ 1 | family,
+                     weights = nlme::varIdent(form = ~ 1 | Condition),
+                     data = mm, method = "REML")
+
+# Residual variance: one value vs one per condition
+anova(fit_hom, fit_het)
+
+# Do families differ in heat response? (random slope vs intercept only;
+# the p value is conservative because the variance is tested at its boundary)
+anova(fit_int, fit_het)
+
+summary(fit_het)$tTable %>% knitr::kable(digits = 3)
+nlme::VarCorr(fit_het)
+
+resid_sd <- fit_het$sigma *
+  coef(fit_het$modelStruct$varStruct, unconstrained = FALSE, allCoef = TRUE)
+resid_sd
+```
+
+## Family estimates with uncertainty
+
+The family estimates (BLUPs) are pulled toward the overall mean in proportion
+to how noisy each family's data are. Their conditional covariance is
+(Z'R^-1^Z + G^-1^)^-1^ for each family, given the fitted variance components.
+
+```{r mm-blups}
+G     <- as.matrix(nlme::getVarCov(fit_het))
+beta  <- nlme::fixef(fit_het)
+re    <- nlme::ranef(fit_het)
+
+blup_cov <- map(set_names(rownames(re)), function(f) {
+  d  <- filter(mm, family == f)
+  Z  <- model.matrix(~ Condition, d)
+  Ri <- diag(1 / resid_sd[as.character(d$Condition)]^2)
+  solve(t(Z) %*% Ri %*% Z + solve(G))
+})
+
+fam_mm <- tibble(
+  family   = rownames(re),
+  b0       = re[, 1],
+  b1       = re[, 2],
+  se_b0    = map_dbl(blup_cov, ~ sqrt(.x[1, 1])),
+  se_b1    = map_dbl(blup_cov, ~ sqrt(.x[2, 2])),
+  se_36C   = map_dbl(blup_cov, ~ sqrt(sum(.x)))
+) %>%
+  mutate(
+    mm_Ambient = beta[1] + b0,
+    mm_36C     = beta[1] + beta[2] + b0 + b1,
+    mm_heat    = beta[2] + b1
+  ) %>%
+  inner_join(fam_rank %>% select(family, composite_score), by = "family") %>%
+  left_join(fam_atpase, by = "family") %>%
+  arrange(desc(composite_score))
+
+fam_mm %>%
+  select(family, composite_score,
+         Ambient, mm_Ambient, se_b0,
+         `36C`, mm_36C, se_36C,
+         delta_36C_minus_Ambient, mm_heat, se_b1) %>%
+  knitr::kable(digits = 2)
+```
+
+```{r mm-shrinkage-plot, fig.width=10, fig.height=4}
+shrink <- bind_rows(
+  fam_mm %>% transmute(family, metric = "Ambient", raw = Ambient,
+                       est = mm_Ambient, se = se_b0),
+  fam_mm %>% transmute(family, metric = "36C", raw = `36C`,
+                       est = mm_36C, se = se_36C),
+  fam_mm %>% transmute(family, metric = "36C - Ambient", raw = delta_36C_minus_Ambient,
+                       est = mm_heat, se = se_b1)
+) %>%
+  mutate(metric = factor(metric, levels = c("Ambient", "36C", "36C - Ambient")),
+         family = factor(family, levels = rev(fam_mm$family)))
+
+ggplot(shrink, aes(y = family)) +
+  geom_segment(aes(x = raw, xend = est, yend = family), colour = "grey70") +
+  geom_point(aes(x = raw), shape = 1, size = 2) +
+  geom_pointrange(aes(x = est, xmin = est - 1.96 * se, xmax = est + 1.96 * se),
+                  size = 0.3) +
+  facet_wrap(~ metric, scales = "free_x") +
+  labs(x = "ATPase (umol ADP / mg protein / hr)",
+       y = "Family (ordered by survival, hardiest at top)",
+       caption = "Open circles: raw family medians. Filled: mixed-model estimate with 95% interval.") +
+  theme_bw()
+```
+
+## Survival correlation with uncertainty carried through
+
+Point correlations use the model estimates. To carry the uncertainty in each
+family's estimate into the correlation, family effects are drawn 4000 times
+from their conditional distributions and the Spearman rho with
+`composite_score` is recomputed each time. Fixed effects shift every family
+equally, so they do not affect the ranks.
+
+```{r mm-survival-cor}
+mm_point <- fam_mm %>%
+  summarise(
+    Ambient         = cor(mm_Ambient, composite_score, method = "spearman"),
+    `36C`           = cor(mm_36C,     composite_score, method = "spearman"),
+    `36C - Ambient` = cor(mm_heat,    composite_score, method = "spearman")
+  ) %>%
+  pivot_longer(everything(), names_to = "metric", values_to = "rho_point")
+
+set.seed(20261003)
+n_draw <- 4000
+draws <- map_dfr(seq_len(nrow(fam_mm)), function(i) {
+  f <- fam_mm$family[i]
+  b <- MASS::mvrnorm(n_draw, mu = c(fam_mm$b0[i], fam_mm$b1[i]), Sigma = blup_cov[[f]])
+  tibble(draw = seq_len(n_draw), family = f, b0 = b[, 1], b1 = b[, 2])
+}) %>%
+  left_join(fam_mm %>% select(family, composite_score), by = "family")
+
+mm_draw_cor <- draws %>%
+  group_by(draw) %>%
+  summarise(
+    Ambient         = cor(b0,      composite_score, method = "spearman"),
+    `36C`           = cor(b0 + b1, composite_score, method = "spearman"),
+    `36C - Ambient` = cor(b1,      composite_score, method = "spearman"),
+    .groups = "drop"
+  ) %>%
+  pivot_longer(-draw, names_to = "metric", values_to = "rho")
+
+mm_cor <- mm_draw_cor %>%
+  group_by(metric) %>%
+  summarise(rho_median = median(rho),
+            lower_95   = quantile(rho, 0.025),
+            upper_95   = quantile(rho, 0.975),
+            prob_neg   = mean(rho < 0),
+            .groups = "drop") %>%
+  left_join(mm_point, by = "metric") %>%
+  mutate(metric = factor(metric, levels = c("Ambient", "36C", "36C - Ambient"))) %>%
+  arrange(metric) %>%
+  select(metric, rho_point, rho_median, lower_95, upper_95, prob_neg)
+
+knitr::kable(mm_cor, digits = 2)
+```
+
+```{r mm-survival-cor-plot, fig.width=8, fig.height=3.5}
+ggplot(mm_draw_cor %>%
+         mutate(metric = factor(metric, levels = c("Ambient", "36C", "36C - Ambient"))),
+       aes(x = rho)) +
+  geom_histogram(binwidth = 1 / 30, fill = "grey60") +
+  geom_vline(xintercept = 0, linetype = "dashed") +
+  facet_wrap(~ metric) +
+  labs(x = "Spearman rho with composite survival score",
+       y = "Draws",
+       caption = "Distribution reflects uncertainty in family ATPase estimates only, not sampling of families.") +
+  theme_bw()
+```
+
+These intervals reflect only measurement uncertainty within families. They do
+not include the larger uncertainty from having only 9 families, so they are
+narrower than a full test against survival would be.
+
+Summary of the mixed-model results:
+
+- **Most variation is among oysters, not families.** The between-family share
+  (ICC) is 0.08 at Ambient and 0.13 at 36C, so a 15-oyster family mean has a
+  reliability of only 0.56 (Ambient) and 0.70 (36C). Reaching 0.8 would take
+  about 47 and 27 oysters per family. Ambient is also more variable among
+  oysters than 36C (residual SD 1.47 vs 0.96; likelihood ratio p < 0.001).
+- **ATPase drops at 36C overall, but there is no evidence families differ in
+  how much.** The population heat effect is -0.43 (p = 0.04), but adding a
+  family-specific heat response does not improve the model (p = 0.40). Once
+  shrunk, every family's heat response is negative (-0.05 to -0.88, versus raw
+  differences of -1.74 to +0.79). The apparent gains in families 6 and 2 are
+  mostly noise. That explains why the heat response does not track survival
+  under any metric above.
+- **Baseline activity carries the survival signal.** The model-estimated
+  Ambient activity correlates with survival at rho = -0.67 (median across draws
+  -0.55, 95% interval -0.83 to -0.03; negative in 98% of draws), slightly
+  stronger than the median-based -0.53. 36C activity is weaker in the same
+  direction (-0.37), and the heat response does not align with survival (0.23,
+  interval spanning zero).
+- **This remains a hypothesis to test.** The intervals cover measurement
+  uncertainty within families but not the uncertainty from sampling only 9
+  families, which dominates. The negative baseline association is the one
+  ATPase measure worth carrying forward, prespecified, to new families or the
+  multi-assay model.
